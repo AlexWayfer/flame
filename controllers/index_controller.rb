@@ -1,0 +1,3 @@
+class IndexController
+
+end

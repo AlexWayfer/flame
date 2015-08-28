@@ -51,7 +51,7 @@ module Atom
 			routes[request_method] << { path: args[0], block: block }
 		end
 
-		private
+	private
 
 		## Helpers for private variables
 		def self.routes

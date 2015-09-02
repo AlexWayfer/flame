@@ -1,3 +1,5 @@
+require_relative './_request'
+
 module Atom
 	## Core class, like Framework::Application
 	class Nucleus
@@ -12,23 +14,7 @@ module Atom
 			self.class.config
 		end
 
-		## Helpers for request variables
-		def status(value = nil)
-			@status ||= 200
-			value ? @status = value : @status
-		end
-
-		def headers
-			@headers ||= { 'Content-Type' => 'text/html' }
-		end
-
-		def params
-			@request.params
-		end
-
-		def request(env = nil)
-			env ? @request = Rack::Request.new(env)	: @request
-		end
+		include Atom::Request
 
 		## Init function
 		def call(env)

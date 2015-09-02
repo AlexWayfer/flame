@@ -41,7 +41,9 @@ module Atom
 
 		## Helpers for private variables
 		def self.routes
-			@routes ||= config[:request_methods].inject({}) { |a, e| a.merge(e => []) }
+			@routes ||= config[:request_methods].inject({}) do |a, e|
+				a.merge(e => [])
+			end
 		end
 
 		def routes
@@ -50,13 +52,8 @@ module Atom
 
 		## Find block of code for routing
 		def find_route
-			params_method = params['_method']
-			if params_method
-				request_method = params_method.upcase.to_sym
-			else
-				request_method = request.request_method.to_sym
-			end
-			routes[request_method].find do |route|
+			request_method = params['_method'] || request.request_method
+			routes[request_method.upcase.to_sym].find do |route|
 				@args = {}
 				compare_paths(request.path_info, route[:path])
 			end

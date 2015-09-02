@@ -1,4 +1,5 @@
 require_relative './_request'
+require_relative './_render'
 
 module Atom
 	## Core class, like Framework::Application
@@ -15,6 +16,12 @@ module Atom
 		end
 
 		include Atom::Request
+		include Atom::Render
+
+		def self.inherited(app)
+			app.config[:root_dir] = File.dirname(caller[0].split(':')[0])
+			app.config[:views_dir] = File.join(app.config[:root_dir], 'views')
+		end
 
 		## Init function
 		def call(env)

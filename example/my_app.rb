@@ -1,7 +1,5 @@
 ## Test app for Framework
 class MyApp < Atom::Nucleus
-	puts '-- Init MyApp'
-
 	get '/' do
 		'index'
 	end

@@ -1,5 +1,5 @@
 ## Test app for Framework
-class MyApp < Atom::Nucleus
+class MyApp < Atom::App
 	get '/' do
 		view :index
 	end

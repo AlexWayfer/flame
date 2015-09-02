@@ -3,7 +3,7 @@ require_relative './_render'
 
 module Atom
 	## Core class, like Framework::Application
-	class Nucleus
+	class App
 		## Framework configuration
 		def self.config
 			@config ||= {

@@ -1,0 +1,9 @@
+Show user by id = <%= id %>
+<form action="/users/<%= id %>" method="POST">
+	<input type="hidden" name="_method" value="PUT" />
+	<input type="submit" value="Update" />
+</form>
+<form action="/users/<%= id %>" method="POST">
+	<input type="hidden" name="_method" value="DELETE" />
+	<input type="submit" value="Delete" />
+</form>

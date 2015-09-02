@@ -1,42 +1,31 @@
 ## Test app for Framework
 class MyApp < Atom::Nucleus
 	get '/' do
-		'index'
+		view :index
 	end
 
 	get '/users' do
-		'Index of users' \
-		'<form action="/users" method="POST">' \
-			'<input type="submit" value="Create" />' \
-		'</form>'
+		view 'users/index'
 	end
 
 	post '/users' do
-		'Create new user'
+		view 'users/create'
 	end
 
 	get '/users/:id' do |id|
-		"Show user by id = #{params[:id]}" \
-		"<form action=\"/users/#{id}\" method=\"POST\">" \
-			'<input type="hidden" name="_method" value="PUT" />' \
-			'<input type="submit" value="Update" />' \
-		'</form>' \
-		"<form action=\"/users/#{id}\" method=\"POST\">" \
-			'<input type="hidden" name="_method" value="DELETE" />' \
-			'<input type="submit" value="Delete" />' \
-		'</form>'
+		view 'users/show', locals: { id: id }
 	end
 
 	put '/users/:id' do
-		"Update user by id = #{params[:id]}"
+		view 'users/update'
 	end
 
-	delete '/users/:id' do |id|
-		"Delete user by id = #{id}"
+	delete '/users/:id' do
+		view 'users/delete'
 	end
 
 	get '/hello/:name' do |name|
-		"Hello, #{name}"
+		view :hello, name: name
 	end
 
 	get '/goodbye' do

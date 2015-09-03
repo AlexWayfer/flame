@@ -1,6 +1,6 @@
 require 'rack'
 
-module Atom
+module Engie
 	## Helper for request variables
 	module Request
 		def status(value = nil)

@@ -1,7 +1,7 @@
 require_relative './_request'
 require_relative './_render'
 
-module Atom
+module Engie
 	## Core class, like Framework::Application
 	class App
 		## Framework configuration
@@ -15,8 +15,8 @@ module Atom
 			self.class.config
 		end
 
-		include Atom::Request
-		include Atom::Render
+		include Engie::Request
+		include Engie::Render
 
 		def self.inherited(app)
 			app.config[:root_dir] = File.dirname(caller[0].split(':')[0])

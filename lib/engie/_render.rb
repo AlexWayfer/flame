@@ -1,6 +1,6 @@
 require 'tilt'
 
-module Atom
+module Engie
 	## Helper for render functionality
 	module Render
 		def view(path, options = {})

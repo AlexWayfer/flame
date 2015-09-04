@@ -1,6 +1,6 @@
 require 'tilt'
 
-module Engie
+module Flame
 	## Helper for render functionality
 	module Render
 		def view(path, options = {})

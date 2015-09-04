@@ -1,6 +1,6 @@
 require 'rack'
 
-module Engie
+module Flame
 	## Helper for request variables
 	module Request
 		def status(value = nil)

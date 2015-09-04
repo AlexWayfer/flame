@@ -1,5 +1,5 @@
 ## Test app for Framework
-class MyApp < Atom::App
+class MyApp < Flame::App
 	get '/' do
 		view :index
 	end

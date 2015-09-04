@@ -1,7 +1,7 @@
 require_relative './_request'
 require_relative './_render'
 
-module Engie
+module Flame
 	## Core class, like Framework::Application
 	class App
 		## Framework configuration

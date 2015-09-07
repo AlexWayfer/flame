@@ -33,6 +33,15 @@ class MyApp < Flame::Application
 	# 	'Goodbye Cruel World!'
 	# end
 
-	mount HomeController, '/home'
-	mount UsersController, '/users'
+	mount HomeController, '/home' do
+		get '/', :index
+		get '/welcome/:name', :welcome
+	end
+	mount UsersController, '/users' do
+		get '/', :index
+		post '/', :create
+		get '/:id', :show
+		put '/:id', :update
+		delete '/:id', :delete
+	end
 end

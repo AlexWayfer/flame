@@ -8,16 +8,9 @@ module Flame
 		def self.config
 			@config ||= {}
 		end
+
 		def config
 			self.class.config
-		end
-
-		## Router for routing
-		def self.router
-			@router ||= Flame::Router.new
-		end
-		def router
-			self.class.router
 		end
 
 		include Flame::Request
@@ -32,7 +25,7 @@ module Flame
 			new_request(env)
 			# p routes
 			request_method = params['_method'] || request.request_method
-			route = router.find_route(request_method, request.path_info)
+			route = self.class.router.find_route(request_method, request.path_info)
 			if route
 				body = route_execute(route)
 				[status, headers, [body]]
@@ -45,7 +38,12 @@ module Flame
 			router.add_controller(ctrl, path, block)
 		end
 
-	private
+		private
+
+		## Router for routing
+		def self.router
+			@router ||= Flame::Router.new
+		end
 
 		def route_execute(route)
 			ctrl = route[:controller].new(self)

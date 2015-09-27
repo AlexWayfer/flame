@@ -1,4 +1,4 @@
-require_relative './_request'
+require_relative './request'
 require_relative './router'
 
 module Flame

@@ -49,8 +49,7 @@ module Flame
 			ctrl = route[:controller].new(self)
 			status 200
 			params.merge!(route[:args])
-			## TODO: Ordering args by keys
-			ctrl.send(route[:action], *route[:args].values)
+			ctrl.send(route[:action], *route[:arranged_args])
 		end
 	end
 end

@@ -44,7 +44,8 @@ module Flame
 				next unless request_method.upcase.to_sym == route[:method]
 				compare_paths(request_path, route[:path])
 			end
-			result_route.merge(args: @args) if result_route.is_a?(Hash)
+			return nil if result_route.nil?
+			arrange_arguments(result_route.merge(args: @args))
 		end
 
 		private
@@ -71,6 +72,14 @@ module Flame
 					}
 				end
 			end
+		end
+
+		def arrange_arguments(route)
+			route[:arranged_args] =
+				route[:controller].instance_method(route[:action]).parameters
+				.map! { |par| par[1] }
+				.each_with_object([]) { |par, arr| arr << route[:args][par] }
+			route
 		end
 
 		## Helpers for finding route

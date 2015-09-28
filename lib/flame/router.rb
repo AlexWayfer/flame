@@ -54,7 +54,7 @@ module Flame
 
 			def defaults
 				@ctrl.public_instance_methods(false).each do |action|
-					next if @routes.detect { |route| route[:action] == action }
+					next if route_index(action)
 					add_route(:GET, nil, action)
 				end
 			end
@@ -79,8 +79,12 @@ module Flame
 					controller: @ctrl,
 					action: action
 				}
-				index = @routes.find_index { |r| r[:action] == action }
+				index = route_index(action)
 				index ? @routes[index] = route : @routes.push(route)
+			end
+
+			def route_index(action)
+				@routes.find_index { |route| route[:action] == action }
 			end
 		end
 

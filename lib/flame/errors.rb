@@ -11,15 +11,15 @@ module Flame
 		## Error if routes have more actions, than controller
 		class ExtraRoutesActionsError < ActionsError
 			def message
-				"Controller '#{@ctrl}' has no methods:" \
-				" '#{@extra_actions.join(', ')}'"
+				"Controller '#{@ctrl}' has no methods" \
+				" '#{@extra_actions.join(', ')}' from routes"
 			end
 		end
 
 		## Error if controller has not assigned in routes actions
 		class ExtraControllerActionsError < ActionsError
 			def message
-				"Routes has no methods from controller '#{@ctrl}':" \
+				"Routes for '#{@ctrl}' has no methods" \
 				" '#{@extra_actions.join(', ')}'"
 			end
 		end
@@ -38,8 +38,8 @@ module Flame
 		class ExtraPathArgumentsError < ArgumentsError
 			def message
 				"Method '#{@action}' from controller '#{@ctrl}'" \
-				" does not know arguments from path '#{@path}':" \
-				" '#{@extra_args.join(', ')}'"
+				" does not know arguments '#{@extra_args.join(', ')}'" \
+				" from path '#{@path}'"
 			end
 		end
 
@@ -47,8 +47,8 @@ module Flame
 		class ExtraActionArgumentsError < ArgumentsError
 			def message
 				"Path '#{@path}' does not contain required arguments" \
-				" of method '#{@action}' from controller '#{@ctrl}':" \
-				" '#{@extra_args.join(', ')}'"
+				" '#{@extra_args.join(', ')}' of method '#{@action}'" \
+				" from controller '#{@ctrl}'"
 			end
 		end
 	end

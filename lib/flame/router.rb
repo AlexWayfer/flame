@@ -10,22 +10,6 @@ module Flame
 		end
 
 		def add_controller(ctrl, path, block)
-			# ctrl.instance_methods(false).each do |action|
-				# parameters = ctrl.instance_method(action).parameters
-				# route_path = path
-				# route_path += "/#{action}" unless action == :index
-				# parameters.each do |parameter|
-				# 	route_path += "/:#{parameter[1]}" if parameter[0] == :req
-				# end
-				# route_path.gsub!('//', '/') unless route_path == '/'
-				# routes << {
-				# 	method: :GET,
-				# 	path: route_path,
-				# 	controller: ctrl,
-				# 	action: action
-				# }
-			# end
-
 			## TODO: Add `rest` method
 			## TODO: Add Regexp paths
 			## TODO: More defaults arguments

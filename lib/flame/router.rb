@@ -53,7 +53,7 @@ module Flame
 			end
 
 			def defaults
-				@ctrl.instance_methods(false).each do |action|
+				@ctrl.public_instance_methods(false).each do |action|
 					next if @routes.detect { |route| route[:action] == action }
 					add_route(:GET, nil, action)
 				end

@@ -64,7 +64,7 @@ module Flame
 
 		def valid?
 			@routes_actions = @routes.map { |route| route[:action] }
-			@ctrl_actions = @ctrl.instance_methods(false)
+			@ctrl_actions = @ctrl.public_instance_methods(false)
 			no_extra_routes_actions? && no_extra_controller_actions?
 		end
 

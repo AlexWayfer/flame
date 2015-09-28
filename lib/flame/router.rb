@@ -41,7 +41,7 @@ module Flame
 			# p routes
 			result_route = routes.find do |route|
 				@args = {}
-				next unless request_method.upcase.to_sym == route[:method]
+				next unless compare_methods(request_method, route[:method])
 				compare_paths(request_path, route[:path])
 			end
 			return nil if result_route.nil?
@@ -106,6 +106,10 @@ module Flame
 				.map! { |par| par[1] }
 				.each_with_object([]) { |par, arr| arr << route[:args][par] }
 			route
+		end
+
+		def compare_methods(request_method, route_method)
+			request_method.upcase.to_sym == route_method.upcase.to_sym
 		end
 
 		## Helpers for finding route

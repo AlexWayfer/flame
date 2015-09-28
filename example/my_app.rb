@@ -1,7 +1,8 @@
 ## Test app for Framework
 class MyApp < Flame::Application
 	mount HomeController, '/home' do
-		get '/', :index
+		# get '/', :index
+		defaults
 		get '/welcome/:last_name/:first_name', :welcome
 	end
 

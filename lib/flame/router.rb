@@ -26,7 +26,7 @@ module Flame
 				# }
 			# end
 
-			## TODO: Add `rest` and `defaults` methods
+			## TODO: Add `rest` method
 			## TODO: Add Regexp paths
 			## TODO: More defaults arguments
 
@@ -64,13 +64,39 @@ module Flame
 			[:GET, :POST, :PUT, :DELETE].each do |request_method|
 				define_method(request_method.downcase) do |path, action|
 					ArgumentsValidator.new(@ctrl, path, action).valid?
-					@routes << {
-						method: request_method,
-						path: "#{@path}/#{path}".gsub!('//', '/'),
-						controller: @ctrl,
-						action: action
-					}
+					add_route(request_method, path, action)
 				end
+			end
+
+			def defaults
+				@ctrl.instance_methods(false).each do |action|
+					next if @routes.detect { |route| route[:action] == action }
+					add_route(:GET, nil, action)
+				end
+			end
+
+			private
+
+			def make_path(path, action = nil)
+				if path.nil?
+					path = @ctrl.instance_method(action).parameters
+					       .select { |par| par[0] == :req }
+					       .map { |par| ":#{par[1]}" }
+					       .unshift(action == :index ? '/' : action)
+					       .join('/')
+				end
+				"#{@path}/#{path}".gsub('//', '/')
+			end
+
+			def add_route(method, path, action)
+				route = {
+					method: method,
+					path: make_path(path, action),
+					controller: @ctrl,
+					action: action
+				}
+				index = @routes.find_index { |r| r[:action] == action }
+				index ? @routes[index] = route : @routes.push(route)
 			end
 		end
 

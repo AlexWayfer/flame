@@ -25,7 +25,7 @@ module Flame
 		end
 
 		## Error for Flame::Router::RouteRefine.arguments_valid?
-		class ArgumentsError
+		class ArgumentsError < StandardError
 			def initialize(ctrl, action, path, extra_args)
 				@ctrl = ctrl
 				@action = action

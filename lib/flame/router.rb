@@ -10,7 +10,6 @@ module Flame
 		end
 
 		def add_controller(ctrl, path, block)
-			## TODO: Add `rest` method
 			## TODO: Add Regexp paths
 			## TODO: More defaults arguments
 
@@ -23,6 +22,9 @@ module Flame
 		## Find block of code for routing
 		def find_route(request_method, request_path)
 			# p routes
+			## TODO: Add priority for routes
+			## (method name has higher priority, than method parameter)
+			## UserController#hello(name) > UserController#show(id='name')
 			result_route = routes.find do |route|
 				@args = {}
 				next unless compare_methods(request_method, route[:method])
@@ -38,6 +40,20 @@ module Flame
 		class RouteRefine
 			attr_reader :routes
 
+			def self.http_methods
+				[:GET, :POST, :PUT, :DELETE]
+			end
+
+			def rest_routes
+				[
+					{ method: :GET,     path: '/',  action: :index  },
+					{ method: :POST,    path: '/',  action: :create },
+					{ method: :GET,     path: '/',  action: :show   },
+					{ method: :PUT,     path: '/',  action: :update },
+					{ method: :DELETE,  path: '/',  action: :delete }
+				]
+			end
+
 			def initialize(ctrl, path, block)
 				@ctrl = ctrl
 				@path = path
@@ -45,7 +61,7 @@ module Flame
 				instance_exec(&block)
 			end
 
-			[:GET, :POST, :PUT, :DELETE].each do |request_method|
+			http_methods.each do |request_method|
 				define_method(request_method.downcase) do |path, action|
 					ArgumentsValidator.new(@ctrl, path, action).valid?
 					add_route(request_method, path, action)
@@ -59,23 +75,38 @@ module Flame
 				end
 			end
 
+			def rest
+				rest_routes.each do |route|
+					action = route[:action]
+					if @ctrl.public_instance_methods.include?(action) &&
+					   route_index(action).nil?
+						add_route(*route.values, true)
+					end
+				end
+			end
+
 			private
 
-			def make_path(path, action = nil)
-				if path.nil?
+			def make_path(path, action = nil, force_params = false)
+				unshifted = force_params ? path : action_path(action)
+				if path.nil? || force_params
 					path = @ctrl.instance_method(action).parameters
 					       .select { |par| par[0] == :req }
 					       .map { |par| ":#{par[1]}" }
-					       .unshift(action == :index ? '/' : action)
+					       .unshift(unshifted)
 					       .join('/')
 				end
 				"#{@path}/#{path}".gsub('//', '/')
 			end
 
-			def add_route(method, path, action)
+			def action_path(action)
+				action == :index ? '/' : action
+			end
+
+			def add_route(method, path, action, force_params = false)
 				route = {
 					method: method,
-					path: make_path(path, action),
+					path: make_path(path, action, force_params),
 					controller: @ctrl,
 					action: action
 				}

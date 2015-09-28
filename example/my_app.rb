@@ -7,10 +7,12 @@ class MyApp < Flame::Application
 	end
 
 	mount UsersController, '/users' do
-		get '/', :index
-		post '/', :create
-		get '/:id', :show
-		put '/:id', :update
-		delete '/:id', :delete
+		# get '/', :index
+		# post '/', :create
+		# get '/:id', :show
+		# put '/:id', :update
+		# delete '/:id', :delete
+		rest
+		defaults
 	end
 end

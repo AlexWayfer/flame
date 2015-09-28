@@ -19,4 +19,8 @@ class UsersController < Flame::Controller
 	def delete(id)
 		render :delete, id: id
 	end
+
+	def hello(name)
+		"Hello, #{name}"
+	end
 end

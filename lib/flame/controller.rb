@@ -17,6 +17,7 @@ module Flame
 			@app.params
 		end
 
+		## TODO: Add 'path_to' helper
 		## TODO: Add more helpers
 	end
 end

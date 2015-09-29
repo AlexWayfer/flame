@@ -139,6 +139,7 @@ module Flame
 			else
 				path_parts = route_path.to_s.split('/').reject(&:empty?)
 				request_parts = request_path.split('/').reject(&:empty?)
+				## TODO: Check not required parameters from controller method
 				return false if request_parts.count != path_parts.count
 				compare_parts(request_parts, path_parts)
 			end

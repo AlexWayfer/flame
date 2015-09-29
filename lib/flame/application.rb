@@ -23,7 +23,6 @@ module Flame
 		## Init function
 		def call(env)
 			new_request(env)
-			# p routes
 			request_method = params['_method'] || request.request_method
 			route = self.class.router.find_route(request_method, request.path_info)
 			if route

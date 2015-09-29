@@ -22,9 +22,6 @@ module Flame
 		## Find block of code for routing
 		def find_route(request_method, request_path)
 			# p routes
-			## TODO: Add priority for routes
-			## (method name has higher priority, than method parameter)
-			## UserController#hello(name) > UserController#show(id='name')
 			result_route = routes.find do |route|
 				@args = {}
 				next unless compare_methods(request_method, route[:method])
@@ -59,6 +56,8 @@ module Flame
 				@path = path
 				@routes = []
 				instance_exec(&block)
+				# p @routes
+				@routes.sort! { |a, b| b[:path] <=> a[:path] }
 			end
 
 			http_methods.each do |request_method|

@@ -20,7 +20,7 @@ class UsersController < Flame::Controller
 		render :delete, id: id
 	end
 
-	def hello(name)
+	def hello(name = 'world')
 		"Hello, #{name}"
 	end
 end

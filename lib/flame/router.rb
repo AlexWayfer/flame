@@ -96,7 +96,7 @@ module Flame
 					       .unshift(unshifted)
 					       .join('/')
 				end
-				"#{@path}/#{path}".gsub('//', '/')
+				"#{@path}/#{path}".gsub(%r{\/{2,}}, '/')
 			end
 
 			def action_path(action)

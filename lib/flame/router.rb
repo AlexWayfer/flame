@@ -88,6 +88,7 @@ module Flame
 
 			def make_path(path, action = nil, force_params = false)
 				unshifted = force_params ? path : action_path(action)
+				## TODO: Add not required parameters to path (/:?name)
 				if path.nil? || force_params
 					path = @ctrl.instance_method(action).parameters
 					       .select { |par| par[0] == :req }

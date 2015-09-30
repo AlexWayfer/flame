@@ -28,7 +28,8 @@ module Flame
 				compare_paths(request_path, route[:path])
 			end
 			return nil if result_route.nil?
-			arrange_arguments(result_route.merge(args: @args))
+			# p @args
+			add_arguments(result_route)
 		end
 
 		private
@@ -124,6 +125,11 @@ module Flame
 				route[:controller].instance_method(route[:action]).parameters
 				.map! { |par| par[1] }
 				.each_with_object([]) { |par, arr| arr << route[:args][par] }
+		end
+
+		def add_arguments(route)
+			route = route.merge(args: @args)
+			route[:arranged_args] = arrange_arguments(route)
 			route
 		end
 

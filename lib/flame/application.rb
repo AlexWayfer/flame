@@ -33,7 +33,7 @@ module Flame
 			end
 		end
 
-		def self.mount(ctrl, path, &block)
+		def self.mount(ctrl, path = nil, &block)
 			router.add_controller(ctrl, path, block)
 		end
 

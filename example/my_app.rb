@@ -1,6 +1,6 @@
 ## Test app for Framework
 class MyApp < Flame::Application
-	mount HomeController, '/home'
+	mount HomeController
 
 	mount UsersController, '/users' do
 		# get '/', :index

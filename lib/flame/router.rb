@@ -12,7 +12,6 @@ module Flame
 		def add_controller(ctrl, path, block = nil)
 			## TODO: Add Regexp paths
 			## TODO: Add `before` and `after` methods
-			## TODO: More defaults arguments
 
 			## Add routes from controller to glob array
 			ctrl_routes = RouteRefine.new(ctrl, path, block).routes
@@ -55,7 +54,7 @@ module Flame
 
 			def initialize(ctrl, path, block)
 				@ctrl = ctrl
-				@path = path
+				@path = path || default_controller_path
 				@routes = []
 				block.nil? ? defaults : instance_exec(&block)
 				# p @routes
@@ -87,6 +86,15 @@ module Flame
 			end
 
 			private
+
+			using GorillaPatch::StringExt
+
+			def default_controller_path
+				@ctrl.name.underscore
+				  .split('_')
+				  .take_while { |part| part != 'controller' }
+				  .join('/')
+			end
 
 			def make_path(path, action = nil, force_params = false)
 				unshifted = force_params ? path : action_path(action)

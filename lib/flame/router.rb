@@ -11,6 +11,7 @@ module Flame
 
 		def add_controller(ctrl, path, block = nil)
 			## TODO: Add Regexp paths
+			## TODO: Add `before` and `after` methods
 			## TODO: More defaults arguments
 
 			## Add routes from controller to glob array

@@ -89,11 +89,9 @@ module Flame
 
 			def make_path(path, action = nil, force_params = false)
 				unshifted = force_params ? path : action_path(action)
-				## TODO: Add not required parameters to path (/:?name)
 				if path.nil? || force_params
 					path = @ctrl.instance_method(action).parameters
-					       .select { |par| par[0] == :req }
-					       .map { |par| ":#{par[1]}" }
+					       .map { |par| ":#{par[0] == :req ? '' : '?'}#{par[1]}" }
 					       .unshift(unshifted)
 					       .join('/')
 				end
@@ -121,10 +119,10 @@ module Flame
 		end
 
 		def arrange_arguments(route)
-			route[:arranged_args] =
-				route[:controller].instance_method(route[:action]).parameters
-				.map! { |par| par[1] }
-				.each_with_object([]) { |par, arr| arr << route[:args][par] }
+			route[:controller].instance_method(route[:action]).parameters
+			  .each_with_object([]) do |par, arr|
+				  arr << route[:args][par[1]] if par[0] == :req || route[:args][par[1]]
+			  end
 		end
 
 		def add_arguments(route)
@@ -145,8 +143,9 @@ module Flame
 			else
 				path_parts = route_path.to_s.split('/').reject(&:empty?)
 				request_parts = request_path.split('/').reject(&:empty?)
-				## TODO: Check not required parameters from controller method
-				return false if request_parts.count != path_parts.count
+				# p route_path
+				req_path_parts = path_parts.select { |part| part[1] != '?' }
+				return false if request_parts.count < req_path_parts.count
 				compare_parts(request_parts, path_parts)
 			end
 		end
@@ -154,13 +153,20 @@ module Flame
 		def compare_parts(request_parts, path_parts)
 			request_parts.each_with_index do |request_part, i|
 				path_part = path_parts[i]
+				# p request_part, path_part
 				break false unless path_part
 				if path_part[0] == ':'
-					@args[path_part[1..-1].to_sym] = URI.decode(request_part)
+					add_argument(request_part, path_part)
 					next
 				end
 				break false unless request_part == path_part
 			end
+		end
+
+		def add_argument(request_part, path_part)
+			@args[
+			  path_part[(path_part[1] == '?' ? 2 : 1)..-1].to_sym
+			] = URI.decode(request_part)
 		end
 	end
 end

@@ -9,7 +9,7 @@ module Flame
 			@routes = []
 		end
 
-		def add_controller(ctrl, path, block)
+		def add_controller(ctrl, path, block = nil)
 			## TODO: Add Regexp paths
 			## TODO: More defaults arguments
 
@@ -56,7 +56,7 @@ module Flame
 				@ctrl = ctrl
 				@path = path
 				@routes = []
-				instance_exec(&block)
+				block.nil? ? defaults : instance_exec(&block)
 				# p @routes
 				@routes.sort! { |a, b| b[:path] <=> a[:path] }
 			end

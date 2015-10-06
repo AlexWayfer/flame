@@ -1,3 +1,4 @@
+require_relative './route.rb'
 require_relative './validators.rb'
 
 module Flame
@@ -19,27 +20,9 @@ module Flame
 			routes.concat(ctrl_routes)
 		end
 
-		## Find block of code for routing
-		def find_route(request_method, request_path)
-			# p routes
-			result_route = routes.find do |route|
-				@args = {}
-				next unless compare_methods(request_method, route[:method])
-				compare_paths(request_path, route[:path])
-			end
-			return nil if result_route.nil?
-			# p @args
-			add_arguments(result_route)
-		end
-
-		## Find path for controller and method
-		def find_path(ctrl, method)
-			result_route = routes.find do |route|
-				route[:controller] == ctrl && route[:action] == method
-			end
-			p result_route
-			return result_route[:path] if result_route
-			fail RouteNotFoundError.new(ctrl, method)
+		## Find route by any attributes
+		def find_route(attrs)
+			routes.find { |route| route.compare_attributes(attrs) }
 		end
 
 		private
@@ -80,17 +63,17 @@ module Flame
 
 			def defaults
 				@ctrl.public_instance_methods(false).each do |action|
-					next if route_index(action)
+					next if find_route_index(action: action)
 					add_route(:GET, nil, action)
 				end
 			end
 
 			def rest
-				rest_routes.each do |route|
-					action = route[:action]
+				rest_routes.each do |rest_route|
+					action = rest_route[:action]
 					if @ctrl.public_instance_methods.include?(action) &&
-					   route_index(action).nil?
-						add_route(*route.values, true)
+					   find_route_index(action: action).nil?
+						add_route(*rest_route.values, true)
 					end
 				end
 			end
@@ -124,70 +107,19 @@ module Flame
 			end
 
 			def add_route(method, path, action, force_params = false)
-				route = {
+				route = Route.new(
 					method: method,
 					path: make_path(path, action, force_params),
 					controller: @ctrl,
 					action: action
-				}
-				index = route_index(action)
+				)
+				index = find_route_index(action: action)
 				index ? @routes[index] = route : @routes.push(route)
 			end
 
-			def route_index(action)
-				@routes.find_index { |route| route[:action] == action }
+			def find_route_index(attrs)
+				@routes.find_index { |route| route.compare_attributes(attrs) }
 			end
-		end
-
-		def arrange_arguments(route)
-			route[:controller].instance_method(route[:action]).parameters
-			  .each_with_object([]) do |par, arr|
-				  arr << route[:args][par[1]] if par[0] == :req || route[:args][par[1]]
-			  end
-		end
-
-		def add_arguments(route)
-			route = route.merge(args: @args)
-			route[:arranged_args] = arrange_arguments(route)
-			route
-		end
-
-		def compare_methods(request_method, route_method)
-			request_method.upcase.to_sym == route_method.upcase.to_sym
-		end
-
-		## Helpers for finding route
-		def compare_paths(request_path, route_path)
-			case route_path.class
-			when Regexp
-				request_path =~ route_path
-			else
-				path_parts = route_path.to_s.split('/').reject(&:empty?)
-				request_parts = request_path.split('/').reject(&:empty?)
-				# p route_path
-				req_path_parts = path_parts.select { |part| part[1] != '?' }
-				return false if request_parts.count < req_path_parts.count
-				compare_parts(request_parts, path_parts)
-			end
-		end
-
-		def compare_parts(request_parts, path_parts)
-			request_parts.each_with_index do |request_part, i|
-				path_part = path_parts[i]
-				# p request_part, path_part
-				break false unless path_part
-				if path_part[0] == ':'
-					add_argument(request_part, path_part)
-					next
-				end
-				break false unless request_part == path_part
-			end
-		end
-
-		def add_argument(request_part, path_part)
-			@args[
-			  path_part[(path_part[1] == '?' ? 2 : 1)..-1].to_sym
-			] = URI.decode(request_part)
 		end
 	end
 end

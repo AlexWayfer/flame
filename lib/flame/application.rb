@@ -24,9 +24,10 @@ module Flame
 		def call(env)
 			new_request(env)
 			request_method = params['_method'] || request.request_method
-			route = self.class.router.find_route(request_method, request.path_info)
+			route = router.find_route(method: request_method, path: request.path_info)
 			if route
-				body = route_execute(route)
+				status 200
+				body = route.execute(self)
 				[status, headers, [body]]
 			else
 				[404, {}, ['Not Found']]
@@ -44,11 +45,8 @@ module Flame
 			@router ||= Flame::Router.new
 		end
 
-		def route_execute(route)
-			ctrl = route[:controller].new(self)
-			status 200
-			params.merge!(route[:args])
-			ctrl.send(route[:action], *route[:arranged_args])
+		def router
+			self.class.router
 		end
 	end
 end

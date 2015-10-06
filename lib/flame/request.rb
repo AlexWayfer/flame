@@ -19,7 +19,18 @@ module Flame
 		end
 
 		def new_request(env)
+			@env = env
+			@status, @headers = nil
 			@request = Rack::Request.new(env)
+		end
+
+		def halt(new_status, body = '', new_headers = {})
+			status new_status
+			@headers = new_headers
+			if body.empty? && !Rack::Utils::STATUS_WITH_NO_ENTITY_BODY.include?(status)
+				body = Rack::Utils::HTTP_STATUS_CODES[status]
+			end
+			throw :halt, body
 		end
 	end
 end

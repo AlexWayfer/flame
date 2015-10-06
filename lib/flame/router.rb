@@ -103,6 +103,7 @@ module Flame
 				@ctrl.name.underscore
 				  .split('_')
 				  .take_while { |part| part != 'controller' }
+				  .unshift(nil)
 				  .join('/')
 			end
 

@@ -52,4 +52,29 @@ module Flame
 			end
 		end
 	end
+
+	## Error for Flame::Router.find_path
+	class RouteNotFoundError < StandardError
+		def initialize(ctrl, method)
+			@ctrl = ctrl
+			@method = method
+		end
+
+		def message
+			"Route with controller '#{@ctrl}' and method '#{@method}'" \
+			' not found in application routes'
+		end
+	end
+
+	## Error for Flame::Controller.path_to
+	class ArgumentNotAssigned < StandardError
+		def initialize(path, path_part)
+			@path = path
+			@path_part = path_part
+		end
+
+		def message
+			"Argument '#{@path_part}' for '#{@path}' is not assigned"
+		end
+	end
 end

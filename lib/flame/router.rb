@@ -32,6 +32,16 @@ module Flame
 			add_arguments(result_route)
 		end
 
+		## Find path for controller and method
+		def find_path(ctrl, method)
+			result_route = routes.find do |route|
+				route[:controller] == ctrl && route[:action] == method
+			end
+			p result_route
+			return result_route[:path] if result_route
+			fail RouteNotFoundError.new(ctrl, method)
+		end
+
 		private
 
 		## Helper module for routing refine

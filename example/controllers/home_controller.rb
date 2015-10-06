@@ -1,7 +1,7 @@
 ## Demo casual controller
 class HomeController < Flame::Controller
 	def index
-		'Welcome!'
+		view :index
 	end
 
 	def welcome(first_name, last_name = nil)

@@ -108,6 +108,7 @@ module Flame
 			end
 
 			def make_path(path, action = nil, force_params = false)
+				## TODO: Add :arg:type support (:id:num, :name:str, etc.)
 				unshifted = force_params ? path : action_path(action)
 				if path.nil? || force_params
 					path = @ctrl.instance_method(action).parameters

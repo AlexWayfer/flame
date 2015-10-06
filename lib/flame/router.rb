@@ -29,6 +29,7 @@ module Flame
 
 		## Helper module for routing refine
 		class RouteRefine
+			attr_accessor :rest_routes
 			attr_reader :routes
 
 			def self.http_methods
@@ -36,7 +37,7 @@ module Flame
 			end
 
 			def rest_routes
-				[
+				@rest_routes ||= [
 					{ method: :GET,     path: '/',  action: :index  },
 					{ method: :POST,    path: '/',  action: :create },
 					{ method: :GET,     path: '/',  action: :show   },

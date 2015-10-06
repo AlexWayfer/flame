@@ -1,4 +1,6 @@
-Show user by id = <%= id %>
+<p>
+	Show user by id = <%= id %>
+</p>
 <form action="/users/<%= id %>" method="POST">
 	<input type="hidden" name="_method" value="PUT" />
 	<input type="submit" value="Update" />
@@ -7,3 +9,4 @@ Show user by id = <%= id %>
 	<input type="hidden" name="_method" value="DELETE" />
 	<input type="submit" value="Delete" />
 </form>
+<a href="<%= path_to UsersController, :index %>">Users Index</a>

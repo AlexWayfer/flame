@@ -21,6 +21,8 @@ module Flame
 
 	private
 
+		## TODO: Add `views_dir` for Application and Controller
+		## TODO: Add `layout` for Controller
 		def find_file(path)
 			## Build controller_dir
 			controller_dir = (

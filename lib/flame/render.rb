@@ -42,8 +42,10 @@ module Flame
 		def layout_render(layout, result)
 			layout_filename = find_file(layout)
 			## Compile layout to hash
+			return result unless layout_filename
 			@tilts[layout_filename] ||= Tilt.new(layout_filename)
-			@tilts[layout_filename] ? @tilts[layout_filename].render { result } : result
+			return result unless @tilts[layout_filename]
+			@tilts[layout_filename].render { result }
 		end
 	end
 end

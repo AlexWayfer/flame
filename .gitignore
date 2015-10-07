@@ -1,2 +1,5 @@
 # Extra files
 extra/
+
+# Gem files
+*.gem

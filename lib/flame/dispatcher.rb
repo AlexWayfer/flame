@@ -11,7 +11,10 @@ module Flame
 
 		def run!
 			body = catch :halt do
-				try_route || try_static
+				try_route ||
+				try_static ||
+				try_static(File.join(__dir__, '..', '..', 'public')) ||
+				halt(404)
 			end
 			response.write body
 			response.finish
@@ -65,13 +68,14 @@ module Flame
 				method: method,
 				path: path
 			)
+			# p route
 			return nil unless route
 			status 200
 			route.execute(self)
 		end
 
-		def try_static
-			static_file = File.join(config[:public_dir], request.path_info)
+		def try_static(dir = config[:public_dir])
+			static_file = File.join(dir, request.path_info)
 			# p static_file
 			return nil unless File.exist?(static_file) && File.file?(static_file)
 			return_static(static_file)

@@ -4,25 +4,16 @@ module Flame
 	## Class initialize when Application.call(env) invoked
 	## For new request and response
 	class Dispatcher
-		attr_reader :request, :response
-
 		def initialize(app, env)
 			@app = app
 			@env = env
-			@request = Rack::Request.new(@env)
-			@response = Rack::Response.new
-			# p response.body
 		end
 
 		def run!
 			body = catch :halt do
-				try_static
-				try_route
+				try_route || try_static
 			end
 			response.write body
-			# p response.status
-			# p response.headers
-			# p response.body
 			response.finish
 		end
 
@@ -31,8 +22,16 @@ module Flame
 			@app.config
 		end
 
+		def request
+			@request ||= Rack::Request.new(@env)
+		end
+
 		def params
-			@request.params
+			request.params
+		end
+
+		def response
+			@response ||= Rack::Response.new
 		end
 
 		def status(value = nil)
@@ -60,11 +59,13 @@ module Flame
 		private
 
 		def try_route
+			method = params['_method'] || request.request_method
+			path = request.path_info
 			route = @app.router.find_route(
-				method: params['_method'] || request.request_method,
-				path: request.path_info
+				method: method,
+				path: path
 			)
-			halt 404 unless route
+			return nil unless route
 			status 200
 			route.execute(self)
 		end

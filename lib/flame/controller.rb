@@ -13,8 +13,16 @@ module Flame
 			@dispatcher.config
 		end
 
+		def request
+			@dispatcher.request
+		end
+
 		def params
 			@dispatcher.params
+		end
+
+		def halt(*params)
+			@dispatcher.halt(*params)
 		end
 
 		def path_to(*params)

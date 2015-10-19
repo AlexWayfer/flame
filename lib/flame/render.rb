@@ -1,4 +1,6 @@
 require 'tilt'
+require 'tilt/plain'
+require 'tilt/erb'
 
 module Flame
 	## Helper for render functionality
@@ -22,21 +24,27 @@ module Flame
 
 	private
 
+		using GorillaPatch::StringExt
+
 		## TODO: Add `views_dir` for Application and Controller
 		## TODO: Add `layout` method for Controller
 		def find_file(path)
-			## Build controller_dir
-			controller_dir = (
-				self.class.name.split(/(?=[A-Z])/) - ['Controller']
-			).join('_').downcase
 			## Get full filename
 			Dir[File.join(
 				config[:views_dir],
-				"{#{controller_dir},}",
+				"{#{controller_dirs.join(',')},}",
 				"#{path}.*"
 			)].find do |file|
 				Tilt[file]
 			end
+		end
+
+		def controller_dirs
+			## Build controller_dirs
+			controller_dir = (
+				self.class.name.underscore.split('_') - %w(controller ctrl)
+			).join('_')
+			[controller_dir, controller_dir.split('/').last]
 		end
 
 		def layout_render(layout, result)

@@ -23,4 +23,10 @@ class UsersController < Flame::Controller
 	def hello(name = 'world')
 		"Hello, #{name}"
 	end
+
+	private
+
+	def check_param!
+		halt 403 unless params['access'] == 'true'
+	end
 end

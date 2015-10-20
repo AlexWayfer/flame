@@ -4,7 +4,9 @@ module Flame
 		attr_reader :attributes
 
 		def initialize(attrs = {})
-			@attributes = attrs
+			@attributes = attrs.merge(
+				path_parts: extract_path_parts(attrs[:path])
+			)
 		end
 
 		def [](attribute)
@@ -29,7 +31,7 @@ module Flame
 
 		## Assign arguments to path for `Controller.path_to`
 		def assign_arguments(args = {})
-			extract_path_parts
+			self[:path_parts]
 			  .map { |path_part| assign_argument(path_part, args) }
 			  .unshift('').join('/').gsub(%r{\/{2,}}, '/')
 		end
@@ -53,7 +55,7 @@ module Flame
 		def extract_arguments(request_path)
 			args = {}
 			request_parts = extract_path_parts(request_path)
-			extract_path_parts.each_with_index do |path_part, i|
+			self[:path_parts].each_with_index do |path_part, i|
 				next unless path_part[0] == ':'
 				args[
 				  path_part[(path_part[1] == '?' ? 2 : 1)..-1].to_sym
@@ -79,12 +81,11 @@ module Flame
 		end
 
 		def compare_path(request_path)
-			path_parts = extract_path_parts
 			request_parts = extract_path_parts(request_path)
 			# p route_path
-			req_path_parts = path_parts.select { |part| part[1] != '?' }
+			req_path_parts = self[:path_parts].select { |part| part[1] != '?' }
 			return false if request_parts.count < req_path_parts.count
-			compare_parts(request_parts, path_parts)
+			compare_parts(request_parts, self[:path_parts])
 		end
 
 		def compare_parts(request_parts, path_parts)

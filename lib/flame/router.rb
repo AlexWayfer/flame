@@ -84,11 +84,8 @@ module Flame
 			using GorillaPatch::StringExt
 
 			def default_controller_path
-				@ctrl.name.underscore
-				  .split('_')
-				  .take_while { |part| part != 'controller' }
-				  .unshift(nil)
-				  .join('/')
+				(@ctrl.name.underscore.split('_') - %w(controller ctrl))
+				  .unshift(nil).join('/')
 			end
 
 			def make_path(path, action = nil, force_params = false)

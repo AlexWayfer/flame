@@ -10,7 +10,6 @@ class MyApp < Flame::Application
 		# delete '/:id', :delete
 		# before [:index, :show], :check_access
 		before :*, :check_param!
-		rest
 		defaults
 	end
 end

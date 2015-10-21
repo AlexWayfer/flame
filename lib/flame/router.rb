@@ -77,6 +77,7 @@ module Flame
 			end
 
 			def defaults
+				rest
 				@ctrl.public_instance_methods(false).each do |action|
 					next if find_route_index(action: action)
 					add_route(:GET, nil, action)

@@ -8,7 +8,7 @@ class MyApp < Flame::Application
 		# get '/:id', :show
 		# put '/:id', :update
 		# delete '/:id', :delete
-		before '/*', :check_param!
+		before :*, :check_param!
 		rest
 		defaults
 	end

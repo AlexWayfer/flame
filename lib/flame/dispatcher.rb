@@ -26,6 +26,10 @@ module Flame
 			@app.config
 		end
 
+		def router
+			@app.router
+		end
+
 		def request
 			@request ||= Flame::Request.new(@env)
 		end

@@ -29,11 +29,11 @@ module Flame
 		end
 
 		## Execute by Application.call
-		def execute(app)
-			ctrl = self[:controller].new(app)
-			args = extract_arguments(app.request.path_info)
-			app.params.merge!(args)
-			ctrl.send(self[:action], *arrange_arguments(args))
+		def execute(dispatcher)
+			ctrl = self[:controller].new(dispatcher)
+			dispatcher.params.merge!(arguments(dispatcher.request.path_parts))
+			dispatcher.router.find_befores(self).each { |before| ctrl.send(before) }
+			ctrl.send(self[:action], *arranged_arguments)
 		end
 
 		private

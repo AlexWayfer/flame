@@ -4,10 +4,11 @@ require_relative 'validators'
 module Flame
 	## Router class for routing
 	class Router
-		attr_accessor :routes
+		attr_accessor :routes, :befores
 
 		def initialize
 			@routes = []
+			@befores = {}
 		end
 
 		def add_controller(ctrl, path, block = nil)
@@ -15,9 +16,10 @@ module Flame
 			## TODO: Add `before` and `after` methods
 
 			## Add routes from controller to glob array
-			ctrl_routes = RouteRefine.new(ctrl, path, block).routes
-			ActionsValidator.new(ctrl_routes, ctrl).valid?
-			routes.concat(ctrl_routes)
+			ctrl_routes = RouteRefine.new(ctrl, path, block)
+			ActionsValidator.new(ctrl_routes.routes, ctrl).valid?
+			routes.concat(ctrl_routes.routes)
+			befores[ctrl] = ctrl_routes.befores
 		end
 
 		## Find route by any attributes
@@ -25,12 +27,18 @@ module Flame
 			routes.find { |route| route.compare_attributes(attrs) }
 		end
 
+		## Find before hook by Route
+		def find_befores(route)
+			(befores[route[:controller]][:*] || []) +
+			  (befores[route[:controller]][route[:action]] || [])
+		end
+
 		private
 
 		## Helper module for routing refine
 		class RouteRefine
 			attr_accessor :rest_routes
-			attr_reader :routes
+			attr_reader :routes, :befores
 
 			def self.http_methods
 				[:GET, :POST, :PUT, :DELETE]
@@ -50,6 +58,7 @@ module Flame
 				@ctrl = ctrl
 				@path = path || default_controller_path
 				@routes = []
+				@befores = {}
 				block.nil? ? defaults : instance_exec(&block)
 				# p @routes
 				@routes.sort! { |a, b| b[:path] <=> a[:path] }
@@ -60,6 +69,11 @@ module Flame
 					ArgumentsValidator.new(@ctrl, path, action).valid?
 					add_route(request_method, path, action)
 				end
+			end
+
+			def before(actions, action)
+				actions = [actions] unless actions.is_a?(Array)
+				actions.each { |a| (@befores[a] ||= []).push(action) }
 			end
 
 			def defaults

@@ -1,4 +1,5 @@
 require 'rack'
+require_relative 'request'
 
 module Flame
 	## Class initialize when Application.call(env) invoked
@@ -26,7 +27,7 @@ module Flame
 		end
 
 		def request
-			@request ||= Rack::Request.new(@env)
+			@request ||= Flame::Request.new(@env)
 		end
 
 		def params
@@ -63,10 +64,9 @@ module Flame
 
 		def try_route
 			method = params['_method'] || request.request_method
-			path = request.path_info
 			route = @app.router.find_route(
 				method: method,
-				path: path
+				path_parts: request.path_parts
 			)
 			# p route
 			return nil unless route

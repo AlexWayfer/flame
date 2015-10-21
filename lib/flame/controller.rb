@@ -1,4 +1,4 @@
-require_relative './render'
+require_relative 'render'
 
 module Flame
 	## Class for controllers helpers, like Framework::Controller

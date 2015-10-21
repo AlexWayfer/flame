@@ -1,5 +1,5 @@
-require_relative './route.rb'
-require_relative './validators.rb'
+require_relative 'route'
+require_relative 'validators'
 
 module Flame
 	## Router class for routing

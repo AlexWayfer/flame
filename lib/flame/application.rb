@@ -1,5 +1,5 @@
-require_relative './router'
-require_relative './dispatcher'
+require_relative 'router'
+require_relative 'dispatcher'
 
 module Flame
 	## Core class, like Framework::Application

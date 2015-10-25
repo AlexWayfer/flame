@@ -131,7 +131,7 @@ module Flame
 
 			def []=(key, new_value)
 				return @response.delete_cookie(key) if new_value.nil?
-				@response.set_cookie(key, new_value)
+				@response.set_cookie(key, value: new_value, path: '/')
 			end
 		end
 	end

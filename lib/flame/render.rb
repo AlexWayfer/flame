@@ -14,6 +14,7 @@ module Flame
 			@locals = options.merge(options.delete(:locals) || {})
 			## Find filename
 			@filename = find_file(path)
+			@layout = nil if File.basename(@filename)[0] == '_'
 			## Compile Tilt to instance hash
 			tilts[@filename] ||= Tilt.new(@filename)
 		end

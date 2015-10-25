@@ -126,12 +126,12 @@ module Flame
 			end
 
 			def [](key)
-				@request_cookies[key] || @request_cookies[key.to_s]
+				@request_cookies[key.to_s]
 			end
 
 			def []=(key, new_value)
-				return @response.delete_cookie(key) if new_value.nil?
-				@response.set_cookie(key, value: new_value, path: '/')
+				return @response.delete_cookie(key.to_s, path: '/') if new_value.nil?
+				@response.set_cookie(key.to_s, value: new_value, path: '/')
 			end
 		end
 	end

@@ -3,8 +3,6 @@ require_relative 'render'
 module Flame
 	## Class for controllers helpers, like Framework::Controller
 	class Controller
-		include Flame::Render
-
 		def initialize(dispatcher)
 			@dispatcher = dispatcher
 		end
@@ -20,6 +18,11 @@ module Flame
 		def params
 			@dispatcher.params
 		end
+
+		def view(path, options = {})
+			Flame::Render.new(self, path, options).render
+		end
+		alias_method :render, :view
 
 		def halt(*params)
 			@dispatcher.halt(*params)

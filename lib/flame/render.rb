@@ -4,25 +4,34 @@ require 'tilt/erb'
 
 module Flame
 	## Helper for render functionality
-	module Render
-		def view(path, options = {})
+	class Render
+		def initialize(ctrl, path, options = {})
 			## Take options for rendering
-			scope = options.delete(:scope) || self
-			layout = options.delete(:layout) || 'layout.*'
+			@ctrl = ctrl
+			@scope = options.delete(:scope) || @ctrl
+			@layout = options.delete(:layout) || 'layout.*'
 			## And get the rest variables to locals
-			locals = options.merge(options.delete(:locals) || {})
+			@locals = options.merge(options.delete(:locals) || {})
 			## Find filename
-			filename = find_file(path)
+			@filename = find_file(path)
 			## Compile Tilt to instance hash
-			@tilts ||= {}
-			@tilts[filename] ||= Tilt.new(filename)
-			## Render Tilt from instance hash with new options
-			layout_render layout, @tilts[filename].render(scope, locals)
+			tilts[@filename] ||= Tilt.new(@filename)
 		end
 
-		alias_method :render, :view
+		def render
+			## Render Tilt from instance hash with new options
+			layout_render tilts[@filename].render(@scope, @locals)
+		end
 
 	private
+
+		def self.tilts
+			@tilts ||= {}
+		end
+
+		def tilts
+			self.class.tilts
+		end
 
 		using GorillaPatch::StringExt
 
@@ -31,7 +40,7 @@ module Flame
 		def find_file(path)
 			## Get full filename
 			Dir[File.join(
-				config[:views_dir],
+				@ctrl.config[:views_dir],
 				"{#{controller_dirs.join(',')},}",
 				"#{path}.*"
 			)].find do |file|
@@ -42,18 +51,18 @@ module Flame
 		def controller_dirs
 			## Build controller_dirs
 			controller_dir = (
-				self.class.name.underscore.split('_') - %w(controller ctrl)
+				@ctrl.class.name.underscore.split('_') - %w(controller ctrl)
 			).join('_')
 			[controller_dir, controller_dir.split('/').last]
 		end
 
-		def layout_render(layout, result)
-			layout_filename = find_file(layout)
+		def layout_render(result)
+			layout_filename = find_file(@layout)
 			## Compile layout to hash
 			return result unless layout_filename
-			@tilts[layout_filename] ||= Tilt.new(layout_filename)
-			return result unless @tilts[layout_filename]
-			@tilts[layout_filename].render { result }
+			tilts[layout_filename] ||= Tilt.new(layout_filename)
+			return result unless tilts[layout_filename]
+			tilts[layout_filename].render(@scope, @locals) { result }
 		end
 	end
 end

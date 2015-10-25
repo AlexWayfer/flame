@@ -61,7 +61,22 @@ module Flame
 		def path_to(ctrl, action, args = {})
 			route = @app.router.find_route(controller: ctrl, action: action)
 			fail RouteNotFoundError.new(ctrl, action) unless route
-			route.assign_arguments(args)
+			path = route.assign_arguments(args)
+			path.empty? ? '/' : path
+		end
+
+		def redirect(*params)
+			throw :halt, response.redirect(
+				params[0].is_a?(String) ? params[0] : path_to(*params)
+			)
+		end
+
+		def session
+			request.session
+		end
+
+		def cookies
+			@cookies ||= Cookies.new(request.cookies, response)
 		end
 
 		private
@@ -101,6 +116,23 @@ module Flame
 
 		def file_mime_type(file)
 			Rack::Mime.mime_type(File.extname(file))
+		end
+
+		## Helper class for cookies
+		class Cookies
+			def initialize(request_cookies, response)
+				@request_cookies = request_cookies
+				@response = response
+			end
+
+			def [](key)
+				@request_cookies[key] || @request_cookies[key.to_s]
+			end
+
+			def []=(key, new_value)
+				return @response.delete_cookie(key) if new_value.nil?
+				@response.set_cookie(key, new_value)
+			end
 		end
 	end
 end

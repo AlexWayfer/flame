@@ -15,6 +15,10 @@ module Flame
 			@dispatcher.request
 		end
 
+		def response
+			@dispatcher.response
+		end
+
 		def params
 			@dispatcher.params
 		end
@@ -30,6 +34,18 @@ module Flame
 
 		def path_to(*params)
 			@dispatcher.path_to(*params)
+		end
+
+		def redirect(*params)
+			@dispatcher.redirect(*params)
+		end
+
+		def session
+			@dispatcher.session
+		end
+
+		def cookies
+			@dispatcher.cookies
 		end
 
 		## TODO: Add more helpers

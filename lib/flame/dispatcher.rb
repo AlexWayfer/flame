@@ -62,7 +62,7 @@ module Flame
 		end
 
 		def path_to(ctrl, action, args = {})
-			route = @app.router.find_route(controller: ctrl, action: action)
+			route = router.find_route(controller: ctrl, action: action)
 			fail RouteNotFoundError.new(ctrl, action) unless route
 			path = route.assign_arguments(args)
 			path.empty? ? '/' : path
@@ -90,9 +90,8 @@ module Flame
 		private
 
 		def try_route
-			method = params['_method'] || request.request_method
-			route = @app.router.find_route(
-				method: method,
+			route = router.find_route(
+				method: request.http_method,
 				path_parts: request.path_parts
 			)
 			# p route

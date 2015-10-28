@@ -28,37 +28,28 @@ module Flame
 			  .unshift('').join('/').gsub(%r{\/{2,}}, '/')
 		end
 
-		## Execute by Application.call
-		def execute(dispatcher)
-			ctrl = self[:controller].new(dispatcher)
-			dispatcher.params.merge!(arguments(dispatcher.request.path_parts))
-			dispatcher.router.find_befores(self).each { |before| ctrl.send(before) }
-			ctrl.send(self[:action], *arranged_arguments)
-		end
-
-		private
-
 		## Extract arguments from request_parts for `execute`
-		def arguments(request_parts = nil)
-			unless request_parts.nil?
-				@args = {}
-				self[:path_parts].each_with_index do |path_part, i|
-					next unless path_part[0] == ':'
-					@args[
-					  path_part[(path_part[1] == '?' ? 2 : 1)..-1].to_sym
-					] = URI.decode(request_parts[i])
-				end
+		def arguments(request_parts)
+			self[:path_parts].each_with_index.with_object({}) do |(path_part, i), args|
+				request_part = request_parts[i]
+				path_part_opt = path_part[1] == '?'
+				next args unless path_part[0] == ':'
+				break args if path_part_opt && request_part.nil?
+				args[
+				  path_part[(path_part_opt ? 2 : 1)..-1].to_sym
+				] = URI.decode(request_part)
 			end
-			@args
 		end
 
 		## Arguments in order as parameters of method of controller
-		def arranged_arguments
+		def arranged_params(params)
 			self[:controller].instance_method(self[:action]).parameters
 			  .each_with_object([]) do |par, arr|
-				  arr << @args[par[1]] if par[0] == :req || @args[par[1]]
+				  arr << params[par[1]] if par[0] == :req || params[par[1]]
 			  end
 		end
+
+		private
 
 		## Helpers for `compare_attributes`
 		def compare_attribute(name, value)

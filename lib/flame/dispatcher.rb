@@ -1,10 +1,13 @@
 require 'rack'
 require_relative 'request'
+require_relative 'render'
 
 module Flame
 	## Class initialize when Application.call(env) invoked
 	## For new request and response
 	class Dispatcher
+		attr_reader :controller
+
 		def initialize(app, env)
 			@app = app
 			@env = env
@@ -79,6 +82,11 @@ module Flame
 			@cookies ||= Cookies.new(request.cookies, response)
 		end
 
+		def view(path, options = {})
+			Flame::Render.new(self, path, options).render
+		end
+		alias_method :render, :view
+
 		private
 
 		def try_route
@@ -90,7 +98,16 @@ module Flame
 			# p route
 			return nil unless route
 			status 200
-			route.execute(self)
+			params.merge!(route.arguments(request.path_parts))
+			# route.execute(self)
+			execute_route(route)
+		end
+
+		def execute_route(route)
+			@controller = route[:controller]
+			singleton_class.include @controller
+			router.find_befores(route).each { |before| send(before) }
+			send(route[:action], *route.arranged_params(params))
 		end
 
 		def try_static(dir = config[:public_dir])

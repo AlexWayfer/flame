@@ -1,5 +1,5 @@
 ## Demo REST controller
-class UsersController < Flame::Controller
+module UsersController
 	def index
 		view :index
 	end

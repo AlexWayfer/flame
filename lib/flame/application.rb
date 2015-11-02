@@ -22,13 +22,34 @@ module Flame
 			)
 		end
 
+		def initialize
+			app = self
+			@builder = Rack::Builder.new do
+				app.class.middlewares.each { |m| use m[:class], *m[:args], &m[:block] }
+				run app
+			end
+		end
+
 		## Init function
 		def call(env)
-			Dispatcher.new(self, env).run!
+			if env[:FLAME_CALL]
+				Dispatcher.new(self, env).run!
+			else
+				env[:FLAME_CALL] = true
+				@builder.call env
+			end
 		end
 
 		def self.mount(ctrl, path = nil, &block)
 			router.add_controller(ctrl, path, block)
+		end
+
+		def self.use(middleware, *args, &block)
+			middlewares << { class: middleware, args: args, block: block }
+		end
+
+		def self.middlewares
+			@middlewares ||= []
 		end
 
 		## Router for routing

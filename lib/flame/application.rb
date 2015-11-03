@@ -20,6 +20,7 @@ module Flame
 				public_dir: File.join(root_dir, 'public'),
 				views_dir: File.join(root_dir, 'views')
 			)
+			app.use Rack::Session::Pool
 		end
 
 		def initialize

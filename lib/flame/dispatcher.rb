@@ -6,8 +6,6 @@ module Flame
 	## Class initialize when Application.call(env) invoked
 	## For new request and response
 	class Dispatcher
-		attr_reader :controller
-
 		def initialize(app, env)
 			@app = app
 			@env = env
@@ -103,8 +101,7 @@ module Flame
 		end
 
 		def execute_route(route)
-			@controller = route[:controller]
-			singleton_class.include @controller
+			singleton_class.include route[:controller]
 			router.find_befores(route).each { |before| send(before) }
 			result = send(route[:action], *route.arranged_params(params))
 			router.find_afters(route).each do |after|

@@ -106,7 +106,11 @@ module Flame
 			@controller = route[:controller]
 			singleton_class.include @controller
 			router.find_befores(route).each { |before| send(before) }
-			send(route[:action], *route.arranged_params(params))
+			result = send(route[:action], *route.arranged_params(params))
+			router.find_afters(route).each do |after|
+				result = send(after, result)
+			end
+			result
 		end
 
 		def try_static(dir = config[:public_dir])

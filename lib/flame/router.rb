@@ -67,7 +67,7 @@ module Flame
 			def initialize(router, ctrl, path, block)
 				@router = router
 				@ctrl = ctrl
-				@path = path || default_controller_path
+				@path = path || @ctrl.default_path
 				@routes = []
 				@befores, @afters = Array.new(2) { {} }
 				block.nil? ? defaults : instance_exec(&block)
@@ -111,18 +111,14 @@ module Flame
 			end
 
 			def mount(ctrl, path = nil, &block)
-				path = path_merge(@path, (path || default_controller_path))
+				path = path_merge(
+					@path,
+					(path || ctrl.default_path(true))
+				)
 				@router.add_controller(ctrl, path, block)
 			end
 
 			private
-
-			using GorillaPatch::StringExt
-
-			def default_controller_path
-				(@ctrl.name.underscore.split('_') - %w(controller ctrl))
-				  .unshift(nil).join('/')
-			end
 
 			def make_path(path, action = nil, force_params = false)
 				## TODO: Add :arg:type support (:id:num, :name:str, etc.)

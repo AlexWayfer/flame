@@ -77,5 +77,15 @@ module Flame
 				@response.set_cookie(key.to_s, value: new_value, path: '/')
 			end
 		end
+
+		private
+
+		using GorillaPatch::StringExt
+
+		def self.default_path(last = false)
+			(name.underscore.split('_') - %w(controller ctrl))
+			  .join('/').split('/')
+			  .unshift(nil)[(last ? -1 : 0)..-1].join('/')
+		end
 	end
 end

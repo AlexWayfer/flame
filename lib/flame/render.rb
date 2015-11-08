@@ -54,7 +54,11 @@ module Flame
 			controller_dir = (
 				@ctrl.class.name.underscore.split('_') - %w(controller ctrl)
 			).join('_')
-			[controller_dir, controller_dir.split('/').last]
+			controller_dir_parts = controller_dir.split('/')
+			[controller_dir,
+			 controller_dir_parts[1..-1].join('/'),
+			 controller_dir_parts[1..-2].join('/'),
+			 controller_dir_parts.last]
 		end
 
 		def layout_render(result)

@@ -13,6 +13,11 @@ module Flame
 			@attributes[attribute]
 		end
 
+		def merge(attrs)
+			dup.attributes.merge!(attrs)
+			self
+		end
+
 		## Compare attributes for `Router.find_route`
 		def compare_attributes(attrs)
 			attrs.each do |name, value|

@@ -52,7 +52,7 @@ module Flame
 		def controller_dirs
 			## Build controller_dirs
 			controller_dir = (
-				@ctrl.controller.name.underscore.split('_') - %w(controller ctrl)
+				@ctrl.class.name.underscore.split('_') - %w(controller ctrl)
 			).join('_')
 			[controller_dir, controller_dir.split('/').last]
 		end

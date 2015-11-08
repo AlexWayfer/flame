@@ -24,8 +24,13 @@ module Flame
 		end
 
 		## Find route by any attributes
-		def find_route(attrs)
-			routes.find { |route| route.compare_attributes(attrs) }
+		def find_route(attrs, with_hooks = true)
+			route = routes.find { |r| r.compare_attributes(attrs) }
+			return route unless route && with_hooks
+			route.merge(
+				befores: find_befores(route),
+				afters: find_afters(route)
+			)
 		end
 
 		## Find before hook by Route
@@ -39,8 +44,6 @@ module Flame
 			(afters[route[:controller]][:*] || []) +
 			  (afters[route[:controller]][route[:action]] || [])
 		end
-
-		private
 
 		## Helper module for routing refine
 		class RouteRefine

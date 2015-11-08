@@ -1,5 +1,5 @@
 ## Demo casual controller
-module HomeController
+class HomeController < Flame::Controller
 	def index
 		view :index
 	end

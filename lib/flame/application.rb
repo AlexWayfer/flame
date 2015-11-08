@@ -76,6 +76,13 @@ module Flame
 			throw :halt, body
 		end
 
+		def path_to(ctrl, action, args = {})
+			route = self.class.router.find_route(controller: ctrl, action: action)
+			fail RouteNotFoundError.new(ctrl, action) unless route
+			path = route.assign_arguments(args)
+			path.empty? ? '/' : path
+		end
+
 		def self.mount(ctrl, path = nil, &block)
 			router.add_controller(ctrl, path, block)
 		end

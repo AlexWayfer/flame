@@ -38,11 +38,8 @@ module Flame
 			@app.halt(*args)
 		end
 
-		def path_to(ctrl, action, args = {})
-			route = router.find_route(controller: ctrl, action: action)
-			fail RouteNotFoundError.new(ctrl, action) unless route
-			path = route.assign_arguments(args)
-			path.empty? ? '/' : path
+		def path_to(*args)
+			@app.path_to(*args)
 		end
 
 		def redirect(*params)

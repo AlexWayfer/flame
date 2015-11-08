@@ -16,7 +16,7 @@ module Flame
 			## TODO: Add `before` and `after` methods
 
 			## Add routes from controller to glob array
-			ctrl_routes = RouteRefine.new(ctrl, path, block)
+			ctrl_routes = RouteRefine.new(self, ctrl, path, block)
 			ActionsValidator.new(ctrl_routes.routes, ctrl).valid?
 			routes.concat(ctrl_routes.routes)
 			befores[ctrl] = ctrl_routes.befores
@@ -64,7 +64,8 @@ module Flame
 				]
 			end
 
-			def initialize(ctrl, path, block)
+			def initialize(router, ctrl, path, block)
+				@router = router
 				@ctrl = ctrl
 				@path = path || default_controller_path
 				@routes = []
@@ -109,6 +110,11 @@ module Flame
 				end
 			end
 
+			def mount(ctrl, path = nil, &block)
+				path = path_merge(@path, (path || default_controller_path))
+				@router.add_controller(ctrl, path, block)
+			end
+
 			private
 
 			using GorillaPatch::StringExt
@@ -127,11 +133,15 @@ module Flame
 					       .unshift(unshifted)
 					       .join('/')
 				end
-				"#{@path}/#{path}".gsub(%r{\/{2,}}, '/')
+				path_merge(@path, path)
 			end
 
 			def action_path(action)
 				action == :index ? '/' : action
+			end
+
+			def path_merge(*parts)
+				parts.join('/').gsub(%r{\/{2,}}, '/')
 			end
 
 			def add_route(method, path, action, force_params = false)

@@ -56,8 +56,12 @@ module Flame
 			@cookies ||= Cookies.new(request.cookies, response)
 		end
 
-		def view(path, options = {})
-			Flame::Render.new(self, path, options).render
+		def view(path = nil, options = {})
+			Flame::Render.new(
+				self,
+				(path || caller_locations(1, 1)[0].label.to_sym),
+				options
+			).render
 		end
 		alias_method :render, :view
 

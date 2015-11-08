@@ -14,10 +14,6 @@ module Flame
 			@app.config
 		end
 
-		def router
-			@app.router
-		end
-
 		def request
 			@app.request
 		end

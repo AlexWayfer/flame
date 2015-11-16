@@ -83,7 +83,7 @@ module Flame
 		using GorillaPatch::StringExt
 
 		def self.default_path(last = false)
-			(name.underscore.split('_') - %w(controller ctrl))
+			(name.split('::').last.underscore.split('_') - %w(controller ctrl))
 			  .join('/').split('/')
 			  .unshift(nil)[(last ? -1 : 0)..-1].join('/')
 		end

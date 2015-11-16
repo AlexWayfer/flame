@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
 	s.name        = 'flame'
-	s.version     = '3.1.2'
+	s.version     = '3.1.3'
 	s.date        = Date.today.to_s
 
 	s.summary     = 'Web-framework, based on MVC-pattern'

@@ -77,8 +77,8 @@ module Flame
 			http_methods.each do |request_method|
 				define_method(request_method.downcase) do |path, action = nil|
 					if action.nil?
-						path = "/#{path}"
 						action = path.to_sym
+						path = "/#{path}"
 					end
 					ArgumentsValidator.new(@ctrl, path, action).valid?
 					add_route(request_method, path, action)

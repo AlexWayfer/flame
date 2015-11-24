@@ -30,7 +30,8 @@ module Flame
 			app.config = {
 				root_dir: root_dir,
 				public_dir: File.join(root_dir, 'public'),
-				views_dir: File.join(root_dir, 'views')
+				views_dir: File.join(root_dir, 'views'),
+				config_dir: File.join(root_dir, 'config')
 			}
 			app.use Rack::Session::Pool
 		end

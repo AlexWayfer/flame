@@ -4,9 +4,10 @@ require_relative 'validators'
 module Flame
 	## Router class for routing
 	class Router
-		attr_accessor :routes, :befores, :afters
+		attr_reader :app, :routes, :befores, :afters
 
-		def initialize
+		def initialize(app)
+			@app = app
 			@routes = []
 			@befores, @afters = Array.new(2) { {} }
 		end
@@ -15,11 +16,9 @@ module Flame
 			## TODO: Add Regexp paths
 
 			## Add routes from controller to glob array
-			ctrl_routes = RouteRefine.new(self, ctrl, path, block)
-			ActionsValidator.new(ctrl_routes.routes, ctrl).valid?
-			routes.concat(ctrl_routes.routes)
-			befores[ctrl] = ctrl_routes.befores
-			afters[ctrl] = ctrl_routes.afters
+			ctrl.include(*@app.helpers)
+			route_refine = RouteRefine.new(self, ctrl, path, block)
+			concat_routes(route_refine) if ActionsValidator.new(route_refine).valid?
 		end
 
 		## Find route by any attributes
@@ -44,10 +43,18 @@ module Flame
 			  (afters[route[:controller]][route[:action]] || [])
 		end
 
+		private
+
+		def concat_routes(route_refine)
+			routes.concat(route_refine.routes)
+			befores[route_refine.ctrl] = route_refine.befores
+			afters[route_refine.ctrl] = route_refine.afters
+		end
+
 		## Helper module for routing refine
 		class RouteRefine
 			attr_accessor :rest_routes
-			attr_reader :routes, :befores, :afters
+			attr_reader :ctrl, :routes, :befores, :afters
 
 			def self.http_methods
 				[:GET, :POST, :PUT, :DELETE]
@@ -69,9 +76,7 @@ module Flame
 				@path = path || @ctrl.default_path
 				@routes = []
 				@befores, @afters = Array.new(2) { {} }
-				block.nil? ? defaults : instance_exec(&block)
-				# p @routes
-				@routes.sort! { |a, b| b[:path] <=> a[:path] }
+				execute(&block)
 			end
 
 			http_methods.each do |request_method|
@@ -85,14 +90,14 @@ module Flame
 				end
 			end
 
-			def before(actions, action)
+			def before(actions, action = nil, &block)
 				actions = [actions] unless actions.is_a?(Array)
-				actions.each { |a| (@befores[a] ||= []).push(action) }
+				actions.each { |a| (@befores[a] ||= []).push(action || block) }
 			end
 
-			def after(actions, action)
+			def after(actions, action = nil, &block)
 				actions = [actions] unless actions.is_a?(Array)
-				actions.each { |a| (@afters[a] ||= []).push(action) }
+				actions.each { |a| (@afters[a] ||= []).push(action || block) }
 			end
 
 			def defaults
@@ -122,6 +127,15 @@ module Flame
 			end
 
 			private
+
+			def execute(&block)
+				block.nil? ? defaults : instance_exec(&block)
+				@router.app.helpers.each do |helper|
+					instance_exec(&helper.mount) if helper.respond_to?(:mount)
+				end
+				# p @routes
+				@routes.sort! { |a, b| b[:path] <=> a[:path] }
+			end
 
 			def make_path(path, action = nil, force_params = false)
 				## TODO: Add :arg:type support (:id:num, :name:str, etc.)

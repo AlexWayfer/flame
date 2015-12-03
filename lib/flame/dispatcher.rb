@@ -1,20 +1,70 @@
 module Flame
 	## Helpers for dispatch Flame::Application#call
-	module Dispatcher
-		def dispatch
+	class Dispatcher
+		attr_reader :request, :response
+
+		def initialize(app, env)
+			@app = app
+			@request = Flame::Request.new(env)
+			@response = Rack::Response.new
+		end
+
+		def run!
 			body = catch :halt do
 				try_route ||
 				try_static ||
 				try_static(File.join(__dir__, '..', '..', 'public')) ||
 				halt(404)
 			end
+			# p body
 			response.write body
 			response.finish
 		end
 
+		def status(value = nil)
+			response.status ||= 200
+			value ? response.status = value : response.status
+		end
+
+		def params
+			request.params
+		end
+
+		def session
+			request.session
+		end
+
+		def cookies
+			@cookies ||= Cookies.new(request.cookies, response)
+		end
+
+		def config
+			@app.config
+		end
+
+		def path_to(ctrl, action, args = {})
+			route = @app.class.router.find_route(controller: ctrl, action: action)
+			fail RouteNotFoundError.new(ctrl, action) unless route
+			path = route.assign_arguments(args)
+			path.empty? ? '/' : path
+		end
+
+		def halt(new_status, body = '', new_headers = {})
+			new_status.is_a?(String) ? (body = new_status) : (status new_status)
+			response.headers.merge!(new_headers)
+			# p response.body
+			if body.empty? &&
+			   !Rack::Utils::STATUS_WITH_NO_ENTITY_BODY.include?(status)
+				body = Rack::Utils::HTTP_STATUS_CODES[status]
+			end
+			throw :halt, body
+		end
+
+		private
+
 		## Find route and try execute it
 		def try_route
-			route = self.class.router.find_route(
+			route = @app.class.router.find_route(
 				method: request.http_method,
 				path_parts: request.path_parts
 			)
@@ -30,8 +80,18 @@ module Flame
 			ctrl = route[:controller].new(self)
 			route[:befores].each { |before| ctrl.send(before) }
 			result = ctrl.send(route[:action], *route.arranged_params(params))
-			route[:afters].each do |after|
-				result = ctrl.send(after, result)
+			route[:afters].each { |after| result = execute_after(ctrl, after, result) }
+			result
+		end
+
+		def execute_after(ctrl, after, result)
+			case after.class.to_s.to_sym
+			when :Symbol, :String
+				result = ctrl.send(after.to_sym, result)
+			when :Proc
+				ctrl.instance_exec(result, &after)
+			else
+				fail UnexpectedTypeOfAfterError.new(after, route)
 			end
 			result
 		end
@@ -52,14 +112,32 @@ module Flame
 		def return_static(file)
 			file_time = File.mtime(file)
 			halt 304 if static_cached?(file_time)
+			mime_type = Rack::Mime.mime_type(File.extname(file))
 			response.headers.merge!(
-				'Content-Type' => Rack::Mime.mime_type(File.extname(file)),
+				'Content-Type' => mime_type,
 				'Last-Modified' => file_time.httpdate
 				# 'Content-Disposition' => 'attachment;' \
 				#	"filename=\"#{File.basename(static_file)}\"",
 				# 'Content-Length' => File.size?(static_file).to_s
 			)
 			halt 200, File.read(file)
+		end
+
+		## Helper class for cookies
+		class Cookies
+			def initialize(request_cookies, response)
+				@request_cookies = request_cookies
+				@response = response
+			end
+
+			def [](key)
+				@request_cookies[key.to_s]
+			end
+
+			def []=(key, new_value)
+				return @response.delete_cookie(key.to_s, path: '/') if new_value.nil?
+				@response.set_cookie(key.to_s, value: new_value, path: '/')
+			end
 		end
 	end
 end

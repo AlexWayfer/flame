@@ -67,14 +67,27 @@ module Flame
 	end
 
 	## Error for Flame::Controller.path_to
-	class ArgumentNotAssigned < StandardError
+	class ArgumentNotAssignedError < StandardError
 		def initialize(path, path_part)
 			@path = path
 			@path_part = path_part
 		end
 
 		def message
-			"Argument '#{@path_part}' for '#{@path}' is not assigned"
+			"Argument '#{@path_part}' for path '#{@path}' is not assigned"
+		end
+	end
+
+	## Error for Flame::Router.find_path
+	class UnexpectedTypeOfAfterError < StandardError
+		def initialize(after, route)
+			@after = after
+			@route = route
+		end
+
+		def message
+			"Unexpected after-block class '#{@after.class}'" \
+			" in route '#{@route}'"
 		end
 	end
 end

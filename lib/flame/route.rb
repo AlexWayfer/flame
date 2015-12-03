@@ -95,7 +95,7 @@ module Flame
 			## Required argument
 			param = args[path_part[1..-1].to_sym]
 			## Required argument is nil
-			fail ArgumentNotAssigned.new(self[:path], path_part) if param.nil?
+			fail ArgumentNotAssignedError.new(self[:path], path_part) if param.nil?
 			## All is ok
 			param
 		end

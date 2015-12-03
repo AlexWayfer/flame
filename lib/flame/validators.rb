@@ -57,9 +57,9 @@ module Flame
 
 	## Compare actions from routes and from controller
 	class ActionsValidator
-		def initialize(routes, ctrl)
-			@routes = routes
-			@ctrl = ctrl
+		def initialize(route_refine)
+			@routes = route_refine.routes
+			@ctrl = route_refine.ctrl
 		end
 
 		def valid?

@@ -49,11 +49,11 @@ module Flame
 			path.empty? ? '/' : path
 		end
 
-		def halt(new_status, body = '', new_headers = {})
+		def halt(new_status, body = nil, new_headers = {})
 			new_status.is_a?(String) ? (body = new_status) : (status new_status)
 			response.headers.merge!(new_headers)
 			# p response.body
-			if body.empty? &&
+			if body.nil? &&
 			   !Rack::Utils::STATUS_WITH_NO_ENTITY_BODY.include?(status)
 				body = Rack::Utils::HTTP_STATUS_CODES[status]
 			end

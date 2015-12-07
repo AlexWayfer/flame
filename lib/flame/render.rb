@@ -15,26 +15,26 @@ module Flame
 			## Find filename
 			@filename = find_file(path)
 			@layout = nil if File.basename(@filename)[0] == '_'
-			## Compile Tilt to instance hash
-			tilts[@filename] ||= Tilt.new(@filename)
 		end
 
-		def render
+		def render(cache: true)
+			## Compile Tilt to instance hash
+			tilt = cache ? self.class.tilts[@filename] ||= compile : compile
 			## Render Tilt from instance hash with new options
-			layout_render tilts[@filename].render(@scope, @locals)
+			layout_render tilt.render(@scope, @locals), cache: cache
 		end
 
 	private
 
+		using GorillaPatch::StringExt
+
+		def compile(filename = @filename)
+			Tilt.new(filename)
+		end
+
 		def self.tilts
 			@tilts ||= {}
 		end
-
-		def tilts
-			self.class.tilts
-		end
-
-		using GorillaPatch::StringExt
 
 		## TODO: Add `views_dir` for Application and Controller
 		## TODO: Add `layout` method for Controller
@@ -61,13 +61,18 @@ module Flame
 			 controller_dir_parts.last]
 		end
 
-		def layout_render(result)
-			layout_filename = find_file(@layout)
+		def layout_render(result, cache: true)
+			layout_file = find_file(@layout)
 			## Compile layout to hash
-			return result unless layout_filename
-			tilts[layout_filename] ||= Tilt.new(layout_filename)
-			return result unless tilts[layout_filename]
-			tilts[layout_filename].render(@scope, @locals) { result }
+			return result unless layout_file
+			layout =
+				if cache
+					self.class.tilts[layout_file] ||= compile(layout_file)
+				else
+					compile(layout_file)
+				end
+			return result unless layout
+			layout.render(@scope, @locals) { result }
 		end
 	end
 end

@@ -19,6 +19,8 @@ module Flame
 				app,
 				default_config_dirs(
 					root_dir: File.dirname(caller[0].split(':')[0])
+				).merge(
+					environment: ENV['RACK_ENV'] || 'development'
 				)
 			)
 			# app.use Rack::Session::Pool

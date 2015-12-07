@@ -22,11 +22,12 @@ module Flame
 		end
 
 		def view(path = nil, options = {})
-			Flame::Render.new(
+			template = Flame::Render.new(
 				self,
 				(path || caller_locations(1, 1)[0].label.to_sym),
 				options
-			).render
+			)
+			template.render(cache: config[:environment] == 'production')
 		end
 		alias_method :render, :view
 

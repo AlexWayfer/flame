@@ -42,7 +42,7 @@ module Flame
 			@app.config
 		end
 
-		def path_to(ctrl, action, args = {})
+		def path_to(ctrl, action = :index, args = {})
 			route = @app.class.router.find_route(controller: ctrl, action: action)
 			fail RouteNotFoundError.new(ctrl, action) unless route
 			path = route.assign_arguments(args)

@@ -57,7 +57,7 @@ module Flame
 		end
 
 		def self.helpers(*modules)
-			modules.empty? ? @helpers : @helpers = modules
+			modules.empty? ? (@helpers ||= []) : @helpers = modules
 		end
 
 		## Router for routing

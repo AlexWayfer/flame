@@ -27,6 +27,6 @@ class UsersController < Flame::Controller
 	private
 
 	def check_param!
-		halt 403 unless params['access'] == 'true'
+		halt 403 unless params[:access] == 'true'
 	end
 end

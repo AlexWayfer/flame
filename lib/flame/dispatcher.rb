@@ -1,7 +1,11 @@
+require 'gorilla-patch/hash'
+
 module Flame
 	## Helpers for dispatch Flame::Application#call
 	class Dispatcher
 		attr_reader :request, :response
+
+		using GorillaPatch::HashExt
 
 		def initialize(app, env)
 			@app = app
@@ -27,7 +31,7 @@ module Flame
 		end
 
 		def params
-			request.params
+			@params ||= request.params.merge(request.params.keys_to_sym)
 		end
 
 		def session

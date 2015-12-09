@@ -2,6 +2,6 @@ require_relative '../lib/flame'
 
 Dir[File.join(__dir__, 'controllers', '*.rb')].each { |file| require file }
 
-require_relative './my_app'
+require_relative './app'
 
-run MyApp.new
+run App.new

@@ -1,5 +1,5 @@
 ## Test app for Framework
-class MyApp < Flame::Application
+class App < Flame::Application
 	mount HomeController
 
 	mount UsersController, '/users' do

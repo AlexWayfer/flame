@@ -90,12 +90,12 @@ module Flame
 				end
 			end
 
-			def before(actions, action = nil, &block)
+			def before(actions = :*, action = nil, &block)
 				actions = [actions] unless actions.is_a?(Array)
 				actions.each { |a| (@befores[a] ||= []).push(action || block) }
 			end
 
-			def after(actions, action = nil, &block)
+			def after(actions = :*, action = nil, &block)
 				actions = [actions] unless actions.is_a?(Array)
 				actions.each { |a| (@afters[a] ||= []).push(action || block) }
 			end

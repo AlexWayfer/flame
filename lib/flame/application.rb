@@ -26,36 +26,13 @@ module Flame
 			# app.use Rack::Session::Pool
 		end
 
-		def initialize
-			app = self
-			@builder = Rack::Builder.new do
-				app.class.middlewares.each do |m|
-					use m[:class], *m[:args], &m[:block]
-				end
-				run app
-			end
-		end
-
 		## Init function
 		def call(env)
-			if env[:FLAME_CALL]
-				Flame::Dispatcher.new(self, env).run!
-			else
-				env[:FLAME_CALL] = true
-				@builder.call env
-			end
+			Flame::Dispatcher.new(self, env).run!
 		end
 
 		def self.mount(ctrl, path = nil, &block)
 			router.add_controller(ctrl, path, block)
-		end
-
-		def self.middlewares
-			@middlewares ||= []
-		end
-
-		def self.use(middleware, *args, &block)
-			middlewares << { class: middleware, args: args, block: block }
 		end
 
 		def self.helpers(*modules)

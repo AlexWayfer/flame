@@ -23,7 +23,6 @@ module Flame
 					environment: ENV['RACK_ENV'] || 'development'
 				)
 			)
-			# app.use Rack::Session::Pool
 		end
 
 		## Init function

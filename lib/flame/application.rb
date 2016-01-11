@@ -25,6 +25,11 @@ module Flame
 			)
 		end
 
+		def self.call(env)
+			@app ||= new
+			@app.call env
+		end
+
 		## Init function
 		def call(env)
 			Flame::Dispatcher.new(self, env).run!

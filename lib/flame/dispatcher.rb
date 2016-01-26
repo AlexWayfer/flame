@@ -105,8 +105,8 @@ module Flame
 		end
 
 		def execute_route(route)
-			exec_route = route.executable
-			exec_route.run!(self)
+			exec_route = route.executable(self)
+			exec_route.run!
 		rescue => exception
 			dump_error(exception)
 			# status 500
@@ -118,7 +118,7 @@ module Flame
 			status error_status if error_status
 			unless exec_route
 				route = nearest_route_for_request unless exec_route
-				exec_route = route.executable if route
+				exec_route = route.executable(self) if route
 			end
 			exec_route.execute_errors(status) if exec_route
 			halt

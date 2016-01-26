@@ -18,8 +18,8 @@ module Flame
 		end
 
 		## Create Executable object (route)
-		def executable
-			Executable.new(self)
+		def executable(dispatcher)
+			Executable.new(self, dispatcher)
 		end
 
 		## Compare attributes for `Router.find_route`
@@ -96,15 +96,16 @@ module Flame
 
 		## Class for Route execution
 		class Executable
-			def initialize(route)
+			## Create executable route with dispatcher
+			def initialize(route, dispatcher)
 				@route = route
+				@ctrl = @route[:controller].new(dispatcher)
 			end
 
-			## Execute route from Dispatcher
-			def run!(dispatcher)
-				@ctrl = @route[:controller].new(dispatcher)
+			## Execute route
+			def run!
 				execute_hooks(:before)
-				dispatcher.body @ctrl.send(@route[:action], *arranged_params)
+				@ctrl.body @ctrl.send(@route[:action], *arranged_params)
 				execute_hooks(:after)
 			end
 

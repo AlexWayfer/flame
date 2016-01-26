@@ -77,6 +77,7 @@ module Flame
 		## Generate default body of error page
 		def default_body
 			return if Rack::Utils::STATUS_WITH_NO_ENTITY_BODY.include?(status)
+			response.headers[Rack::CONTENT_TYPE] = 'text/html'
 			"<h1>#{Rack::Utils::HTTP_STATUS_CODES[status]}</h1>"
 		end
 

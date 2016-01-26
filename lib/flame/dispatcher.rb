@@ -39,7 +39,7 @@ module Flame
 		end
 
 		def body(value = nil)
-			value ? @body = value : @body
+			value ? @body = value : @body ||= ''
 		end
 
 		def params

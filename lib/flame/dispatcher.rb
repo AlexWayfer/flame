@@ -109,9 +109,12 @@ module Flame
 		end
 
 		def try_error(error_status = nil, exec_route = nil)
-			exec_route = nearest_route_for_request.executable unless exec_route
 			status error_status if error_status
-			exec_route.execute_errors(status)
+			unless exec_route
+				route = nearest_route_for_request unless exec_route
+				exec_route = route.executable if route
+			end
+			exec_route.execute_errors(status) if exec_route
 			halt
 		end
 

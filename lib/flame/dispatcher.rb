@@ -28,6 +28,7 @@ module Flame
 				  try_static(File.join(__dir__, '..', '..', 'public')) ||
 				  try_error(404)
 			end
+			response.write body
 			response.finish
 		end
 
@@ -35,6 +36,10 @@ module Flame
 			response.status ||= 200
 			response.headers['X-Cascade'] = 'pass' if value == 404
 			value ? response.status = value : response.status
+		end
+
+		def body(value = nil)
+			value ? @body = value : @body
 		end
 
 		def params
@@ -60,14 +65,14 @@ module Flame
 			path.empty? ? '/' : path
 		end
 
-		def halt(new_status = nil, body = nil, new_headers = {})
+		def halt(new_status = nil, new_body = nil, new_headers = {})
 			case new_status
-			when String then body = new_status
+			when String then new_body = new_status
 			when Integer then status new_status
 			end
 			# new_status.is_a?(String) ? () : (status new_status)
-			body = default_body if body.nil? && response.body.empty?
-			response.body = body if body
+			new_body = default_body if new_body.nil? && body.empty?
+			body new_body if new_body
 			response.headers.merge!(new_headers)
 			throw :halt
 		end
@@ -101,7 +106,7 @@ module Flame
 
 		def execute_route(route)
 			exec_route = route.executable
-			response.body = exec_route.run!(self)
+			exec_route.run!(self)
 		rescue => exception
 			dump_error(exception)
 			# status 500

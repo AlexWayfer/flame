@@ -104,9 +104,8 @@ module Flame
 			def run!(dispatcher)
 				@ctrl = @route[:controller].new(dispatcher)
 				execute_hooks(:before)
-				result = @ctrl.send(@route[:action], *arranged_params)
+				dispatcher.body @ctrl.send(@route[:action], *arranged_params)
 				execute_hooks(:after)
-				result
 			end
 
 			def execute_errors(status = 500)

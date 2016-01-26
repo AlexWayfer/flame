@@ -4,12 +4,12 @@ require_relative 'validators'
 module Flame
 	## Router class for routing
 	class Router
-		attr_reader :app, :routes, :befores, :afters
+		attr_reader :app, :routes, :hooks
 
 		def initialize(app)
 			@app = app
 			@routes = []
-			@befores, @afters = Array.new(2) { {} }
+			@hooks = {}
 		end
 
 		def add_controller(ctrl, path, block = nil)
@@ -22,39 +22,48 @@ module Flame
 		end
 
 		## Find route by any attributes
-		def find_route(attrs, with_hooks = true)
+		def find_route(attrs)
 			route = routes.find { |r| r.compare_attributes(attrs) }
-			return route unless route && with_hooks
-			route.merge(
-				befores: find_befores(route),
-				afters: find_afters(route)
-			)
+			route.dup if route
 		end
 
-		## Find before hook by Route
-		def find_befores(route)
-			(befores[route[:controller]][:*] || []) +
-			  (befores[route[:controller]][route[:action]] || [])
+		## Find the nearest route by path parts
+		def find_nearest_route(path_parts)
+			while path_parts.size >= 0
+				route = find_route(path_parts: path_parts)
+				break if route || path_parts.empty?
+				path_parts.pop
+			end
+			route
 		end
 
-		## Find after hook by Route
-		def find_afters(route)
-			(afters[route[:controller]][:*] || []) +
-			  (afters[route[:controller]][route[:action]] || [])
+		## Find hooks by Route
+		def find_hooks(route)
+			result = {}
+			hooks[route[:controller]].each do |type, hash|
+				if type == :error
+					result[type] = hash
+				else
+					result[type] = (hash[route[:action]] || []) | (hash[:*] || [])
+				end
+			end
+			# p result
+			result
 		end
 
 		private
 
 		def concat_routes(route_refine)
 			routes.concat(route_refine.routes)
-			befores[route_refine.ctrl] = route_refine.befores
-			afters[route_refine.ctrl] = route_refine.afters
+			hooks[route_refine.ctrl] = route_refine.hooks
 		end
 
 		## Helper module for routing refine
 		class RouteRefine
 			attr_accessor :rest_routes
-			attr_reader :ctrl, :routes, :befores, :afters
+			attr_reader :ctrl, :routes, :hooks
+
+			HOOK_TYPES = [:before, :after, :error].freeze
 
 			def self.http_methods
 				[:GET, :POST, :PUT, :DELETE]
@@ -75,7 +84,7 @@ module Flame
 				@ctrl = ctrl
 				@path = path || @ctrl.default_path
 				@routes = []
-				@befores, @afters = Array.new(2) { {} }
+				@hooks = HOOK_TYPES.each_with_object({}) { |type, hash| hash[type] = {} }
 				execute(&block)
 			end
 
@@ -90,14 +99,12 @@ module Flame
 				end
 			end
 
-			def before(actions = :*, action = nil, &block)
-				actions = [actions] unless actions.is_a?(Array)
-				actions.each { |a| (@befores[a] ||= []).push(action || block) }
-			end
-
-			def after(actions = :*, action = nil, &block)
-				actions = [actions] unless actions.is_a?(Array)
-				actions.each { |a| (@afters[a] ||= []).push(action || block) }
+			HOOK_TYPES.each do |type|
+				default_actions = (type == :error ? 500 : :*)
+				define_method(type) do |actions = default_actions, action = nil, &block|
+					actions = [actions] unless actions.is_a?(Array)
+					actions.each { |a| (@hooks[type][a] ||= []).push(action || block) }
+				end
 			end
 
 			def defaults
@@ -141,10 +148,9 @@ module Flame
 				## TODO: Add :arg:type support (:id:num, :name:str, etc.)
 				unshifted = force_params ? path : action_path(action)
 				if path.nil? || force_params
-					path = @ctrl.instance_method(action).parameters
-					       .map { |par| ":#{par[0] == :req ? '' : '?'}#{par[1]}" }
-					       .unshift(unshifted)
-					       .join('/')
+					parameters = @ctrl.instance_method(action).parameters
+					parameters.map! { |par| ":#{par[0] == :req ? '' : '?'}#{par[1]}" }
+					path = parameters.unshift(unshifted).join('/')
 				end
 				path_merge(@path, path)
 			end

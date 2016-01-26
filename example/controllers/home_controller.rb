@@ -5,6 +5,14 @@ class HomeController < Flame::Controller
 	end
 
 	def welcome(first_name, last_name = nil)
+		# p first_name, last_name
+		# fail 'Lol'
 		view 'home/welcome', first_name: first_name, last_name: last_name
+	end
+
+	protected
+
+	def error!
+		view 500
 	end
 end

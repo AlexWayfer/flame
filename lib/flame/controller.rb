@@ -29,7 +29,7 @@ module Flame
 			)
 			template.render(cache: config[:environment] == 'production')
 		end
-		alias_method :render, :view
+		alias render view
 
 		## Helpers from Flame::Dispatcher
 		def method_missing(m, *args, &block)
@@ -37,14 +37,14 @@ module Flame
 			@dispatcher.send(m, *args, &block)
 		end
 
-		private
+		class << self
+			using GorillaPatch::StringExt
 
-		using GorillaPatch::StringExt
-
-		def self.default_path(last = false)
-			(name.split('::').last.underscore.split('_') - %w(index controller ctrl))
-			  .join('/').split('/')
-			  .unshift(nil)[(last ? -1 : 0)..-1].join('/')
+			def default_path(last = false)
+				(name.split('::').last.underscore.split('_') - %w(index controller ctrl))
+				  .join('/').split('/')
+				  .unshift(nil)[(last ? -1 : 0)..-1].join('/')
+			end
 		end
 	end
 end

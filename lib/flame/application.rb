@@ -1,5 +1,4 @@
 require_relative 'router'
-require_relative 'request'
 require_relative 'dispatcher'
 
 module Flame
@@ -25,14 +24,24 @@ module Flame
 			)
 		end
 
-		def self.call(env)
-			@app ||= new
-			@app.call env
+		def initialize(app = nil)
+			@app = app
+			router.routes.map! do |route|
+				route[:hooks] = router.find_hooks(route)
+				route.freeze
+			end
+			router.freeze
 		end
 
 		## Init function
 		def call(env)
+			@app.call(env) if @app.respond_to? :call
 			Flame::Dispatcher.new(self, env).run!
+		end
+
+		def self.call(env)
+			@app ||= new
+			@app.call env
 		end
 
 		def self.mount(ctrl, path = nil, &block)
@@ -40,12 +49,16 @@ module Flame
 		end
 
 		def self.helpers(*modules)
-			modules.empty? ? (@helpers ||= []) : @helpers = modules
+			modules.empty? ? (@helpers ||= []) : helpers.concat(modules).uniq!
 		end
 
 		## Router for routing
 		def self.router
 			@router ||= Flame::Router.new(self)
+		end
+
+		def router
+			self.class.router
 		end
 
 		def self.default_config_dirs(root_dir:)

@@ -58,28 +58,42 @@ module Flame
 	## Compare actions from routes and from controller
 	class ActionsValidator
 		def initialize(route_refine)
-			@routes = route_refine.routes
+			@routes_actions = route_refine.routes.map { |route| route[:action] }
+			@hooks_actions = route_refine.hooks.values.map(&:values).flatten
+			@hooks_actions.select! { |action| action.is_a? Symbol }
 			@ctrl = route_refine.ctrl
+			@ctrl_actions = {
+				public: @ctrl.public_instance_methods(false),
+				all: @ctrl.instance_methods + @ctrl.private_instance_methods
+			}
 		end
 
 		def valid?
-			@routes_actions = @routes.map { |route| route[:action] }
-			@ctrl_actions = @ctrl.public_instance_methods(false)
-			no_extra_routes_actions? && no_extra_controller_actions?
+			no_extra_routes_actions? &&
+			  no_extra_hooks_actions? &&
+			  no_extra_controller_actions?
 		end
 
 		private
 
 		def no_extra_routes_actions?
-			extra_routes_actions = @routes_actions - @ctrl_actions
+			extra_routes_actions = @routes_actions - @ctrl_actions[:public]
 			return true if extra_routes_actions.empty?
 			fail RouterError::ExtraRoutesActionsError.new(
 				@ctrl, extra_routes_actions
 			)
 		end
 
+		def no_extra_hooks_actions?
+			extra_hooks_actions = @hooks_actions - @ctrl_actions[:all]
+			return true if extra_hooks_actions.empty?
+			fail RouterError::ExtraRoutesActionsError.new(
+				@ctrl, extra_hooks_actions
+			)
+		end
+
 		def no_extra_controller_actions?
-			extra_ctrl_actions = @ctrl_actions - @routes_actions
+			extra_ctrl_actions = @ctrl_actions[:public] - @routes_actions
 			return true if extra_ctrl_actions.empty?
 			fail RouterError::ExtraControllerActionsError.new(
 				@ctrl, extra_ctrl_actions

@@ -1,5 +1,10 @@
 require 'gorilla-patch/hash'
 
+require_relative 'cookies'
+require_relative 'request'
+require_relative 'response'
+require_relative 'static'
+
 module Flame
 	## Helpers for dispatch Flame::Application#call
 	class Dispatcher
@@ -7,26 +12,28 @@ module Flame
 
 		using GorillaPatch::HashExt
 
+		include Flame::Dispatcher::Static
+
 		def initialize(app, env)
 			@app = app
+			@env = env
 			@request = Flame::Request.new(env)
-			@response = Rack::Response.new
+			@response = Flame::Response.new
 		end
 
 		def run!
-			body = catch :halt do
+			catch :halt do
 				try_route ||
-				try_static ||
-				try_static(File.join(__dir__, '..', '..', 'public')) ||
-				halt(404)
+				  try_static ||
+				  try_static(File.join(__dir__, '..', '..', 'public')) ||
+				  try_error(404)
 			end
-			# p body
-			response.write body
 			response.finish
 		end
 
 		def status(value = nil)
 			response.status ||= 200
+			response.headers['X-Cascade'] = 'pass' if value == 404
 			value ? response.status = value : response.status
 		end
 
@@ -53,18 +60,30 @@ module Flame
 			path.empty? ? '/' : path
 		end
 
-		def halt(new_status, body = nil, new_headers = {})
-			new_status.is_a?(String) ? (body = new_status) : (status new_status)
-			response.headers.merge!(new_headers)
-			# p response.body
-			if body.nil? &&
-			   !Rack::Utils::STATUS_WITH_NO_ENTITY_BODY.include?(status)
-				body = Rack::Utils::HTTP_STATUS_CODES[status]
+		def halt(new_status = nil, body = nil, new_headers = {})
+			case new_status
+			when String then body = new_status
+			when Integer then status new_status
 			end
-			throw :halt, body
+			# new_status.is_a?(String) ? () : (status new_status)
+			body = default_body if body.nil? && response.body.empty?
+			response.body = body if body
+			response.headers.merge!(new_headers)
+			throw :halt
 		end
 
 		private
+
+		## Generate default body of error page
+		def default_body
+			return if Rack::Utils::STATUS_WITH_NO_ENTITY_BODY.include?(status)
+			"<h1>#{Rack::Utils::HTTP_STATUS_CODES[status]}</h1>"
+		end
+
+		## Find nearest route
+		def nearest_route_for_request
+			@app.router.find_nearest_route(request.path_parts)
+		end
 
 		## Find route and try execute it
 		def try_route
@@ -72,7 +91,6 @@ module Flame
 				method: request.http_method,
 				path_parts: request.path_parts
 			)
-			# p route
 			return nil unless route
 			status 200
 			params.merge!(route.arguments(request.path_parts))
@@ -81,67 +99,29 @@ module Flame
 		end
 
 		def execute_route(route)
-			ctrl = route[:controller].new(self)
-			route[:befores].each { |before| ctrl.send(before) }
-			result = ctrl.send(route[:action], *route.arranged_params(params))
-			route[:afters].each { |after| result = execute_after(ctrl, after, result) }
-			result
+			exec_route = route.executable
+			response.body = exec_route.run!(self)
+		rescue => exception
+			dump_error(exception)
+			# status 500
+			# exec_route.execute_errors(status)
+			try_error(500, exec_route)
 		end
 
-		def execute_after(ctrl, after, result)
-			case after.class.to_s.to_sym
-			when :Symbol, :String
-				result = ctrl.send(after.to_sym, result)
-			when :Proc
-				ctrl.instance_exec(result, &after)
-			else
-				fail UnexpectedTypeOfAfterError.new(after, route)
-			end
-			result
+		def try_error(error_status = nil, exec_route = nil)
+			exec_route = nearest_route_for_request.executable unless exec_route
+			status error_status if error_status
+			exec_route.execute_errors(status)
+			halt
 		end
 
-		## Find static files and try return it
-		def try_static(dir = config[:public_dir])
-			file = File.join(dir, request.path_info)
-			# p static_file
-			return nil unless File.exist?(file) && File.file?(file)
-			return_static(file)
-		end
-
-		def static_cached?(file_time)
-			since = request.env['HTTP_IF_MODIFIED_SINCE']
-			since && Time.httpdate(since).to_i >= file_time.to_i
-		end
-
-		def return_static(file)
-			file_time = File.mtime(file)
-			halt 304 if static_cached?(file_time)
-			mime_type = Rack::Mime.mime_type(File.extname(file))
-			response.headers.merge!(
-				'Content-Type' => mime_type,
-				'Last-Modified' => file_time.httpdate
-				# 'Content-Disposition' => 'attachment;' \
-				#	"filename=\"#{File.basename(static_file)}\"",
-				# 'Content-Length' => File.size?(static_file).to_s
-			)
-			halt 200, File.read(file)
-		end
-
-		## Helper class for cookies
-		class Cookies
-			def initialize(request_cookies, response)
-				@request_cookies = request_cookies
-				@response = response
-			end
-
-			def [](key)
-				@request_cookies[key.to_s]
-			end
-
-			def []=(key, new_value)
-				return @response.delete_cookie(key.to_s, path: '/') if new_value.nil?
-				@response.set_cookie(key.to_s, value: new_value, path: '/')
-			end
+		def dump_error(error)
+			msg = [
+				"#{Time.now.strftime('%Y-%m-%d %H:%M:%S')} - " \
+				"#{error.class} - #{error.message}:",
+				*error.backtrace
+			].join("\n\t")
+			@env['rack.errors'].puts(msg)
 		end
 	end
 end

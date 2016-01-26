@@ -1,6 +1,9 @@
 ## Test app for Framework
 class App < Flame::Application
-	mount HomeController
+	mount HomeController do
+		error 500, :error!
+		defaults
+	end
 
 	mount UsersController, '/users' do
 		# get '/', :index

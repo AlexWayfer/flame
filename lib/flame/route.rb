@@ -9,13 +9,17 @@ module Flame
 			)
 		end
 
-		def [](attribute)
-			@attributes[attribute]
+		def [](key)
+			@attributes[key]
 		end
 
-		def merge(attrs)
-			dup.attributes.merge!(attrs)
-			self
+		def []=(key, value)
+			@attributes[key] = value
+		end
+
+		## Create Executable object (route)
+		def executable
+			Executable.new(self)
 		end
 
 		## Compare attributes for `Router.find_route`
@@ -45,16 +49,6 @@ module Flame
 				] = URI.decode(request_part)
 			end
 		end
-
-		## Arguments in order as parameters of method of controller
-		def arranged_params(params)
-			self[:controller].instance_method(self[:action]).parameters
-			  .each_with_object([]) do |par, arr|
-				  arr << params[par[1]] if par[0] == :req || params[par[1]]
-			  end
-		end
-
-		private
 
 		## Helpers for `compare_attributes`
 		def compare_attribute(name, value)
@@ -98,6 +92,60 @@ module Flame
 			fail ArgumentNotAssignedError.new(self[:path], path_part) if param.nil?
 			## All is ok
 			param
+		end
+
+		## Class for Route execution
+		class Executable
+			def initialize(route)
+				@route = route
+			end
+
+			## Execute route from Dispatcher
+			def run!(dispatcher)
+				@ctrl = @route[:controller].new(dispatcher)
+				execute_hooks(:before)
+				result = @ctrl.send(@route[:action], *arranged_params)
+				execute_hooks(:after)
+				result
+			end
+
+			def execute_errors(status = 500)
+				execute_hooks(:error, status)
+			end
+
+			private
+
+			## Arguments in order as parameters of method of controller
+			def arranged_params
+				# action_parameters.each_with_object([]) do |par, arr|
+				# 	arr << @ctrl.params[par[1]] if par[0] == :req || @ctrl.params[par[1]]
+				# end
+				@ctrl.params.values_at(*action_parameters.map { |par| par[1] })
+			end
+
+			## Method parameters of route controller#action
+			def action_parameters
+				@route[:controller].instance_method(@route[:action]).parameters
+			end
+
+			## Execute before, after or error hook of Symbol, String or Proc
+			def execute_hook(hook)
+				case hook
+				when Symbol, String
+					@ctrl.send(hook.to_sym)
+				when Proc
+					@ctrl.instance_exec(&hook)
+				else
+					fail UnexpectedTypeOfHookError.new(hook, @route)
+				end
+			end
+
+			## Execute before, after or error hooks
+			def execute_hooks(*keys)
+				hooks = @route[:hooks].dig(*keys)
+				# p hooks
+				hooks.each { |hook| execute_hook(hook) } if hooks
+			end
 		end
 	end
 end

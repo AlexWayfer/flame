@@ -79,14 +79,14 @@ module Flame
 	end
 
 	## Error for Flame::Router.find_path
-	class UnexpectedTypeOfAfterError < StandardError
-		def initialize(after, route)
-			@after = after
+	class UnexpectedTypeOfHookError < StandardError
+		def initialize(hook, route)
+			@hook = hook
 			@route = route
 		end
 
 		def message
-			"Unexpected after-block class '#{@after.class}'" \
+			"Unexpected hook-block class '#{@hook.class}'" \
 			" in route '#{@route}'"
 		end
 	end

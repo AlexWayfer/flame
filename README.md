@@ -1,6 +1,13 @@
 # Flame
 
-Flame is a small Ruby web framework, built on Rack, which follows class-controllers style.
+Flame is a small Ruby web framework, built on Rack,
+inspired by Gin (which follows class-controllers style),
+designed as a replacement Sintra, or maybe even Rails.
+
+## Status
+
+Flame still hardly suitable for production, but it's already possible to try,
+and if you find flaws - please let me know.
 
 ## Installation
 
@@ -46,3 +53,8 @@ run App.new # or `run App`
 ```
 
 More in `example/` directory.
+
+## TODO
+
+* Create a command-line utility (for the generation of the project)
+* ...

@@ -5,7 +5,7 @@ module Flame
 
 		def initialize(attrs = {})
 			@attributes = attrs.merge(
-				path_parts: attrs[:path].to_s.split('/').reject(&:empty?)
+				path_parts: attrs[:path].to_s.split('/').reject(&:empty?).freeze
 			)
 		end
 

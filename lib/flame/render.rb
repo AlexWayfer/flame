@@ -47,11 +47,6 @@ module Flame
 		## TODO: Add `layout` method for Controller
 		def find_file(path)
 			## Get full filename
-			# p Dir[File.join(
-			# 	@ctrl.config[:views_dir],
-			# 	"{#{controller_dirs.join(',')},}",
-			# 	"#{path}.*"
-			# )].uniq
 			Dir[File.join(
 				@ctrl.config[:views_dir],
 				"{#{controller_dirs.join(',')},}",

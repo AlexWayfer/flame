@@ -58,10 +58,10 @@ module Flame
 
 		def controller_dirs
 			## Build controller_dirs
-			controller_dir = (
-				@ctrl.class.name.underscore.split('_') - %w(controller ctrl)
-			).join('_')
-			controller_dir_parts = controller_dir.split('/')
+			controller_dir_parts = @ctrl.class.name.underscore.split('/').map do |part|
+				(part.split('_') - %w(controller controllers ctrl)).join('_')
+			end
+			controller_dir = controller_dir_parts.join('/')
 			[controller_dir,
 			 controller_dir_parts[1..-1].join('/'),
 			 controller_dir_parts[1..-2].join('/'),

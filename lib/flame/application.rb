@@ -13,6 +13,7 @@ module Flame
 			self.class.config
 		end
 
+		## Generating application config when inherited
 		def self.inherited(app)
 			app.config = Config.new(
 				app,
@@ -26,30 +27,36 @@ module Flame
 
 		def initialize(app = nil)
 			@app = app
-			router.routes.map! do |route|
-				route[:hooks] = router.find_hooks(route)
-				route.freeze
-			end
-			router.freeze
 		end
 
-		## Init function
+		## Request recieving method
 		def call(env)
 			@app.call(env) if @app.respond_to? :call
 			Flame::Dispatcher.new(self, env).run!
 		end
 
+		## Make available `run Application` without `.new` for `rackup`
 		def self.call(env)
 			@app ||= new
 			@app.call env
 		end
 
+		## Mount controller in application class
+		## @param ctrl [Flame::Controller] the mounted controller class
+		## @param path [String, nil] root path for the mounted controller
+		## @yield refine defaults pathes for a methods of the mounted controller
+		## @example Mount controller with defaults
+		##   mount ArticlesController
+		## @example Mount controller with specific path
+		##   mount HomeController, '/welcome'
+		## @example Mount controller with specific path of methods
+		##   mount HomeController do
+		##     get '/bye', :goodbye
+		##     post '/greetings', :new
+		##     defaults
+		##   end
 		def self.mount(ctrl, path = nil, &block)
 			router.add_controller(ctrl, path, block)
-		end
-
-		def self.helpers(*modules)
-			modules.empty? ? (@helpers ||= []) : helpers.concat(modules).uniq!
 		end
 
 		## Router for routing
@@ -61,6 +68,7 @@ module Flame
 			self.class.router
 		end
 
+		## Initialize default for config directories
 		def self.default_config_dirs(root_dir:)
 			{
 				root_dir: File.realpath(root_dir),

@@ -20,6 +20,8 @@ module Flame
 			@layout = nil if File.basename(@filename)[0] == '_'
 		end
 
+		## Render template
+		## @param cache [Boolean] cache compiles or not
 		def render(cache: true)
 			## Compile Tilt to instance hash
 			tilt = cache ? self.class.tilts[@filename] ||= compile : compile
@@ -39,12 +41,14 @@ module Flame
 
 		using GorillaPatch::StringExt
 
+		## Compile file with Tilt engine
+		## @param filename [String] filename
 		def compile(filename = @filename)
 			Tilt.new(filename)
 		end
 
-		## TODO: Add `views_dir` for Application and Controller
-		## TODO: Add `layout` method for Controller
+		## @todo Add `views_dir` for Application and Controller
+		## @todo Add `layout` method for Controller
 		def find_file(path)
 			## Get full filename
 			Dir[File.join(
@@ -56,8 +60,8 @@ module Flame
 			end
 		end
 
+		## Find possible directories for the controller
 		def controller_dirs
-			## Build controller_dirs
 			controller_dir_parts = @ctrl.class.name.underscore.split('/').map do |part|
 				(part.split('_') - %w(controller controllers ctrl)).join('_')
 			end
@@ -68,6 +72,9 @@ module Flame
 			 controller_dir_parts.last]
 		end
 
+		## Render the layout with template
+		## @param result [String] result of template rendering
+		## @param cache [Boolean] cache compiles or not
 		def layout_render(result, cache: true)
 			layout_file = find_file(@layout)
 			## Compile layout to hash

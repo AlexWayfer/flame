@@ -5,24 +5,26 @@ module Flame
 
 		def initialize(attrs = {})
 			@attributes = attrs.merge(
+				## Split path to parts (Array of String)
 				path_parts: attrs[:path].to_s.split('/').reject(&:empty?).freeze
 			)
 		end
 
+		## Get the attribute of route
+		## @param key [Symbol] name of attribute
 		def [](key)
 			@attributes[key]
 		end
 
+		## Set the attribute of route
+		## @param key [Symbol] name of attribute
+		## @param value [Object] value of attribute
 		def []=(key, value)
 			@attributes[key] = value
 		end
 
-		## Create Executable object (route)
-		def executable(dispatcher)
-			Executable.new(self, dispatcher)
-		end
-
 		## Compare attributes for `Router.find_route`
+		## @param attrs [Hash] Hash of attributes for comparing
 		def compare_attributes(attrs)
 			attrs.each do |name, value|
 				next true if compare_attribute(name, value)
@@ -31,6 +33,7 @@ module Flame
 		end
 
 		## Assign arguments to path for `Controller.path_to`
+		## @param args [Hash] arguments for assigning
 		def assign_arguments(args = {})
 			self[:path_parts]
 			  .map { |path_part| assign_argument(path_part, args) }
@@ -38,6 +41,7 @@ module Flame
 		end
 
 		## Extract arguments from request_parts for `execute`
+		## @param request_parts [Array] parts of the request (Array of String)
 		def arguments(request_parts)
 			self[:path_parts].each_with_index.with_object({}) do |(path_part, i), args|
 				request_part = request_parts[i]
@@ -92,60 +96,6 @@ module Flame
 			fail ArgumentNotAssignedError.new(self[:path], path_part) if param.nil?
 			## All is ok
 			param
-		end
-
-		## Class for Route execution
-		class Executable
-			## Create executable route with dispatcher
-			def initialize(route, dispatcher)
-				@route = route
-				@ctrl = @route[:controller].new(dispatcher)
-			end
-
-			## Execute route
-			def run!
-				execute_hooks(:before)
-				@ctrl.body @ctrl.send(@route[:action], *arranged_params)
-				execute_hooks(:after)
-			end
-
-			def execute_errors(status = 500)
-				execute_hooks(:error, status)
-			end
-
-			private
-
-			## Arguments in order as parameters of method of controller
-			def arranged_params
-				# action_parameters.each_with_object([]) do |par, arr|
-				# 	arr << @ctrl.params[par[1]] if par[0] == :req || @ctrl.params[par[1]]
-				# end
-				@ctrl.params.values_at(*action_parameters.map { |par| par[1] })
-			end
-
-			## Method parameters of route controller#action
-			def action_parameters
-				@route[:controller].instance_method(@route[:action]).parameters
-			end
-
-			## Execute before, after or error hook of Symbol, String or Proc
-			def execute_hook(hook)
-				case hook
-				when Symbol, String
-					@ctrl.send(hook.to_sym)
-				when Proc
-					@ctrl.instance_exec(&hook)
-				else
-					fail UnexpectedTypeOfHookError.new(hook, @route)
-				end
-			end
-
-			## Execute before, after or error hooks
-			def execute_hooks(*keys)
-				hooks = @route[:hooks].dig(*keys)
-				# p hooks
-				hooks.each { |hook| execute_hook(hook) } if hooks
-			end
 		end
 	end
 end

@@ -12,7 +12,9 @@ class HomeController < Flame::Controller
 
 	protected
 
-	def error!
+	def execute(method)
+		super
+	rescue
 		view 500
 	end
 end

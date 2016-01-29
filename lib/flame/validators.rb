@@ -59,8 +59,6 @@ module Flame
 	class ActionsValidator
 		def initialize(route_refine)
 			@routes_actions = route_refine.routes.map { |route| route[:action] }
-			@hooks_actions = route_refine.hooks.values.map(&:values).flatten
-			@hooks_actions.select! { |action| action.is_a? Symbol }
 			@ctrl = route_refine.ctrl
 			@ctrl_actions = {
 				public: @ctrl.public_instance_methods(false),
@@ -69,9 +67,7 @@ module Flame
 		end
 
 		def valid?
-			no_extra_routes_actions? &&
-			  no_extra_hooks_actions? &&
-			  no_extra_controller_actions?
+			no_extra_routes_actions? && no_extra_controller_actions?
 		end
 
 		private
@@ -81,14 +77,6 @@ module Flame
 			return true if extra_routes_actions.empty?
 			fail RouterError::ExtraRoutesActionsError.new(
 				@ctrl, extra_routes_actions
-			)
-		end
-
-		def no_extra_hooks_actions?
-			extra_hooks_actions = @hooks_actions - @ctrl_actions[:all]
-			return true if extra_hooks_actions.empty?
-			fail RouterError::ExtraRoutesActionsError.new(
-				@ctrl, extra_hooks_actions
 			)
 		end
 

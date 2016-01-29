@@ -4,30 +4,36 @@ require_relative 'validators'
 module Flame
 	## Router class for routing
 	class Router
-		attr_reader :app, :routes, :hooks
+		attr_reader :app, :routes
 
 		def initialize(app)
 			@app = app
 			@routes = []
-			@hooks = {}
 		end
 
+		## Add the controller with it's methods to routes
+		## @param ctrl [Flame::Controller] class of the controller which will be added
+		## @param path [String] root path for controller's methods
+		## @param block [Proc, nil] block for routes refine
 		def add_controller(ctrl, path, block = nil)
-			## TODO: Add Regexp paths
+			## @todo Add Regexp paths
 
 			## Add routes from controller to glob array
-			ctrl.include(*@app.helpers)
 			route_refine = RouteRefine.new(self, ctrl, path, block)
 			concat_routes(route_refine) if ActionsValidator.new(route_refine).valid?
 		end
 
 		## Find route by any attributes
+		## @param attrs [Hash] attributes for comparing
+		## @return [Flame::Route, nil] return the found route, otherwise `nil`
 		def find_route(attrs)
 			route = routes.find { |r| r.compare_attributes(attrs) }
 			route.dup if route
 		end
 
 		## Find the nearest route by path parts
+		## @param path_parts [Array] parts of path for route finding
+		## @return [Flame::Route, nil] return the found nearest route, otherwise `nil`
 		def find_nearest_route(path_parts)
 			while path_parts.size >= 0
 				route = find_route(path_parts: path_parts)
@@ -37,38 +43,24 @@ module Flame
 			route
 		end
 
-		## Find hooks by Route
-		def find_hooks(route)
-			result = {}
-			hooks[route[:controller]].each do |type, hash|
-				if type == :error
-					result[type] = hash
-				else
-					result[type] = (hash[route[:action]] || []) | (hash[:*] || [])
-				end
-			end
-			# p result
-			result
-		end
-
 		private
 
+		## Add `RouteRefine` routes to the routes of `Flame::Router`
+		## @param route_refine [Flame::Router::RouteRefine] `RouteRefine` with routes
 		def concat_routes(route_refine)
 			routes.concat(route_refine.routes)
-			hooks[route_refine.ctrl] = route_refine.hooks
 		end
 
-		## Helper module for routing refine
+		## Helper class for controller routing refine
 		class RouteRefine
 			attr_accessor :rest_routes
-			attr_reader :ctrl, :routes, :hooks
-
-			HOOK_TYPES = [:before, :after, :error].freeze
+			attr_reader :ctrl, :routes
 
 			def self.http_methods
 				[:GET, :POST, :PUT, :DELETE]
 			end
 
+			## Defaults REST routes (methods, pathes, controllers actions)
 			def rest_routes
 				@rest_routes ||= [
 					{ method: :GET,     path: '/',  action: :index  },
@@ -84,11 +76,22 @@ module Flame
 				@ctrl = ctrl
 				@path = path || @ctrl.default_path
 				@routes = []
-				@hooks = HOOK_TYPES.each_with_object({}) { |type, hash| hash[type] = {} }
 				execute(&block)
 			end
 
 			http_methods.each do |request_method|
+				## Define refine methods for all HTTP methods
+				## @overload post(path, action)
+				##   Execute action on requested path and HTTP method
+				##   @param path [String] path of method for the request
+				##   @param action [Symbol] name of method for the request
+				##   @example Set path to '/bye' and method to :POST for action `goodbye`
+				##     post '/bye', :goodbye
+				## @overload post(action)
+				##   Execute action on requested HTTP method
+				##   @param action [Symbol] name of method for the request
+				##   @example Set method to :POST for action `goodbye`
+				##     post :goodbye
 				define_method(request_method.downcase) do |path, action = nil|
 					if action.nil?
 						action = path.to_sym
@@ -99,14 +102,8 @@ module Flame
 				end
 			end
 
-			HOOK_TYPES.each do |type|
-				default_actions = (type == :error ? 500 : :*)
-				define_method(type) do |actions = default_actions, action = nil, &block|
-					actions = [actions] unless actions.is_a?(Array)
-					actions.each { |a| (@hooks[type][a] ||= []).push(action || block) }
-				end
-			end
-
+			## Assign remaining methods of the controller
+			##   to defaults pathes and HTTP methods
 			def defaults
 				rest
 				@ctrl.public_instance_methods(false).each do |action|
@@ -115,6 +112,7 @@ module Flame
 				end
 			end
 
+			## Assign methods of the controller to REST architecture
 			def rest
 				rest_routes.each do |rest_route|
 					action = rest_route[:action]
@@ -125,6 +123,10 @@ module Flame
 				end
 			end
 
+			## Mount controller inside other (parent) controller
+			## @param ctrl [Flame::Controller] class of mounting controller
+			## @param path [String, nil] root path for mounting controller
+			## @yield Block of code for routes refine
 			def mount(ctrl, path = nil, &block)
 				path = path_merge(
 					@path,
@@ -135,15 +137,18 @@ module Flame
 
 			private
 
+			## Execute block of refinings end sorting routes
 			def execute(&block)
 				block.nil? ? defaults : instance_exec(&block)
-				@router.app.helpers.each do |helper|
-					instance_exec(&helper.mount) if helper.respond_to?(:mount)
-				end
+				# instance_exec(&@ctrl.mounted) if @ctrl.respond_to? :mounted
+				# @router.app.helpers.each do |helper|
+				# 	instance_exec(&helper.mount) if helper.respond_to?(:mount)
+				# end
 				# p @routes
 				@routes.sort! { |a, b| b[:path] <=> a[:path] }
 			end
 
+			## Build path for the action of controller
 			def make_path(path, action = nil, force_params = false)
 				## TODO: Add :arg:type support (:id:num, :name:str, etc.)
 				unshifted = force_params ? path : action_path(action)

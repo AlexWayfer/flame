@@ -16,7 +16,8 @@ module Flame
 			@locals = options.merge(options.delete(:locals) || {})
 			## Find filename
 			@filename = find_file(path)
-			@ctrl.instance_exec { halt 404 } unless @filename
+			# @ctrl.instance_exec { halt 404 } unless @filename
+			return unless @filename
 			@layout = nil if File.basename(@filename)[0] == '_'
 		end
 
@@ -24,6 +25,7 @@ module Flame
 		## @param cache [Boolean] cache compiles or not
 		def render(cache: true)
 			## Compile Tilt to instance hash
+			return unless @filename
 			tilt = cache ? self.class.tilts[@filename] ||= compile : compile
 			## Render Tilt from instance hash with new options
 			layout_render tilt.render(@scope, @locals), cache: cache

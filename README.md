@@ -52,7 +52,7 @@ require_relative './app'
 run App.new # or `run App`
 ```
 
-More in `example/` directory.
+More at [Wiki](https://gitlab.com/AlexWayfer/flame/wikis/home) and in `example/` directory.
 
 ## TODO
 

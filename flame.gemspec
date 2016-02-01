@@ -13,7 +13,7 @@ Gem::Specification.new do |s|
 	s.license     = 'MIT'
 
 	s.add_runtime_dependency 'rack', '~> 1'
-	s.add_runtime_dependency 'tilt', '> 1.4', '< 3'
+	s.add_runtime_dependency 'tilt', '>= 1.4', '< 3'
 	s.add_runtime_dependency 'gorilla-patch', '~> 0.0', '>= 0.0.6'
 
 	s.files = Dir[File.join('{lib,public}', '**', '*')]

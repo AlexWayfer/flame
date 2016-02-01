@@ -67,9 +67,9 @@ module Flame
 				@rest_routes ||= [
 					{ method: :GET,     path: '/',  action: :index  },
 					{ method: :POST,    path: '/',  action: :create },
-					{ method: :GET,     path: '/',  action: :show   },
-					{ method: :PUT,     path: '/',  action: :update },
-					{ method: :DELETE,  path: '/',  action: :delete }
+					{ method: :GET,     path: '/:id',  action: :show   },
+					{ method: :PUT,     path: '/:id',  action: :update },
+					{ method: :DELETE,  path: '/:id',  action: :delete }
 				]
 			end
 

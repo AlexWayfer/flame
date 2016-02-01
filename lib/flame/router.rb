@@ -20,7 +20,9 @@ module Flame
 
 			## Add routes from controller to glob array
 			route_refine = RouteRefine.new(self, ctrl, path, block)
-			concat_routes(route_refine) if ActionsValidator.new(route_refine).valid?
+			if Validators::ActionsValidator.new(route_refine).valid?
+				concat_routes(route_refine)
+			end
 		end
 
 		## Find route by any attributes
@@ -97,7 +99,7 @@ module Flame
 						action = path.to_sym
 						path = "/#{path}"
 					end
-					ArgumentsValidator.new(@ctrl, path, action).valid?
+					Validators::ArgumentsValidator.new(@ctrl, path, action).valid?
 					add_route(request_method, path, action)
 				end
 			end

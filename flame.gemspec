@@ -1,6 +1,8 @@
+require_relative 'lib/flame/version'
+
 Gem::Specification.new do |s|
 	s.name        = 'flame'
-	s.version     = '4.0.3'
+	s.version     = Flame::VERSION
 	s.date        = Date.today.to_s
 
 	s.summary     = 'Web-framework, based on MVC-pattern'

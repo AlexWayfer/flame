@@ -13,7 +13,7 @@ module Flame
 
 		## Helpers
 		def path_to(*args)
-			args.unshift self.class if args[0].is_a? Symbol
+			add_controller_class(args)
 			@dispatcher.path_to(*args)
 		end
 
@@ -71,6 +71,12 @@ module Flame
 		def method_missing(m, *args, &block)
 			return super unless @dispatcher.respond_to?(m)
 			@dispatcher.send(m, *args, &block)
+		end
+
+		private
+
+		def add_controller_class(args)
+			args.unshift self.class if args[0].is_a? Symbol
 		end
 
 		class << self

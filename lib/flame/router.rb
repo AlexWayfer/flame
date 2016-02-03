@@ -132,7 +132,7 @@ module Flame
 			def mount(ctrl, path = nil, &block)
 				path = path_merge(
 					@path,
-					(path || ctrl.default_path(true))
+					(path || ctrl.default_path)
 				)
 				@router.add_controller(ctrl, path, block)
 			end

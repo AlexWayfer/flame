@@ -83,10 +83,9 @@ module Flame
 			using GorillaPatch::StringExt
 
 			## Default root path of the controller for requests
-			def default_path(last = false)
-				(name.split('::').last.underscore.split('_') - %w(index controller ctrl))
-				  .join('/').split('/')
-				  .unshift(nil)[(last ? -1 : 0)..-1].join('/')
+			def default_path
+				parts = name.demodulize.underscore.split('_')
+				(parts - %w(index controller ctrl)).join('_')
 			end
 		end
 	end

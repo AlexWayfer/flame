@@ -41,7 +41,7 @@ module Flame
 			end
 		end
 
-		using GorillaPatch::StringExt
+		using GorillaPatch::ModuleExt
 
 		## Compile file with Tilt engine
 		## @param filename [String] filename
@@ -64,7 +64,7 @@ module Flame
 
 		## Find possible directories for the controller
 		def controller_dirs
-			controller_dir_parts = @ctrl.class.name.underscore.split('/').map do |part|
+			controller_dir_parts = @ctrl.class.underscore.split('/').map do |part|
 				(part.split('_') - %w(controller controllers ctrl)).join('_')
 			end
 			controller_dir = controller_dir_parts.join('/')

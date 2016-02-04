@@ -152,7 +152,7 @@ module Flame
 			status 200
 			params.merge!(route.arguments(request.path_parts))
 			# route.execute(self)
-			route[:controller].new(self).execute(route[:action])
+			route_exec(route)
 		rescue => exception
 			# p 'rescue from dispatcher'
 			dump_error(exception) unless @error_message
@@ -173,7 +173,13 @@ module Flame
 			##   or it's `not_found` method not defined
 			return halt unless route && route[:controller].method_defined?(:not_found)
 			## Execute `not_found` method for the founded route
-			route[:controller].new(self).execute(:not_found)
+			route_exec(route, :not_found)
+		end
+
+		## Create controller object and execute method
+		def route_exec(route, method = nil)
+			method ||= route[:action]
+			route[:controller].new(self).send(:execute, method)
 		end
 	end
 end

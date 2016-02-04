@@ -86,7 +86,7 @@ module Flame
 		##   path_to ArticlesController, :show, id: 2 # => "/articles/show/2"
 		def path_to(ctrl, action = :index, args = {})
 			route = @app.class.router.find_route(controller: ctrl, action: action)
-			fail RouteNotFoundError.new(ctrl, action) unless route
+			fail Errors::RouteNotFoundError.new(ctrl, action) unless route
 			path = route.assign_arguments(args)
 			path.empty? ? '/' : path
 		end

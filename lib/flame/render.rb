@@ -1,3 +1,5 @@
+require 'pathname'
+
 require 'tilt'
 require 'tilt/plain'
 require 'tilt/erb'
@@ -41,6 +43,10 @@ module Flame
 			end
 		end
 
+		def views_dir
+			@ctrl.config[:views_dir]
+		end
+
 		using GorillaPatch::ModuleExt
 
 		## Compile file with Tilt engine
@@ -51,11 +57,12 @@ module Flame
 
 		## @todo Add `views_dir` for Application and Controller
 		## @todo Add `layout` method for Controller
-		def find_file(path)
+		def find_file(path, layout: false)
 			## Get full filename
+			dirs = layout ? layout_dirs : controller_dirs
 			Dir[File.join(
-				@ctrl.config[:views_dir],
-				"{#{controller_dirs.join(',')},}",
+				views_dir,
+				"{#{dirs.join(',')},}",
 				"#{path}.*"
 			)].uniq.find do |file|
 				Tilt[file]
@@ -67,18 +74,25 @@ module Flame
 			controller_dir_parts = @ctrl.class.underscore.split('/').map do |part|
 				(part.split('_') - %w(controller controllers ctrl)).join('_')
 			end
-			controller_dir = controller_dir_parts.join('/')
-			[controller_dir,
-			 controller_dir_parts[1..-1].join('/'),
-			 controller_dir_parts[1..-2].join('/'),
-			 controller_dir_parts.last]
+			controller_dir_parts.map.with_index do |_part, ind|
+				controller_dir_parts[ind..-1].join('/')
+			end
+		end
+
+		def layout_dirs
+			file_dir = Pathname.new(@filename).dirname
+			diff_path = file_dir.relative_path_from Pathname.new(views_dir)
+			diff_parts = diff_path.to_s.split('/')
+			diff_parts.map.with_index do |_part, ind|
+				diff_parts[0..-(ind + 1)].join('/')
+			end
 		end
 
 		## Render the layout with template
 		## @param result [String] result of template rendering
 		## @param cache [Boolean] cache compiles or not
 		def layout_render(result, cache: true)
-			layout_file = find_file(@layout)
+			layout_file = find_file(@layout, layout: true)
 			## Compile layout to hash
 			return result unless layout_file
 			layout =

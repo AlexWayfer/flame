@@ -4,7 +4,7 @@ require 'tilt'
 require 'tilt/plain'
 require 'tilt/erb'
 
-require 'gorilla-patch/string'
+require 'gorilla-patch/module'
 
 module Flame
 	## Helper for render functionality

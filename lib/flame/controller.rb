@@ -1,4 +1,3 @@
-require 'rack'
 require_relative 'render'
 
 module Flame

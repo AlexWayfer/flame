@@ -14,9 +14,9 @@ Gem::Specification.new do |s|
 	s.homepage    = 'https://github.com/AlexWayfer/flame'
 	s.license     = 'MIT'
 
-	s.add_runtime_dependency 'rack', '~> 1'
-	s.add_runtime_dependency 'tilt', '>= 1.4', '< 3'
-	s.add_runtime_dependency 'gorilla-patch', '~> 0.0', '>= 0.0.7'
+	s.add_dependency 'rack', '~> 1'
+	s.add_dependency 'tilt', '>= 1.4', '< 3'
+	s.add_dependency 'gorilla-patch', '~> 0.0', '>= 0.0.8.1'
 
 	s.files = Dir[File.join('{lib,public}', '**', '*')]
 end

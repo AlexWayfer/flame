@@ -1,3 +1,4 @@
+require_relative 'route'
 require_relative 'errors'
 
 module Flame
@@ -23,8 +24,11 @@ module Flame
 
 			## Split path to args array
 			def path_arguments(path)
-				args = path.split('/').select { |part| part[0] == ':' }
-				args.map { |arg| arg[1..-1].to_sym }
+				args = path.split('/').select { |part| part[0] == Router::ARG_CHAR }
+				args.map do |arg|
+					opt_arg = arg[1] == Router::ARG_CHAR_OPT
+					arg[(opt_arg ? 2 : 1)..-1].to_sym
+				end
 			end
 
 			## Take args from controller's action
@@ -59,7 +63,7 @@ module Flame
 		## Compare actions from routes and from controller
 		class ActionsValidator
 			def initialize(route_refine)
-				@routes_actions = route_refine.routes.map { |route| route[:action] }
+				@routes_actions = route_refine.routes.map { |route| route.action }
 				@ctrl = route_refine.ctrl
 				@ctrl_actions = {
 					public: @ctrl.public_instance_methods(false),

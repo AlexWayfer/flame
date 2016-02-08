@@ -171,15 +171,15 @@ module Flame
 			route = @app.router.find_nearest_route(request.path_parts)
 			## Halt with default body if the route not found
 			##   or it's `not_found` method not defined
-			return halt unless route && route[:controller].method_defined?(:not_found)
+			return halt unless route && route.controller.method_defined?(:not_found)
 			## Execute `not_found` method for the founded route
 			route_exec(route, :not_found)
 		end
 
 		## Create controller object and execute method
 		def route_exec(route, method = nil)
-			method ||= route[:action]
-			route[:controller].new(self).send(:execute, method)
+			method ||= route.action
+			route.controller.new(self).send(:execute, method)
 		end
 	end
 end

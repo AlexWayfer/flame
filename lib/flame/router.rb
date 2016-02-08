@@ -67,9 +67,9 @@ module Flame
 				@rest_routes ||= [
 					{ method: :GET,     path: '/',  action: :index  },
 					{ method: :POST,    path: '/',  action: :create },
-					{ method: :GET,     path: '/:id',  action: :show   },
-					{ method: :PUT,     path: '/:id',  action: :update },
-					{ method: :DELETE,  path: '/:id',  action: :delete }
+					{ method: :GET,     path: '/',  action: :show   },
+					{ method: :PUT,     path: '/',  action: :update },
+					{ method: :DELETE,  path: '/',  action: :delete }
 				]
 			end
 
@@ -94,13 +94,15 @@ module Flame
 				##   @param action [Symbol] name of method for the request
 				##   @example Set method to :POST for action `goodbye`
 				##     post :goodbye
-				define_method(request_method.downcase) do |path, action = nil|
-					if action.nil?
-						action = path.to_sym
-						path = "/#{path}"
+				method = request_method.downcase
+				define_method(method) do |path_or_action, action = nil, prefix: false|
+					unless action
+						action = path_or_action.to_sym
+						path = nil
 					end
-					Validators::ArgumentsValidator.new(@ctrl, path, action).valid?
-					add_route(request_method, path, action)
+					route = Route.new(@ctrl, action, method, path, prefix: prefix)
+					index = find_route_index(action: action)
+					index ? @routes[index] = route : @routes.push(route)
 				end
 			end
 
@@ -110,7 +112,7 @@ module Flame
 				rest
 				@ctrl.public_instance_methods(false).each do |action|
 					next if find_route_index(action: action)
-					add_route(:GET, nil, action)
+					send(:GET.downcase, action)
 				end
 			end
 
@@ -118,10 +120,9 @@ module Flame
 			def rest
 				rest_routes.each do |rest_route|
 					action = rest_route[:action]
-					if @ctrl.public_instance_methods.include?(action) &&
+					next unless @ctrl.public_instance_methods.include?(action) &&
 					   find_route_index(action: action).nil?
-						add_route(*rest_route.values, true)
-					end
+					send(*rest_route.values.map(&:downcase), prefix: true)
 				end
 			end
 
@@ -142,43 +143,7 @@ module Flame
 			## Execute block of refinings end sorting routes
 			def execute(&block)
 				block.nil? ? defaults : instance_exec(&block)
-				# instance_exec(&@ctrl.mounted) if @ctrl.respond_to? :mounted
-				# @router.app.helpers.each do |helper|
-				# 	instance_exec(&helper.mount) if helper.respond_to?(:mount)
-				# end
-				# p @routes
-				@routes.sort! { |a, b| b[:path] <=> a[:path] }
-			end
-
-			## Build path for the action of controller
-			def make_path(path, action = nil, force_params = false)
-				## TODO: Add :arg:type support (:id:num, :name:str, etc.)
-				unshifted = force_params ? path : action_path(action)
-				if path.nil? || force_params
-					parameters = @ctrl.instance_method(action).parameters
-					parameters.map! { |par| ":#{par[0] == :req ? '' : '?'}#{par[1]}" }
-					path = parameters.unshift(unshifted).join('/')
-				end
-				path_merge(@path, path)
-			end
-
-			def action_path(action)
-				action == :index ? '/' : action
-			end
-
-			def path_merge(*parts)
-				parts.join('/').gsub(%r{\/{2,}}, '/')
-			end
-
-			def add_route(method, path, action, force_params = false)
-				route = Route.new(
-					method: method,
-					path: make_path(path, action, force_params),
-					controller: @ctrl,
-					action: action
-				)
-				index = find_route_index(action: action)
-				index ? @routes[index] = route : @routes.push(route)
+				@routes.sort! { |a, b| b.path <=> a.path }
 			end
 
 			def find_route_index(attrs)

@@ -1,27 +1,29 @@
+# frozen_string_literal: true
+
 module Flame
 	class Router
+		ARG_CHAR = ':'.freeze
+		ARG_CHAR_OPT = '?'.freeze
+
 		## Class for Route in Router.routes
 		class Route
-			attr_reader :attributes
+			attr_reader :method, :controller, :action, :path, :path_parts
 
-			def initialize(attrs = {})
-				@attributes = attrs.merge(
-					## Split path to parts (Array of String)
-					path_parts: attrs[:path].to_s.split('/').reject(&:empty?).freeze
-				)
+			def initialize(controller, action, method, path = nil, prefix: false)
+				@controller = controller
+				@action = action
+				@method = method.to_sym.upcase
+				## MAKE PATH
+				@path = prefix || path.nil? ? default_action_path(path) : path
+				Validators::ArgumentsValidator.new(@controller, @path, @action).valid?
+				@path_parts = @path.to_s.split('/').reject(&:empty?)
+				freeze
 			end
 
-			## Get the attribute of route
-			## @param key [Symbol] name of attribute
-			def [](key)
-				@attributes[key]
-			end
-
-			## Set the attribute of route
-			## @param key [Symbol] name of attribute
-			## @param value [Object] value of attribute
-			def []=(key, value)
-				@attributes[key] = value
+			def freeze
+				@path.freeze
+				@path_parts.freeze
+				super
 			end
 
 			## Compare attributes for `Router.find_route`
@@ -36,24 +38,25 @@ module Flame
 			## Assign arguments to path for `Controller.path_to`
 			## @param args [Hash] arguments for assigning
 			def assign_arguments(args = {})
-				self[:path_parts]
-				  .map { |path_part| assign_argument(path_part, args) }
-				  .unshift('').join('/').gsub(%r{\/{2,}}, '/')
+				parts = @path_parts.map { |part| assign_argument(part, args) }
+				path_merge(parts.unshift(''))
 			end
 
 			## Extract arguments from request_parts for `execute`
 			## @param request_parts [Array] parts of the request (Array of String)
 			def arguments(request_parts)
-				self[:path_parts].each_with_index.with_object({}) do |(path_part, i), args|
+				@path_parts.each_with_index.with_object({}) do |(path_part, i), args|
 					request_part = request_parts[i]
-					path_part_opt = path_part[1] == '?'
-					next args unless path_part[0] == ':'
+					path_part_opt = path_part[1] == ARG_CHAR_OPT
+					next args unless path_part[0] == ARG_CHAR
 					break args if path_part_opt && request_part.nil?
 					args[
-					  path_part[(path_part_opt ? 2 : 1)..-1].to_sym
+						path_part[(path_part_opt ? 2 : 1)..-1].to_sym
 					] = URI.decode(request_part)
 				end
 			end
+
+			private
 
 			## Helpers for `compare_attributes`
 			def compare_attribute(name, value)
@@ -63,24 +66,24 @@ module Flame
 				when :path_parts
 					compare_path_parts(value)
 				else
-					self[name] == value
+					send(name) == value
 				end
 			end
 
 			def compare_method(request_method)
-				self[:method].upcase.to_sym == request_method.upcase.to_sym
+				method.upcase.to_sym == request_method.upcase.to_sym
 			end
 
 			def compare_path_parts(request_parts)
 				# p route_path
-				req_path_parts = self[:path_parts].select { |part| part[1] != '?' }
+				req_path_parts = @path_parts.select { |part| part[1] != ARG_CHAR_OPT }
 				return false if request_parts.count < req_path_parts.count
 				# compare_parts(request_parts, self[:path_parts])
 				request_parts.each_with_index do |request_part, i|
-					path_part = self[:path_parts][i]
+					path_part = @path_parts[i]
 					# p request_part, path_part
 					break false unless path_part
-					next if path_part[0] == ':'
+					next if path_part[0] == ARG_CHAR
 					break false unless request_part == path_part
 				end
 			end
@@ -88,16 +91,35 @@ module Flame
 			## Helpers for `assign_arguments`
 			def assign_argument(path_part, args = {})
 				## Not argument
-				return path_part unless path_part[0] == ':'
+				return path_part unless path_part[0] == ARG_CHAR
 				## Not required argument
-				return args[path_part[2..-1].to_sym] if path_part[1] == '?'
+				return args[path_part[2..-1].to_sym] if path_part[1] == ARG_CHAR_OPT
 				## Required argument
 				param = args[path_part[1..-1].to_sym]
 				## Required argument is nil
-				error = Errors::ArgumentNotAssignedError.new(self[:path], path_part)
+				error = Errors::ArgumentNotAssignedError.new(path, path_part)
 				fail error if param.nil?
 				## All is ok
 				param
+			end
+
+			## Build path for the action of controller
+			## @todo Add :arg:type support (:id:num, :name:str, etc.)
+			def default_action_path(prefix)
+				unshifted = prefix ? prefix : action_prefix(@action)
+				parameters = @controller.instance_method(action).parameters
+				parameters.map! do |par|
+					":#{par[0] == :req ? '' : ARG_CHAR_OPT}#{par[1]}"
+				end
+				path_merge(parameters.unshift(unshifted))
+			end
+
+			def path_merge(*parts)
+				parts.join('/').gsub(%r{\/{2,}}, '/')
+			end
+
+			def action_prefix(action)
+				action == :index ? '/' : action
 			end
 		end
 	end

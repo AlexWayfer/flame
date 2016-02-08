@@ -9,12 +9,12 @@ module Flame
 		class Route
 			attr_reader :method, :controller, :action, :path, :path_parts
 
-			def initialize(controller, action, method, path = nil, prefix: false)
+			def initialize(controller, action, method, path)
 				@controller = controller
 				@action = action
 				@method = method.to_sym.upcase
 				## MAKE PATH
-				@path = prefix || path.nil? ? default_action_path(path) : path
+				@path = path
 				Validators::ArgumentsValidator.new(@controller, @path, @action).valid?
 				@path_parts = @path.to_s.split('/').reject(&:empty?)
 				freeze
@@ -39,7 +39,7 @@ module Flame
 			## @param args [Hash] arguments for assigning
 			def assign_arguments(args = {})
 				parts = @path_parts.map { |part| assign_argument(part, args) }
-				path_merge(parts.unshift(''))
+				self.class.path_merge(parts.unshift(''))
 			end
 
 			## Extract arguments from request_parts for `execute`
@@ -54,6 +54,10 @@ module Flame
 						path_part[(path_part_opt ? 2 : 1)..-1].to_sym
 					] = URI.decode(request_part)
 				end
+			end
+
+			def self.path_merge(*parts)
+				parts.join('/').gsub(%r{\/{2,}}, '/')
 			end
 
 			private
@@ -101,25 +105,6 @@ module Flame
 				fail error if param.nil?
 				## All is ok
 				param
-			end
-
-			## Build path for the action of controller
-			## @todo Add :arg:type support (:id:num, :name:str, etc.)
-			def default_action_path(prefix)
-				unshifted = prefix ? prefix : action_prefix(@action)
-				parameters = @controller.instance_method(action).parameters
-				parameters.map! do |par|
-					":#{par[0] == :req ? '' : ARG_CHAR_OPT}#{par[1]}"
-				end
-				path_merge(parameters.unshift(unshifted))
-			end
-
-			def path_merge(*parts)
-				parts.join('/').gsub(%r{\/{2,}}, '/')
-			end
-
-			def action_prefix(action)
-				action == :index ? '/' : action
 			end
 		end
 	end

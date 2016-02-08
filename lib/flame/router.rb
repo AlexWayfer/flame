@@ -95,12 +95,14 @@ module Flame
 				##   @example Set method to :POST for action `goodbye`
 				##     post :goodbye
 				method = request_method.downcase
-				define_method(method) do |path_or_action, action = nil, prefix: false|
+				define_method(method) do |path, action = nil, prefix: false|
 					unless action
-						action = path_or_action.to_sym
+						action = path.to_sym
 						path = nil
 					end
-					route = Route.new(@ctrl, action, method, path, prefix: prefix)
+					path = default_action_path(action, path) if prefix || path.nil?
+					path = Route.path_merge(@path, path)
+					route = Route.new(@ctrl, action, method, path)
 					index = find_route_index(action: action)
 					index ? @routes[index] = route : @routes.push(route)
 				end
@@ -131,10 +133,7 @@ module Flame
 			## @param path [String, nil] root path for mounting controller
 			## @yield Block of code for routes refine
 			def mount(ctrl, path = nil, &block)
-				path = path_merge(
-					@path,
-					(path || ctrl.default_path)
-				)
+				path = Route.path_merge(@path, path || ctrl.default_path)
 				@router.add_controller(ctrl, path, block)
 			end
 
@@ -148,6 +147,21 @@ module Flame
 
 			def find_route_index(attrs)
 				@routes.find_index { |route| route.compare_attributes(attrs) }
+			end
+
+			## Build path for the action of controller
+			## @todo Add :arg:type support (:id:num, :name:str, etc.)
+			def default_action_path(action, prefix)
+				unshifted = prefix ? prefix : action_prefix(action)
+				parameters = @ctrl.instance_method(action).parameters
+				parameters.map! do |par|
+					":#{par[0] == :req ? '' : ARG_CHAR_OPT}#{par[1]}"
+				end
+				Route.path_merge(parameters.unshift(unshifted))
+			end
+
+			def action_prefix(action)
+				action == :index ? '/' : action
 			end
 		end
 	end

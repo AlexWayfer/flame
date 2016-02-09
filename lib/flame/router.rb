@@ -96,11 +96,14 @@ module Flame
 				##     post :goodbye
 				method = request_method.downcase
 				define_method(method) do |path, action = nil, prefix: false|
+					## Swap arguments if action in path variable
 					unless action
 						action = path.to_sym
 						path = nil
 					end
+					## Make path by controller method with parameners
 					path = default_action_path(action, path) if prefix || path.nil?
+					## Merge action path with controller path
 					path = Route.path_merge(@path, path)
 					route = Route.new(@ctrl, action, method, path)
 					index = find_route_index(action: action)

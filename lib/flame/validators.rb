@@ -63,7 +63,7 @@ module Flame
 		## Compare actions from routes and from controller
 		class ActionsValidator
 			def initialize(route_refine)
-				@routes_actions = route_refine.routes.map { |route| route.action }
+				@routes_actions = route_refine.routes.map(&:action)
 				@ctrl = route_refine.ctrl
 				@ctrl_actions = {
 					public: @ctrl.public_instance_methods(false),

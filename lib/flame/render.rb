@@ -71,12 +71,25 @@ module Flame
 
 		## Find possible directories for the controller
 		def controller_dirs
-			controller_dir_parts = @ctrl.class.underscore.split('/').map do |part|
-				(part.split('_') - %w(index controller controllers ctrl)).join('_')
+			parts = @ctrl.class.underscore.split('/').map do |part|
+				(part.split('_') - %w(controller controllers ctrl)).join('_')
 			end
-			controller_dir_parts.map.with_index do |_part, ind|
-				controller_dir_parts[ind..-1].join('/')
+			combine_parts(parts).map! { |path| path.join('/') }
+		end
+
+		## Make combinations in order with different sizes
+		## @example Make parts for ['project', 'namespace', 'controller']
+		##   # => [
+		##          ['project', 'namespace', 'controller'],
+		##          ['project', 'namespace'],
+		##          ['namespace', 'controller'],
+		##          ['namespace']
+		##        ]
+		def combine_parts(parts)
+			variants = parts.size.times.with_object([]) do |i, arr|
+				arr.push parts[i..-1], parts[0..-(i + 1)], parts[i..-(i + 1)]
 			end
+			variants.uniq!.reject!(&:empty?)
 		end
 
 		def layout_dirs

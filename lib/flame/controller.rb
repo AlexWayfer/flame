@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative 'render'
 
 module Flame
@@ -31,6 +33,17 @@ module Flame
 			response.redirect(
 				params[0].is_a?(String) ? params[0] : path_to(*params)
 			)
+		end
+
+		# Set the Content-Disposition to "attachment" with the specified filename,
+		# instructing the user agents to prompt to save.
+		def attachment(filename = nil, disposition = :attachment)
+			content_dis = 'Content-Disposition'.freeze
+			response[content_dis] = disposition.to_s
+			return unless filename
+			response[content_dis] << "; filename=\"#{File.basename(filename)}\""
+			ext = File.extname(filename)
+			content_type(ext) unless response[Rack::CONTENT_TYPE] || ext.empty?
 		end
 
 		## Render a template with `Flame::Render` (based on Tilt-engine)

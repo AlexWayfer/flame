@@ -86,10 +86,10 @@ module Flame
 		##          ['namespace']
 		##        ]
 		def combine_parts(parts)
-			variants = parts.size.times.with_object([]) do |i, arr|
-				arr.push parts[i..-1], parts[0..-(i + 1)], parts[i..-(i + 1)]
+			parts.size.downto(1).with_object([]) do |i, arr|
+				arr.push(*parts.combination(i).to_a)
 			end
-			variants.uniq!.reject!(&:empty?)
+			# variants.uniq!.reject!(&:empty?)
 		end
 
 		def layout_dirs

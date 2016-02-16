@@ -88,7 +88,8 @@ module Flame
 		private
 
 		def add_controller_class(args)
-			args.unshift self.class if args[0].is_a? Symbol
+			args.unshift(self.class) if args[0].is_a?(Symbol)
+			args.insert(1, :index) if args[0].is_a?(Class) && !args[1].is_a?(Symbol)
 		end
 
 		class << self

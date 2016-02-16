@@ -4,7 +4,7 @@ module Flame
 		module Static
 			## Find static files and try return it
 			def try_static(dir = config[:public_dir])
-				file = File.join(dir, request.path_info)
+				file = File.join(dir, URI.decode(request.path_info))
 				return nil unless File.exist?(file) && File.file?(file)
 				return_static(file)
 			end

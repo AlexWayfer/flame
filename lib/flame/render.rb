@@ -36,7 +36,7 @@ module Flame
 		private
 
 		class << self
-			private
+			# private
 
 			def tilts
 				@tilts ||= {}

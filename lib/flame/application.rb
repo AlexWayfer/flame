@@ -92,6 +92,28 @@ module Flame
 				end
 				result
 			end
+
+			## Method for loading YAML-files from config directory
+			## @param file [String, Symbol] file name (typecast to String with '.yml')
+			## @param key [Symbol, String, nil]
+			##   key for allocating YAML in config Hash (typecast to Symbol)
+			## @param set [Boolean] allocating YAML in Config Hash
+			## @example Load SMTP file from `config/smtp.yml' to config[]
+			##   config.load_yaml('smtp.yml')
+			## @example Load SMTP file without extension, by Symbol
+			##   config.load_yaml(:smtp)
+			## @example Load SMTP file with other key to config[:mail]
+			##   config.load_yaml('smtp.yml', :mail)
+			## @example Load SMTP file without allocating in config[]
+			##   config.load_yaml('smtp.yml', set: false)
+			def load_yaml(file, key: nil, set: true)
+				file = "#{file}.yml" if file.is_a? Symbol
+				file_path = File.join(self[:config_dir], file)
+				yaml = YAML.load_file(file_path)
+				key ||= File.basename(file, '.*')
+				self[key.to_sym] = yaml if set
+				yaml
+			end
 		end
 	end
 end

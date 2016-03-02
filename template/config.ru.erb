@@ -1,0 +1,18 @@
+## Require gems
+require 'bundler'
+Bundler.require
+
+## Require project
+Dir[File.join(
+	__dir__, '{config,models,helpers,controllers}', '{,**}', '{_,}*.rb'
+)].each { |file| require file }
+
+## Require application
+require_relative './app'
+
+## Use middlewares
+use Rack::Session::Cookie, key: 'rack.session', secret: 'dummy_secret'
+use Rack::CommonLogger
+
+## Run application
+run <%= @module_name %>::Application

@@ -1,0 +1,11 @@
+# configuration
+config/*.yml
+!config/*example.yml
+
+# temp
+log/
+tmp/
+*.bak
+
+# dumps
+*.sql

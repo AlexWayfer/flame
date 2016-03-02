@@ -1,0 +1,13 @@
+source 'https://rubygems.org'
+
+## Framework
+gem 'flame'
+# gem 'flame-flash'
+# gem 'flame-r18n'
+
+## Server
+gem 'thin'
+
+## DataBase
+gem 'sequel'
+# gem 'pg'

@@ -1,0 +1,11 @@
+module <%= @module_name %>
+	## Base controller for any others controllers
+	class Controller < Flame::Controller
+		# include Flame::R18n
+
+		def execute(method)
+			# session[:locale] = params[:locale] || 'ru'
+			super
+		end
+	end
+end

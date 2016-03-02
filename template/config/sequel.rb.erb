@@ -1,0 +1,13 @@
+require 'yaml'
+
+## Database initialize for Sequel
+module <%= @module_name %>
+	# Sequel::Model.plugin :timestamps
+	# Sequel::Model.raise_on_save_failure = false
+
+	DB = Sequel.connect(
+		YAML.load_file(File.join(__dir__, 'database.yml'))
+	)
+
+	# DB.extension :pg_enum
+end

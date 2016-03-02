@@ -1,0 +1,62 @@
+namespace :db do
+	## Require libs and config
+	require 'sequel'
+	require File.join(__dir__, 'config', 'sequel.rb')
+	## Default path to db-files
+	db_dir = File.join(__dir__, 'db')
+
+	desc 'Run migrations'
+	task :migrate, [:version] do |_t, args|
+		Sequel.extension :migration
+		migrations_dir = File.join(db_dir, 'migrations')
+
+		if args[:version]
+			puts "Migrating to version #{args[:version]}"
+			Sequel::Migrator.run(
+				<%= @module_name %>::DB,
+				migrations_dir,
+				target: args[:version].to_i
+			)
+		else
+			puts 'Migrating to latest'
+			Sequel::Migrator.run(<%= @module_name %>::DB, migrations_dir)
+		end
+
+		Rake::Task['db:schema:dump'].invoke('same_db=true')
+	end
+
+	desc 'Run seeds'
+	task :seed do |_t|
+		require 'sequel/extensions/seed'
+		seeds_dir = File.join(db_dir, 'seeds')
+
+		## Doesn't support version yet
+		puts 'Seeding latest'
+		Sequel::Seeder.apply(<%= @module_name %>::DB, seeds_dir)
+	end
+
+	namespace :schema do
+		schema_filename = '001_schema.rb'
+
+		desc 'Run schema dump'
+		task :dump do |_t|
+			<%= @module_name %>::DB.extension :schema_dumper
+			puts 'Dump latest schema'
+			dump = <%= @module_name %>::DB.dump_schema_migration(
+				same_db: env_true?('same_db')
+			)
+			File.write(File.join(db_dir, schema_filename), dump)
+		end
+
+		desc 'Run schema load'
+		task :load do |_t|
+			Sequel.extension :migration
+			puts 'Load latest schema'
+			Sequel::Migrator.run(<%= @module_name %>::DB, db_dir, target: 1)
+		end
+	end
+end
+
+def env_true?(key)
+	%(true yes 1 y).include?(ENV[key].to_s.downcase)
+end

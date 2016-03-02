@@ -1,0 +1,14 @@
+# frozen_string_literal: true
+
+module <%= @module_name %>
+	## Constants
+	SITE_NAME = '<%= @module_name %>'.freeze
+
+	## Configuration for application
+	module Config
+		def self.included(app)
+			## Translations
+			# Flame::R18n.config(app)
+		end
+	end
+end

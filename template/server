@@ -1,0 +1,48 @@
+#!/usr/bin/env ruby
+
+## Functons
+def show_usage
+	puts 'Usage: ./server COMMAND'
+	puts 'COMMAND is one of:'
+	puts '    start - Start server'
+	puts '     stop - Stop server'
+	puts '  restart - Stop/Start server'
+	puts '  monitor - Show log'
+	puts '    devel - Restart/Monitor server'
+end
+
+def start_server
+	system 'rm log/*'
+	system 'thin -C config/thin.yml start'
+end
+
+def stop_server
+	system 'thin -C config/thin.yml stop'
+end
+
+def restart_server
+	stop_server
+	start_server
+end
+
+def monitor_server
+	system 'tail -f log/thin.*.log'
+end
+
+## Runtime
+case ARGV[0]
+when 'start'
+	start_server
+when 'stop'
+	stop_server
+when 'restart'
+	restart_server
+when 'monitor'
+	monitor_server
+when 'devel'
+	restart_server
+	monitor_server
+else
+	puts "Unknown command #{ARGV[0]}"
+	show_usage
+end

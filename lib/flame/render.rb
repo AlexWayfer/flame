@@ -54,7 +54,7 @@ module Flame
 		## @param filename [String] filename
 		def compile_file(filename = @filename)
 			cached = self.class.tilts[filename]
-			return cached if @cache
+			return cached if @cache && cached
 			compiled = Tilt.new(filename)
 			self.class.tilts[filename] ||= compiled if @cache
 			compiled

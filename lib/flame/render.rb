@@ -26,11 +26,12 @@ module Flame
 		## Render template
 		## @param cache [Boolean] cache compiles or not
 		def render(cache: true)
+			@cache = cache
 			## Compile Tilt to instance hash
 			return unless @filename
-			tilt = cache ? self.class.tilts[@filename] ||= compile : compile
+			tilt = compile_file
 			## Render Tilt from instance hash with new options
-			layout_render tilt.render(@scope, @locals), cache: cache
+			layout_render tilt.render(@scope, @locals)
 		end
 
 		private
@@ -51,8 +52,12 @@ module Flame
 
 		## Compile file with Tilt engine
 		## @param filename [String] filename
-		def compile(filename = @filename)
-			Tilt.new(filename)
+		def compile_file(filename = @filename)
+			cached = self.class.tilts[filename]
+			return cached if @cache
+			compiled = Tilt.new(filename)
+			self.class.tilts[filename] ||= compiled if @cache
+			compiled
 		end
 
 		## @todo Add `views_dir` for Application and Controller

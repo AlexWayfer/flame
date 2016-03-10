@@ -62,16 +62,20 @@ module Flame
 
 		## @todo Add `views_dir` for Application and Controller
 		## @todo Add `layout` method for Controller
-		def find_file(path, layout: false)
-			## Get full filename
-			dirs = layout ? layout_dirs : controller_dirs
-			Dir[File.join(
-				views_dir,
-				"{#{dirs.join(',')},}",
-				"#{path}.*"
-			)].uniq.find do |file|
-				Tilt[file]
-			end
+
+		## Common method for `find_file` and `find_layouts`
+		def find_files(path, dirs)
+			Dir[File.join(views_dir, "{#{dirs.join(',')},}", "#{path}.*")].uniq
+		end
+
+		## Find template-file by path
+		def find_file(path)
+			find_files(path, controller_dirs).find { |file| Tilt[file] }
+		end
+
+		## Find layout-files by path
+		def find_layouts(path)
+			find_files(path, layout_dirs).select { |file| Tilt[file] }.sort!.reverse!
 		end
 
 		## Find possible directories for the controller
@@ -108,19 +112,14 @@ module Flame
 
 		## Render the layout with template
 		## @param result [String] result of template rendering
-		## @param cache [Boolean] cache compiles or not
-		def layout_render(result, cache: true)
-			layout_file = find_file(@layout, layout: true)
-			## Compile layout to hash
-			return result unless layout_file
-			layout =
-					if cache
-						self.class.tilts[layout_file] ||= compile(layout_file)
-					else
-						compile(layout_file)
-					end
-			return result unless layout
-			layout.render(@scope, @locals) { result }
+		def layout_render(content)
+			return content unless @layout
+			layout_files = find_layouts(@layout)
+			return content if layout_files.empty?
+			layout_files.each_with_object(content) do |layout_file, result|
+				layout = compile_file(layout_file)
+				result.replace layout.render(@scope, @locals) { result }
+			end
 		end
 	end
 end

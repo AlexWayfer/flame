@@ -16,7 +16,7 @@ Gem::Specification.new do |s|
 
 	s.add_dependency 'rack', '~> 1'
 	s.add_dependency 'tilt', '>= 1.4', '< 3'
-	s.add_dependency 'gorilla-patch', '~> 0.0', '>= 0.0.8.1'
+	s.add_dependency 'gorilla-patch', '~> 0.0', '>= 0.0.11'
 	s.add_dependency 'thor', '~> 0'
 
 	s.files = Dir[File.join('{lib,public,template}', '**', '{*,.*}')]

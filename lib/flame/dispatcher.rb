@@ -58,7 +58,7 @@ module Flame
 
 		## Parameters of the request
 		def params
-			@params ||= request.params.merge(request.params.keys_to_sym)
+			@params ||= request.params.merge(request.params.keys_to_sym(deep: true))
 		end
 
 		## Session object as Hash

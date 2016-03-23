@@ -65,7 +65,12 @@ module Flame
 
 		## Common method for `find_file` and `find_layouts`
 		def find_files(path, dirs)
-			Dir[File.join(views_dir, "{#{dirs.join(',')},}", "#{path}.*")].uniq
+			paths = [path]
+			paths.push(dirs.last) if path.to_sym == :index
+			dirs.push(nil)
+			Dir[
+				File.join(views_dir, "{#{dirs.join(',')}}", "{#{paths.join(',')}}.*")
+			].uniq
 		end
 
 		## Find template-file by path

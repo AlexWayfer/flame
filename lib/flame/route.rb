@@ -102,7 +102,7 @@ module Flame
 				param = args[path_part[1..-1].to_sym]
 				## Required argument is nil
 				error = Errors::ArgumentNotAssignedError.new(path, path_part)
-				fail error if param.nil?
+				raise error if param.nil?
 				## All is ok
 				param
 			end

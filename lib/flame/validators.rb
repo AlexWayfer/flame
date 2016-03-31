@@ -45,7 +45,7 @@ module Flame
 				## Subtraction action args from path args
 				extra_path_args = @path_args - @action_args[:all]
 				return true if extra_path_args.empty?
-				fail Errors::RouterError::ExtraPathArgumentsError.new(
+				raise Errors::RouterError::ExtraPathArgumentsError.new(
 					@ctrl, @action, @path, extra_path_args
 				)
 			end
@@ -54,7 +54,7 @@ module Flame
 				## Subtraction path args from action required args
 				extra_action_args = @action_args[:req] - @path_args
 				return true if extra_action_args.empty?
-				fail Errors::RouterError::ExtraActionArgumentsError.new(
+				raise Errors::RouterError::ExtraActionArgumentsError.new(
 					@ctrl, @action, @path, extra_action_args
 				)
 			end
@@ -80,7 +80,7 @@ module Flame
 			def no_extra_routes_actions?
 				extra_routes_actions = @routes_actions - @ctrl_actions[:public]
 				return true if extra_routes_actions.empty?
-				fail Errors::RouterError::ExtraRoutesActionsError.new(
+				raise Errors::RouterError::ExtraRoutesActionsError.new(
 					@ctrl, extra_routes_actions
 				)
 			end
@@ -88,7 +88,7 @@ module Flame
 			def no_extra_controller_actions?
 				extra_ctrl_actions = @ctrl_actions[:public] - @routes_actions
 				return true if extra_ctrl_actions.empty?
-				fail Errors::RouterError::ExtraControllerActionsError.new(
+				raise Errors::RouterError::ExtraControllerActionsError.new(
 					@ctrl, extra_ctrl_actions
 				)
 			end

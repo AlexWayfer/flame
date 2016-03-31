@@ -82,7 +82,7 @@ module Flame
 			response[Rack::CONTENT_TYPE] = Rack::Mime.mime_type(ext)
 		end
 
-		## Get path for controller and action.
+		## Build a path to the given controller and action, with any expected params
 		##
 		## @param ctrl [Flame::Controller] class of controller
 		## @param action [Symbol] method of controller

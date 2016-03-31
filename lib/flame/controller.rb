@@ -18,6 +18,12 @@ module Flame
 			@dispatcher.path_to(*args)
 		end
 
+		## Build a URI to the given controller and action, or path
+		def url_to(*args)
+			path = args.first.is_a?(String) ? args.first : path_to(*args)
+			"#{request.scheme}://#{request.host}#{path}"
+		end
+
 		## Redirect for response
 		## @overload redirect(path)
 		##   Redirect to the string path

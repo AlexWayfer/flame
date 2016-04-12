@@ -115,7 +115,8 @@ module Flame
 			when Integer then status new_status_or_body
 			end
 			# new_status.is_a?(String) ? () : (status new_status)
-			default_body_of_nearest_route if new_body.nil? && body.empty?
+			body new_body if new_body
+			default_body_of_nearest_route if body.empty?
 			response.headers.merge!(new_headers)
 			throw :halt
 		end

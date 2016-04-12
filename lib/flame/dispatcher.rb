@@ -30,7 +30,7 @@ module Flame
 				try_route ||
 				  try_static ||
 				  try_static(File.join(__dir__, '..', '..', 'public')) ||
-				  not_found
+				  halt(404)
 			end
 			response.write body
 			response.finish
@@ -175,7 +175,7 @@ module Flame
 			## Return nil if the route not found
 			##   or it's `default_body` method not defined
 			return default_body unless route
-			## Execute `not_found` method for the founded route
+			## Execute `default_body` method for the founded route
 			route_send(route, :default_body) || default_body
 		end
 

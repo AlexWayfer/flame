@@ -115,7 +115,7 @@ module Flame
 			when Integer then status new_status_or_body
 			end
 			# new_status.is_a?(String) ? () : (status new_status)
-			new_body = default_body if new_body.nil? && body.empty?
+			new_body = default_body_of_nearest_route if new_body.nil? && body.empty?
 			body new_body if new_body
 			response.headers.merge!(new_headers)
 			throw :halt
@@ -132,15 +132,13 @@ module Flame
 			@env['rack.errors'].puts(@error_message)
 		end
 
-		private
-
 		## Generate default body of error page
 		def default_body
-			## Return nil if must be no body for current HTTP status
-			return if Rack::Utils::STATUS_WITH_NO_ENTITY_BODY.include?(status)
-			response.headers[Rack::CONTENT_TYPE] = 'text/html'
+			# response.headers[Rack::CONTENT_TYPE] = 'text/html'
 			"<h1>#{Rack::Utils::HTTP_STATUS_CODES[status]}</h1>"
 		end
+
+		private
 
 		## Find route and try execute it
 		def try_route
@@ -158,7 +156,7 @@ module Flame
 			status 200
 			params.merge!(route.arguments(request.path_parts))
 			# route.execute(self)
-			route_exec(route)
+			route_send(route, :execute, route.action)
 		rescue => exception
 			# p 'rescue from dispatcher'
 			dump_error(exception) unless @error_message
@@ -168,24 +166,22 @@ module Flame
 			# raise exception
 		end
 
-		## Generate a response if the route is not found
-		def not_found
-			# p 'not found from dispatcher'
-			## Change the status of response to 404
-			status 404
+		## Generate a default body of nearest route
+		def default_body_of_nearest_route
+			## Return nil if must be no body for current HTTP status
+			return if Rack::Utils::STATUS_WITH_NO_ENTITY_BODY.include?(status)
 			## Find the nearest route by the parts of requested path
 			route = @app.router.find_nearest_route(request.path_parts)
-			## Halt with default body if the route not found
-			##   or it's `not_found` method not defined
-			return halt unless route && route.controller.method_defined?(:not_found)
+			## Return nil if the route not found
+			##   or it's `default_body` method not defined
+			return default_body unless route
 			## Execute `not_found` method for the founded route
-			route_exec(route, :not_found)
+			route_send(route, :default_body) || default_body
 		end
 
-		## Create controller object and execute method
-		def route_exec(route, method = nil)
-			method ||= route.action
-			route.controller.new(self).send(:execute, method)
+		## Create controller object and send method with arguments
+		def route_send(route, method, *args)
+			route.controller.new(self).send(method, *args)
 		end
 	end
 end

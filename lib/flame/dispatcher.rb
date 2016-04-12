@@ -115,8 +115,7 @@ module Flame
 			when Integer then status new_status_or_body
 			end
 			# new_status.is_a?(String) ? () : (status new_status)
-			new_body = default_body_of_nearest_route if new_body.nil? && body.empty?
-			body new_body if new_body
+			default_body_of_nearest_route if new_body.nil? && body.empty?
 			response.headers.merge!(new_headers)
 			throw :halt
 		end
@@ -156,7 +155,7 @@ module Flame
 			status 200
 			params.merge!(route.arguments(request.path_parts))
 			# route.execute(self)
-			route_send(route, :execute, route.action)
+			route_exec(route)
 		rescue => exception
 			# p 'rescue from dispatcher'
 			dump_error(exception) unless @error_message
@@ -176,12 +175,13 @@ module Flame
 			##   or it's `default_body` method not defined
 			return default_body unless route
 			## Execute `default_body` method for the founded route
-			route_send(route, :default_body) || default_body
+			route_exec(route, :default_body)
+			body default_body if body.empty?
 		end
 
-		## Create controller object and send method with arguments
-		def route_send(route, method, *args)
-			route.controller.new(self).send(method, *args)
+		## Create controller object and execute method with arguments
+		def route_exec(route, method = route.action)
+			route.controller.new(self).send(:execute, method)
 		end
 	end
 end

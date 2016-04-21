@@ -21,7 +21,7 @@ module Flame
 		## Build a URI to the given controller and action, or path
 		def url_to(*args)
 			path = args.first.is_a?(String) ? args.first : path_to(*args)
-			"#{request.scheme}://#{request.host}#{path}"
+			"#{request.scheme}://#{request.host_with_port}#{path}"
 		end
 
 		## Redirect for response

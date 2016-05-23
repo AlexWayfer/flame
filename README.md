@@ -11,8 +11,8 @@ and if you find flaws - please let me know.
 
 ## Installation
 
-```
-gem install flame
+```bash
+$ gem install flame
 ```
 
 ## Usage

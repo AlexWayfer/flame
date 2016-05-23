@@ -21,26 +21,26 @@ $ gem install flame
 # index_controller.rb
 
 class IndexController < Flame::Controller
-    def index
-        view :index
-    end
+  def index
+    view :index
+  end
     
-    def hello_world
-        "Hello World!"
-    end
+  def hello_world
+    "Hello World!"
+  end
     
-    def goodbye
-        "Goodbye World!"
-    end
+  def goodbye
+    "Goodbye World!"
+  end
 end
 
 # app.rb
 
 class App < Flame::Application
-    mount IndexController do
-        get '/hello', :hello_world
-        defaults
-    end
+  mount IndexController do
+    get '/hello', :hello_world
+    defaults
+  end
 end
 
 # config.ru

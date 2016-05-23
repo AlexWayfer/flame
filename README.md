@@ -22,7 +22,7 @@ $ gem install flame
 
 class IndexController < Flame::Controller
   def index
-    view :index
+    view :index # or just `view`, Symbol as method-name by default
   end
     
   def hello_world

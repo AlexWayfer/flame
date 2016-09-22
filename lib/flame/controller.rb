@@ -108,6 +108,14 @@ module Flame
 				return modules[-2] if parts.empty?
 				parts.join('_')
 			end
+
+			## Take public instance method from parent
+			def inherit_public_methods
+				superclass.public_instance_methods(false).each do |public_method|
+					um = superclass.public_instance_method(public_method)
+					define_method public_method, um
+				end
+			end
 		end
 	end
 end

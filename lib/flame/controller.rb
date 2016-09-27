@@ -109,8 +109,30 @@ module Flame
 				parts.join('_')
 			end
 
-			## Take public instance method from parent
-			def inherit_public_methods
+			## Re-define public instance method from parent
+			## @example Inherit controller with parent actions by method
+			##   class MyController < BaseController.with_actions
+			##   end
+			def with_actions
+				@with_actions ||= Class.new(self) { extend ParentActions }
+			end
+		end
+
+		## Module for public instance methods re-defining from superclass
+		## @example Inherit controller with parent actions by `extend`
+		##   class MyController < BaseController
+		##     extend Flame::Controller::ParentActions
+		##   end
+		module ParentActions
+			def inherited(ctrl)
+				ctrl.define_parent_actions
+			end
+
+			def self.extended(ctrl)
+				ctrl.define_parent_actions
+			end
+
+			def define_parent_actions
 				superclass.public_instance_methods(false).each do |public_method|
 					um = superclass.public_instance_method(public_method)
 					define_method public_method, um

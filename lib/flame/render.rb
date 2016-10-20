@@ -13,7 +13,8 @@ module Flame
 			## Take options for rendering
 			@ctrl = ctrl
 			@scope = options.delete(:scope) || @ctrl
-			@layout = options.delete(:layout) || 'layout.*'
+			@layout = options.delete(:layout)
+			@layout = 'layout.*' if @layout.nil?
 			## And get the rest variables to locals
 			@locals = options.merge(options.delete(:locals) || {})
 			## Find filename

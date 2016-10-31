@@ -90,11 +90,16 @@ module Flame
 		## @return [String] path for requested method, controller and parameters
 		## @example Path for `show(id)` method of `ArticlesController` with `id: 2`
 		##   path_to ArticlesController, :show, id: 2 # => "/articles/show/2"
+		## @example Path for `new` method of `ArticlesController` with params
+		##   path_to ArticlesController, :new, params: { author_id: 1 }
+		##   # => "/articles/new?author_id=1"
 		def path_to(ctrl, action = :index, args = {})
 			route = @app.class.router.find_route(controller: ctrl, action: action)
 			raise Errors::RouteNotFoundError.new(ctrl, action) unless route
+			params = Rack::Utils.build_nested_query args.delete(:params)
 			path = route.assign_arguments(args)
-			path.empty? ? '/' : path
+			path = '/' if path.empty?
+			path << ("?#{params}" if params).to_s
 		end
 
 		## Interrupt the execution of route, and set new optional data

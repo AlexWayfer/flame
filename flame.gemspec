@@ -14,10 +14,10 @@ Gem::Specification.new do |s|
 	s.homepage    = 'https://github.com/AlexWayfer/flame'
 	s.license     = 'MIT'
 
-	s.add_dependency 'rack', '~> 2'
-	s.add_dependency 'tilt', '>= 2.0', '< 3'
-	s.add_dependency 'gorilla-patch', '~> 0.0', '>= 0.0.17'
-	s.add_dependency 'thor', '~> 0'
+	s.add_runtime_dependency 'rack', '~> 2'
+	s.add_runtime_dependency 'tilt', '>= 2.0', '< 3'
+	s.add_runtime_dependency 'gorilla-patch', '~> 0.0', '>= 0.0.17'
+	s.add_runtime_dependency 'thor', '~> 0'
 
 	s.files = Dir[File.join('{lib,public,template}', '**', '{*,.*}')]
 	s.executables = ['flame']

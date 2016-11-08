@@ -9,6 +9,8 @@ designed as a replacement Sintra, or maybe even Rails.
 Flame still hardly suitable for production, but it's already possible to try,
 and if you find flaws - please let me know.
 
+[![Dependency Status](https://gemnasium.com/badges/github.com/AlexWayfer/flame.svg)](https://gemnasium.com/github.com/AlexWayfer/flame)
+
 ## Installation
 
 ```bash

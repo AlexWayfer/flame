@@ -1,4 +1,4 @@
-require 'gorilla-patch/hash'
+require 'gorilla-patch/symbolize'
 
 require_relative 'cookies'
 require_relative 'request'
@@ -9,8 +9,6 @@ module Flame
 	## Helpers for dispatch Flame::Application#call
 	class Dispatcher
 		attr_reader :request, :response
-
-		using GorillaPatch::HashExt
 
 		include Flame::Dispatcher::Static
 
@@ -56,9 +54,13 @@ module Flame
 			value ? @body = value : @body ||= ''
 		end
 
+		using GorillaPatch::Symbolize
+
 		## Parameters of the request
 		def params
-			@params ||= request.params.merge(request.params.keys_to_sym(deep: true))
+			@params ||= request.params.merge(
+				request.params.symbolize_keys(deep: true)
+			)
 		end
 
 		## Session object as Hash

@@ -4,7 +4,7 @@ require 'tilt'
 require 'tilt/plain'
 require 'tilt/erb'
 
-require 'gorilla-patch/module'
+require 'gorilla-patch/letters_case'
 
 module Flame
 	## Helper for render functionality
@@ -49,8 +49,6 @@ module Flame
 			@ctrl.config[:views_dir]
 		end
 
-		using GorillaPatch::ModuleExt
-
 		## Compile file with Tilt engine
 		## @param filename [String] filename
 		def compile_file(filename = @filename)
@@ -84,6 +82,8 @@ module Flame
 			find_files(path, layout_dirs).select { |file| Tilt[file] }
 				.sort! { |a, b| b.split('/').size <=> a.split('/').size }
 		end
+
+		using GorillaPatch::LettersCase
 
 		## Find possible directories for the controller
 		def controller_dirs

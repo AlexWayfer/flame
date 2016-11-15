@@ -58,9 +58,7 @@ module Flame
 
 		## Parameters of the request
 		def params
-			@params ||= request.params.merge(
-				request.params.symbolize_keys(deep: true)
-			)
+			@params ||= request.params.symbolize_keys(deep: true)
 		end
 
 		## Session object as Hash

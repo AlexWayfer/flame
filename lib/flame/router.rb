@@ -59,7 +59,7 @@ module Flame
 			attr_reader :ctrl, :routes
 
 			def self.http_methods
-				[:GET, :POST, :PUT, :DELETE]
+				[:GET, :POST, :PUT, :PATCH, :DELETE]
 			end
 
 			## Defaults REST routes (methods, pathes, controllers actions)

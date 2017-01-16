@@ -58,10 +58,6 @@ module Flame
 			attr_accessor :rest_routes
 			attr_reader :ctrl, :routes
 
-			def self.http_methods
-				[:GET, :POST, :PUT, :PATCH, :DELETE]
-			end
-
 			## Defaults REST routes (methods, pathes, controllers actions)
 			def rest_routes
 				@rest_routes ||= [
@@ -81,7 +77,7 @@ module Flame
 				execute(&block)
 			end
 
-			http_methods.each do |request_method|
+			%i(GET POST PUT PATCH DELETE).each do |request_method|
 				## Define refine methods for all HTTP methods
 				## @overload post(path, action)
 				##   Execute action on requested path and HTTP method

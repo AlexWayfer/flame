@@ -111,7 +111,7 @@ module Flame
 			##   to defaults pathes and HTTP methods
 			def defaults
 				rest
-				@ctrl.public_instance_methods(false).each do |action|
+				@ctrl.actions.each do |action|
 					next if find_route_index(action: action)
 					send(:GET.downcase, action)
 				end
@@ -121,7 +121,7 @@ module Flame
 			def rest
 				rest_routes.each do |rest_route|
 					action = rest_route[:action]
-					next unless @ctrl.public_instance_methods.include?(action) &&
+					next unless @ctrl.actions.include?(action) &&
 					   find_route_index(action: action).nil?
 					send(*rest_route.values.map(&:downcase), prefix: true)
 				end

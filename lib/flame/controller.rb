@@ -6,6 +6,11 @@ module Flame
 	## Class initialize when Dispatcher found route with it
 	## For new request and response
 	class Controller
+		## Shortcut for not-inherited public methods: actions
+		def self.actions
+			public_instance_methods(false)
+		end
+
 		## Initialize the controller for request execution
 		## @param dispatcher [Flame::Dispatcher] dispatcher object
 		def initialize(dispatcher)
@@ -133,7 +138,7 @@ module Flame
 			end
 
 			def define_parent_actions
-				superclass.public_instance_methods(false).each do |public_method|
+				superclass.actions.each do |public_method|
 					um = superclass.public_instance_method(public_method)
 					define_method public_method, um
 				end

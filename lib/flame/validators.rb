@@ -65,10 +65,6 @@ module Flame
 			def initialize(route_refine)
 				@routes_actions = route_refine.routes.map(&:action)
 				@ctrl = route_refine.ctrl
-				@ctrl_actions = {
-					public: @ctrl.public_instance_methods(false),
-					all: @ctrl.instance_methods + @ctrl.private_instance_methods
-				}
 			end
 
 			def valid?
@@ -78,7 +74,7 @@ module Flame
 			private
 
 			def no_extra_routes_actions?
-				extra_routes_actions = @routes_actions - @ctrl_actions[:public]
+				extra_routes_actions = @routes_actions - @ctrl.actions
 				return true if extra_routes_actions.empty?
 				raise Errors::RouterError::ExtraRoutesActionsError.new(
 					@ctrl, extra_routes_actions
@@ -86,7 +82,7 @@ module Flame
 			end
 
 			def no_extra_controller_actions?
-				extra_ctrl_actions = @ctrl_actions[:public] - @routes_actions
+				extra_ctrl_actions = @ctrl.actions - @routes_actions
 				return true if extra_ctrl_actions.empty?
 				raise Errors::RouterError::ExtraControllerActionsError.new(
 					@ctrl, extra_ctrl_actions

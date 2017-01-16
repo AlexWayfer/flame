@@ -96,6 +96,11 @@ module Flame
 			@dispatcher.send(m, *args, &block)
 		end
 
+		## Respond to Dispatcher methods
+		def respond_to_missing?(m, *)
+			@dispatcher.respond_to?(m) || super
+		end
+
 		private
 
 		def add_controller_class(args)

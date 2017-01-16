@@ -20,9 +20,8 @@ module Flame
 
 			## Add routes from controller to glob array
 			route_refine = RouteRefine.new(self, ctrl, path, block)
-			if Validators::ActionsValidator.new(route_refine).valid?
-				concat_routes(route_refine)
-			end
+			return unless Validators::ActionsValidator.new(route_refine).valid?
+			concat_routes(route_refine)
 		end
 
 		## Find route by any attributes
@@ -121,8 +120,8 @@ module Flame
 			def rest
 				rest_routes.each do |rest_route|
 					action = rest_route[:action]
-					next unless @ctrl.actions.include?(action) &&
-					   find_route_index(action: action).nil?
+					next if !@ctrl.actions.include?(action) ||
+					        find_route_index(action: action)
 					send(*rest_route.values.map(&:downcase), prefix: true)
 				end
 			end

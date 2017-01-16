@@ -19,9 +19,9 @@ module Flame
 				halt 304 if static_cached?(file_time)
 				content_type File.extname(file)
 				response['Last-Modified'] = file_time.httpdate
-					# 'Content-Disposition' => 'attachment;' \
-					#	"filename=\"#{File.basename(static_file)}\"",
-					# 'Content-Length' => File.size?(static_file).to_s
+				# 'Content-Disposition' => 'attachment;' \
+				# 	"filename=\"#{File.basename(static_file)}\"",
+				# 'Content-Length' => File.size?(static_file).to_s
 				halt 200, File.read(file)
 			end
 		end

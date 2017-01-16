@@ -19,6 +19,8 @@ Gem::Specification.new do |s|
 	s.add_runtime_dependency 'gorilla-patch', '~> 1', '>= 1.0.0'
 	s.add_runtime_dependency 'thor', '~> 0'
 
+	s.add_development_dependency 'rubocop', '~> 0'
+
 	s.files = Dir[File.join('{lib,public,template}', '**', '{*,.*}')]
 	s.executables = ['flame']
 end

@@ -79,7 +79,8 @@ module Flame
 
 		## Find layout-files by path
 		def find_layouts(path)
-			find_files(path, layout_dirs).select { |file| Tilt[file] }
+			find_files(path, layout_dirs)
+				.select { |file| Tilt[file] }
 				.sort! { |a, b| b.split('/').size <=> a.split('/').size }
 		end
 

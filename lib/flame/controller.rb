@@ -109,7 +109,7 @@ module Flame
 		end
 
 		class << self
-			using GorillaPatch::LettersCase
+			using GorillaPatch::Inflections
 
 			## Default root path of the controller for requests
 			def default_path

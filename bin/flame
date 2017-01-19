@@ -2,7 +2,7 @@
 
 require 'thor'
 require 'fileutils'
-require 'gorilla-patch/letters_case'
+require 'gorilla-patch/inflections'
 require 'erb'
 
 ## CLI Application
@@ -25,7 +25,7 @@ class FlameCLI < Thor
 		module New
 			module_function
 
-			using GorillaPatch::LettersCase
+			using GorillaPatch::Inflections
 
 			def build(app_name)
 				@app_name = app_name

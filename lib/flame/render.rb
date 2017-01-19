@@ -4,7 +4,7 @@ require 'tilt'
 require 'tilt/plain'
 require 'tilt/erb'
 
-require 'gorilla-patch/letters_case'
+require 'gorilla-patch/inflections'
 
 module Flame
 	## Helper for render functionality
@@ -84,7 +84,7 @@ module Flame
 				.sort! { |a, b| b.split('/').size <=> a.split('/').size }
 		end
 
-		using GorillaPatch::LettersCase
+		using GorillaPatch::Inflections
 
 		## Find possible directories for the controller
 		def controller_dirs

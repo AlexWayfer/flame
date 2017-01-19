@@ -139,7 +139,8 @@ module Flame
 
 			## Execute block of refinings end sorting routes
 			def execute(&block)
-				block.nil? ? defaults : instance_exec(&block)
+				instance_exec(&block) if block
+				defaults
 				@routes.sort! { |a, b| b.path <=> a.path }
 			end
 

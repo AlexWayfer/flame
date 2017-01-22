@@ -1,6 +1,7 @@
 # Extra files
 extra/
 .*.rb
+Gemfile.lock
 
 # Gem files
 *.gem

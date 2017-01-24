@@ -10,5 +10,10 @@ module Flame
 		def http_method
 			params['_method'] || request_method
 		end
+
+		## Return fullpath without trailing slashes
+		def fullpath_without_trailing_slashes
+			fullpath.gsub(%r{(?<=.)\/+(?=$|\?)}, '')
+		end
 	end
 end

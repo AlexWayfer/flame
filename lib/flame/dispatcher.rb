@@ -25,7 +25,8 @@ module Flame
 		## Start of execution the request
 		def run!
 			catch :halt do
-				try_route ||
+				try_fix_slashes ||
+					try_route ||
 					try_static ||
 					try_static(File.join(__dir__, '..', '..', 'public')) ||
 					halt(404)
@@ -144,6 +145,12 @@ module Flame
 		end
 
 		private
+
+		## Redirect from urls endings by slashes to same url without slashes
+		def try_fix_slashes
+			return if request.fullpath == request.fullpath_without_trailing_slashes
+			response.redirect(request.fullpath_without_trailing_slashes, 301)
+		end
 
 		## Find route and try execute it
 		def try_route

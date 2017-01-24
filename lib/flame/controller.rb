@@ -62,12 +62,14 @@ module Flame
 		## @param options [Hash] options for the `Flame::Render` rendering
 		## @return [String] rendered template
 		def view(path = nil, options = {})
+			cache = options.delete(:cache)
+			cache = config[:environment] == 'production' if cache.nil?
 			template = Flame::Render.new(
 				self,
 				(path || caller_locations(1, 1)[0].label.to_sym),
 				options
 			)
-			template.render(cache: config[:environment] == 'production')
+			template.render(cache: cache)
 		end
 		alias render view
 

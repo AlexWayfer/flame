@@ -124,7 +124,7 @@ module Flame
 			return content unless @layout
 			layout_files = find_layouts(@layout)
 			return content if layout_files.empty?
-			layout_files.each_with_object(content) do |layout_file, result|
+			layout_files.each_with_object(content.dup) do |layout_file, result|
 				layout = compile_file(layout_file)
 				result.replace layout.render(@scope, @locals) { result }
 			end

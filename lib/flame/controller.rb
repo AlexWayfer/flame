@@ -77,12 +77,7 @@ module Flame
 		## @param method [Symbol] name of the controller method
 		def execute(method)
 			# send method
-			body send(
-				method,
-				*params.values_at(
-					*self.class.instance_method(method).parameters.map { |par| par[1] }
-				)
-			)
+			body send(method, *select_args(method))
 		rescue => exception
 			# p 'rescue from controller'
 			status 500
@@ -104,6 +99,16 @@ module Flame
 		end
 
 		private
+
+		def select_args(method)
+			parameters = self.class.instance_method(method).parameters
+			params_select = proc do |type|
+				params.values_at(
+					*parameters.select { |par| par.first == type }.map(&:last)
+				)
+			end
+			params_select.call(:req) + params_select.call(:opt).compact
+		end
 
 		def add_controller_class(args)
 			args.unshift(self.class) if args[0].is_a?(Symbol)

@@ -67,9 +67,10 @@ module Flame
 			paths = [path]
 			paths.push(dirs.last) if path.to_sym == :index
 			dirs.push(nil)
-			Dir[
+			files = Dir[
 				File.join(views_dir, "{#{dirs.join(',')}}", "{#{paths.join(',')}}.*")
-			].uniq
+			]
+			files.map! { |file| File.realpath(file) }.uniq
 		end
 
 		## Find template-file by path

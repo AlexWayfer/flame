@@ -1,15 +1,23 @@
 # frozen_string_literal: true
 
+require 'forwardable'
 require_relative 'render'
 
 module Flame
 	## Class initialize when Dispatcher found route with it
 	## For new request and response
 	class Controller
+		extend Forwardable
+
 		## Shortcut for not-inherited public methods: actions
 		def self.actions
 			public_instance_methods(false)
 		end
+
+		def_delegators(
+			:@dispatcher,
+			:config, :params, :status, :body, :default_body, :dump_error
+		)
 
 		## Initialize the controller for request execution
 		## @param dispatcher [Flame::Dispatcher] dispatcher object
@@ -85,17 +93,6 @@ module Flame
 
 			## Re-raise exception for inherited controllers or `Flame::Dispatcher`
 			raise exception
-		end
-
-		## Call helpers methods from `Flame::Dispatcher`
-		def method_missing(m, *args, &block)
-			return super unless @dispatcher.respond_to?(m)
-			@dispatcher.send(m, *args, &block)
-		end
-
-		## Respond to Dispatcher methods
-		def respond_to_missing?(m, *)
-			@dispatcher.respond_to?(m) || super
 		end
 
 		private

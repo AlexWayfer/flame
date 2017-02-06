@@ -5,3 +5,6 @@ Gemfile.lock
 
 # Gem files
 *.gem
+
+# Tests coverage
+coverage/

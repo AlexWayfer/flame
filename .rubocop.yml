@@ -4,3 +4,7 @@ Style/IndentationWidth:
   Width: 1
 Style/MultilineMethodCallIndentation:
   EnforcedStyle: indented
+
+Metrics/BlockLength:
+  Exclude:
+    - 'spec/**/*'

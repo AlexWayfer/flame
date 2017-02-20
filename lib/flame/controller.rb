@@ -92,8 +92,6 @@ module Flame
 			status 500
 			dump_error(exception)
 
-			body default_body
-
 			## Re-raise exception for inherited controllers or `Flame::Dispatcher`
 			raise exception
 		end

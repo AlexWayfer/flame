@@ -14,7 +14,9 @@ class HomeController < Flame::Controller
 
 	def execute(method)
 		super
-	rescue
-		view 500
+	end
+
+	def default_body
+		view status
 	end
 end

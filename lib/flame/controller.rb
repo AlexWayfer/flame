@@ -82,18 +82,18 @@ module Flame
 		end
 		alias render view
 
+		protected
+
 		## Execute the method of the controller with hooks (may be overloaded)
 		## @param method [Symbol] name of the controller method
 		def execute(method)
 			# send method
 			body send(method, *select_args(method))
-		rescue => exception
-			# p 'rescue from controller'
-			status 500
-			dump_error(exception)
+		end
 
-			## Re-raise exception for inherited controllers or `Flame::Dispatcher`
-			raise exception
+		## Default method for Internal Server Error, can be inherited
+		def server_error(_exception)
+			body default_body
 		end
 
 		private

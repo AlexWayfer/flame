@@ -168,12 +168,13 @@ module Flame
 			status 200
 			params.merge!(route.arguments(request.path_parts))
 			# route.execute(self)
-			route_exec(route)
+			controller = route.controller.new(self)
+			controller.send(:execute, route.action)
 		rescue => exception
 			# p 'rescue from dispatcher'
 			dump_error(exception) unless @error_message
-			halt 500
-
+			status 500
+			controller.send(:server_error, exception)
 			# p 're raise exception from dispatcher'
 			# raise exception
 		end
@@ -188,13 +189,8 @@ module Flame
 			##   or it's `default_body` method not defined
 			return default_body unless route
 			## Execute `default_body` method for the founded route
-			route_exec(route, :default_body)
+			route.controller.new(self).send(:execute, :default_body)
 			body default_body if body.empty?
-		end
-
-		## Create controller object and execute method with arguments
-		def route_exec(route, method = route.action)
-			route.controller.new(self).send(:execute, method)
 		end
 	end
 end

@@ -16,7 +16,7 @@ module Flame
 
 		def_delegators(
 			:@dispatcher,
-			:config, :request, :params, :session, :response, :status, :body,
+			:config, :request, :params, :halt, :session, :response, :status, :body,
 			:default_body, :dump_error
 		)
 

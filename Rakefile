@@ -1,5 +1,5 @@
 task :spec do
-	system 'bacon -a'
+	sh 'bacon -a'
 end
 
 task default: :spec

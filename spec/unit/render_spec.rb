@@ -1,15 +1,15 @@
-class MyApp < Flame::Application
+class RenderApp < Flame::Application
 end
 
-class MyCtrl < Flame::Controller
+class RenderCtrl < Flame::Controller
 end
 
-class MyOwnCtrl < Flame::Controller
+class AnotherCtrl < Flame::Controller
 end
 
 describe Flame::Render do
 	before do
-		@ctrl = MyCtrl.new(Flame::Dispatcher.new(MyApp, {}))
+		@ctrl = RenderCtrl.new(Flame::Dispatcher.new(RenderApp, {}))
 	end
 
 	it 'should have defaults' do
@@ -49,7 +49,7 @@ describe Flame::Render do
 	end
 
 	it 'should find file priority by controller name' do
-		ctrl = MyOwnCtrl.new(Flame::Dispatcher.new(MyApp, {}))
+		ctrl = AnotherCtrl.new(Flame::Dispatcher.new(RenderApp, {}))
 		render = Flame::Render.new(ctrl, :view)
 		render.render.should.be.equal(
 			"<body>\n\t<h1>I am from controller name!</h1>\n\n</body>\n"

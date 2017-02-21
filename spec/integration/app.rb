@@ -4,9 +4,9 @@ require 'rack/test'
 include Rack::Test::Methods
 
 ## Exampe of application
-class MyApp < Flame::Application
+class IntegrationApp < Flame::Application
 end
 
 def app
-	MyApp.new
+	IntegrationApp.new
 end

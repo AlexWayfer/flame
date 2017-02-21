@@ -70,7 +70,11 @@ module Flame
 			files = Dir[
 				File.join(views_dir, "{#{dirs.join(',')}}", "{#{paths.join(',')}}.*")
 			]
-			files.map! { |file| File.realpath(file) }.uniq
+			clean_paths files
+		end
+
+		def clean_paths(paths)
+			paths.map! { |path| Pathname.new(path).cleanpath.to_s }.uniq
 		end
 
 		## Find template-file by path

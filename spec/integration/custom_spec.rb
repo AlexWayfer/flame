@@ -36,7 +36,7 @@ class CustomController < Flame::Controller
 end
 
 ## Mount example controller to app
-class MyApp
+class IntegrationApp
 	mount CustomController
 end
 

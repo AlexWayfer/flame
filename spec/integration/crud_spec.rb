@@ -24,7 +24,7 @@ class CRUDController < Flame::Controller
 end
 
 ## Mount example controller to app
-class MyApp
+class IntegrationApp
 	mount CRUDController
 end
 

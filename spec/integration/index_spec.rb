@@ -8,7 +8,7 @@ class IndexController < Flame::Controller
 end
 
 ## Mount example controller to app
-class MyApp
+class IntegrationApp
 	mount IndexController, '/'
 end
 

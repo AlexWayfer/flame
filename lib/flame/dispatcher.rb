@@ -130,12 +130,12 @@ module Flame
 		## Add error's backtrace to @env['rack.errors'] (terminal or file)
 		## @param error [Exception] exception for class, message and backtrace
 		def dump_error(error)
-			@error_message = [
+			error_message = [
 				"#{Time.now.strftime('%Y-%m-%d %H:%M:%S')} - " \
 				"#{error.class} - #{error.message}:",
 				*error.backtrace
 			].join("\n\t")
-			@env['rack.errors'].puts(@error_message)
+			@env['rack.errors'].puts(error_message)
 		end
 
 		## Generate default body of error page
@@ -172,7 +172,7 @@ module Flame
 			controller.send(:execute, route.action)
 		rescue => exception
 			# p 'rescue from dispatcher'
-			dump_error(exception) unless @error_message
+			dump_error(exception)
 			status 500
 			controller.send(:server_error, exception)
 			# p 're raise exception from dispatcher'

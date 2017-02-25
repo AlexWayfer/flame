@@ -17,7 +17,7 @@ module Flame
 		def_delegators(
 			:@dispatcher,
 			:config, :request, :params, :halt, :session, :response, :status, :body,
-			:default_body, :dump_error
+			:default_body
 		)
 
 		## Initialize the controller for request execution

@@ -1,3 +1,5 @@
+require 'date'
+
 require_relative 'lib/flame/version'
 
 Gem::Specification.new do |s|

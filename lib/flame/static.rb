@@ -2,6 +2,8 @@ module Flame
 	class Dispatcher
 		## Module for working with static files
 		module Static
+			private
+
 			## Find static files and try return it
 			def try_static(dir = config[:public_dir])
 				file = File.join(dir, URI.decode(request.path_info))

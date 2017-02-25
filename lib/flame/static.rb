@@ -22,10 +22,7 @@ module Flame
 				content_type File.extname(file)
 				response[Rack::CACHE_CONTROL] = 'no-cache'
 				response['Last-Modified'] = file_time.httpdate
-				# 'Content-Disposition' => 'attachment;' \
-				# 	"filename=\"#{File.basename(static_file)}\"",
-				# 'Content-Length' => File.size?(static_file).to_s
-				halt 200, File.read(file)
+				File.read(file)
 			end
 		end
 	end

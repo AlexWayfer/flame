@@ -17,7 +17,7 @@ module Flame
 		def_delegators(
 			:@dispatcher,
 			:config, :request, :params, :halt, :session, :response, :status, :body,
-			:default_body
+			:default_body, :content_type
 		)
 
 		## Initialize the controller for request execution
@@ -63,7 +63,7 @@ module Flame
 			return unless filename
 			response[content_dis] << "; filename=\"#{File.basename(filename)}\""
 			ext = File.extname(filename)
-			content_type(ext) unless response[Rack::CONTENT_TYPE] || ext.empty?
+			content_type(ext) unless ext.empty?
 		end
 
 		## Render a template with `Flame::Render` (based on Tilt-engine)

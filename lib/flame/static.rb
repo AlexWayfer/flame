@@ -22,7 +22,7 @@ module Flame
 				content_type File.extname(file)
 				response[Rack::CACHE_CONTROL] = 'no-cache'
 				response['Last-Modified'] = file_time.httpdate
-				File.read(file)
+				body File.read(file)
 			end
 		end
 	end

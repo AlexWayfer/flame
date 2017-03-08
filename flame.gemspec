@@ -22,13 +22,13 @@ Gem::Specification.new do |s|
 	s.add_runtime_dependency 'thor', '~> 0'
 
 	s.add_development_dependency 'rubocop', '~> 0'
-	s.add_development_dependency 'rake', '~> 0'
-	s.add_development_dependency 'bacon', '~> 1.2'
-	s.add_development_dependency 'bacon-colored_output', '~> 0'
-	s.add_development_dependency 'simplecov', '~> 0.13'
-	s.add_development_dependency 'rack-test', '~> 0.6'
+	s.add_development_dependency 'rake', '~> 12'
+	s.add_development_dependency 'bacon', '~> 1'
+	s.add_development_dependency 'bacon-colored_output', '~> 1'
+	s.add_development_dependency 'simplecov', '~> 0'
+	s.add_development_dependency 'rack-test', '~> 0'
 	s.add_development_dependency 'pry', '~> 0'
-	s.add_development_dependency 'pry-byebug', '~> 0'
+	s.add_development_dependency 'pry-byebug', '~> 3'
 
 	s.files = Dir[File.join('{lib,public,template}', '**', '{*,.*}')]
 	s.executables = ['flame']

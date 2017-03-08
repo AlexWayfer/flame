@@ -10,6 +10,7 @@ or maybe even [Rails](https://github.com/rails/rails).
 
 Flame is ready to use in production, but if you find flaws - please let me know.
 
+[![Build Status](https://travis-ci.org/AlexWayfer/flame.svg?branch=master)](https://travis-ci.org/AlexWayfer/flame)
 [![Dependency Status](https://gemnasium.com/badges/github.com/AlexWayfer/flame.svg)](https://gemnasium.com/github.com/AlexWayfer/flame)
 
 ## Installation

@@ -11,7 +11,7 @@ or maybe even [Rails](https://github.com/rails/rails).
 
 Flame is ready to use in production, but if you find flaws - please let me know.
 
-[![Gem Version](https://badge.fury.io/rb/gorilla-patch.svg)](https://badge.fury.io/rb/gorilla-patch)
+[![Gem Version](https://badge.fury.io/rb/flame.svg)](https://badge.fury.io/rb/flame)
 [![Build Status](https://travis-ci.org/AlexWayfer/flame.svg?branch=master)](https://travis-ci.org/AlexWayfer/flame)
 [![Test Coverage](https://codeclimate.com/github/AlexWayfer/flame/badges/coverage.svg)](https://codeclimate.com/github/AlexWayfer/flame/coverage)
 [![Code Climate](https://codeclimate.com/github/AlexWayfer/flame/badges/gpa.svg)](https://codeclimate.com/github/AlexWayfer/flame)

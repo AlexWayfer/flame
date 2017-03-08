@@ -27,7 +27,7 @@ Gem::Specification.new do |s|
 	s.add_development_dependency 'bacon-colored_output', '~> 1'
 	s.add_development_dependency 'rack-test', '~> 0'
 	s.add_development_dependency 'simplecov', '~> 0'
-	s.add_development_dependency 'codeclimate-test-reporter', '~> 1'
+	s.add_development_dependency 'codecov', '~> 0'
 	s.add_development_dependency 'pry', '~> 0'
 	s.add_development_dependency 'pry-byebug', '~> 3'
 

@@ -4,6 +4,11 @@ SimpleCov.start do
 end
 SimpleCov.start
 
+if ENV['CODECOV']
+	require 'codecov'
+	SimpleCov.formatter = SimpleCov::Formatter::Codecov
+end
+
 require_relative File.join('..', 'lib', 'flame')
 
 require 'bacon'

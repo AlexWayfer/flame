@@ -13,7 +13,7 @@ Flame is ready to use in production, but if you find flaws - please let me know.
 
 [![Gem Version](https://badge.fury.io/rb/flame.svg)](https://badge.fury.io/rb/flame)
 [![Build Status](https://travis-ci.org/AlexWayfer/flame.svg?branch=master)](https://travis-ci.org/AlexWayfer/flame)
-[![Test Coverage](https://codeclimate.com/github/AlexWayfer/flame/badges/coverage.svg)](https://codeclimate.com/github/AlexWayfer/flame/coverage)
+[![codecov](https://codecov.io/gh/AlexWayfer/flame/branch/master/graph/badge.svg)](https://codecov.io/gh/AlexWayfer/flame)
 [![Code Climate](https://codeclimate.com/github/AlexWayfer/flame/badges/gpa.svg)](https://codeclimate.com/github/AlexWayfer/flame)
 [![Dependency Status](https://gemnasium.com/badges/github.com/AlexWayfer/flame.svg)](https://gemnasium.com/github.com/AlexWayfer/flame)
 

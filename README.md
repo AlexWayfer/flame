@@ -1,6 +1,7 @@
 # Flame
 
-Flame is a small Ruby web framework, built on Rack,
+Flame is a small Ruby web framework,
+built on [Rack](https://github.com/rack/rack),
 inspired by [Gin](https://github.com/jcasts/gin)
 (which follows class-controllers style),
 designed as a replacement [Sintra](https://github.com/sinatra/sinatra),
@@ -16,8 +17,17 @@ Flame is ready to use in production, but if you find flaws - please let me know.
 
 ## Installation
 
+Using the built-in `gem`:
+
 ```bash
 $ gem install flame
+```
+
+or with [Bundler](http://bundler.io/):
+
+```ruby
+# Gemfile
+gem 'flame'
 ```
 
 ## Usage

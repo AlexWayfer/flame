@@ -13,6 +13,8 @@ Flame is ready to use in production, but if you find flaws - please let me know.
 
 [![Gem Version](https://badge.fury.io/rb/gorilla-patch.svg)](https://badge.fury.io/rb/gorilla-patch)
 [![Build Status](https://travis-ci.org/AlexWayfer/flame.svg?branch=master)](https://travis-ci.org/AlexWayfer/flame)
+[![Test Coverage](https://codeclimate.com/github/AlexWayfer/flame/badges/coverage.svg)](https://codeclimate.com/github/AlexWayfer/flame/coverage)
+[![Code Climate](https://codeclimate.com/github/AlexWayfer/flame/badges/gpa.svg)](https://codeclimate.com/github/AlexWayfer/flame)
 [![Dependency Status](https://gemnasium.com/badges/github.com/AlexWayfer/flame.svg)](https://gemnasium.com/github.com/AlexWayfer/flame)
 
 ## Installation

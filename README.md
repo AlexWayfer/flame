@@ -1,13 +1,14 @@
 # Flame
 
 Flame is a small Ruby web framework, built on Rack,
-inspired by Gin (which follows class-controllers style),
-designed as a replacement Sintra, or maybe even Rails.
+inspired by [Gin](https://github.com/jcasts/gin)
+(which follows class-controllers style),
+designed as a replacement [Sintra](https://github.com/sinatra/sinatra),
+or maybe even [Rails](https://github.com/rails/rails).
 
 ## Status
 
-Flame still hardly suitable for production, but it's already possible to try,
-and if you find flaws - please let me know.
+Flame is ready to use in production, but if you find flaws - please let me know.
 
 [![Dependency Status](https://gemnasium.com/badges/github.com/AlexWayfer/flame.svg)](https://gemnasium.com/github.com/AlexWayfer/flame)
 
@@ -26,11 +27,11 @@ class IndexController < Flame::Controller
   def index
     view :index # or just `view`, Symbol as method-name by default
   end
-    
+
   def hello_world
     "Hello World!"
   end
-    
+
   def goodbye
     "Goodbye World!"
   end

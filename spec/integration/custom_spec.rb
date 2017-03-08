@@ -59,13 +59,6 @@ describe CustomController do
 		last_response.body.should.equal 'Hello, Alex!'
 	end
 
-	it 'should return path from array' do
-		# get '/custom/page/path/to/page'
-		# last_response.should.be.ok
-		# last_response.body.should.equal 'path/to/page'
-		should.flunk 'no realization yet'
-	end
-
 	it 'should return custom 404' do
 		get '/custom/foo/404'
 		last_response.should.be.not_found

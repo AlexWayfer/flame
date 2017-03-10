@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 ## Demo REST controller
 class UsersController < Flame::Controller
 	def index

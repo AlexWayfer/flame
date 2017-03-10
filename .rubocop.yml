@@ -5,6 +5,9 @@ Style/IndentationWidth:
 Style/MultilineMethodCallIndentation:
   EnforcedStyle: indented
 
+AllCops:
+  TargetRubyVersion: 2.3
+
 Metrics/BlockLength:
   Exclude:
     - 'spec/**/*'

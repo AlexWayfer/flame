@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module Flame
 	class Dispatcher
 		## Module for working with static files

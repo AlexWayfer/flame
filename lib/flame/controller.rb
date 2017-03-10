@@ -1,5 +1,4 @@
 # frozen_string_literal: true
-
 require 'forwardable'
 require_relative 'render'
 
@@ -58,7 +57,7 @@ module Flame
 		# Set the Content-Disposition to "attachment" with the specified filename,
 		# instructing the user agents to prompt to save.
 		def attachment(filename = nil, disposition = :attachment)
-			content_dis = 'Content-Disposition'.freeze
+			content_dis = 'Content-Disposition'
 			response[content_dis] = disposition.to_s
 			return unless filename
 			response[content_dis] << "; filename=\"#{File.basename(filename)}\""

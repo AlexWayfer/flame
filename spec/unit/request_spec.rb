@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 describe Flame::Request do
 	before do
 		@env = {

@@ -1,9 +1,8 @@
 # frozen_string_literal: true
-
 module Flame
 	class Router
-		ARG_CHAR = ':'.freeze
-		ARG_CHAR_OPT = '?'.freeze
+		ARG_CHAR = ':'
+		ARG_CHAR_OPT = '?'
 
 		## Class for Route in Router.routes
 		class Route

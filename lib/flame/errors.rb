@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module Flame
 	module Errors
 		module RouterError

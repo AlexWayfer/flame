@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module Flame
 	## Class for requests
 	class Request < Rack::Request

@@ -21,7 +21,6 @@ module Flame
 
 			## Add routes from controller to glob array
 			route_refine = RouteRefine.new(self, ctrl, path, block)
-			return unless Validators::ActionsValidator.new(route_refine).valid?
 			concat_routes(route_refine)
 		end
 

@@ -2,30 +2,6 @@
 module Flame
 	module Errors
 		module RouterError
-			## Error for Flame::Router.compare_actions
-			class ActionsError < StandardError
-				def initialize(ctrl, extra_actions)
-					@ctrl = ctrl
-					@extra_actions = extra_actions
-				end
-			end
-
-			## Error if routes have more actions, than controller
-			class ExtraRoutesActionsError < ActionsError
-				def message
-					"Controller '#{@ctrl}' has no methods" \
-					" '#{@extra_actions.join(', ')}' from routes"
-				end
-			end
-
-			## Error if controller has not assigned in routes actions
-			class ExtraControllerActionsError < ActionsError
-				def message
-					"Routes for '#{@ctrl}' has no methods" \
-					" '#{@extra_actions.join(', ')}'"
-				end
-			end
-
 			## Error for Route initialization
 			class RouteArgumentsError < StandardError
 				def initialize(ctrl, action, path, extra)

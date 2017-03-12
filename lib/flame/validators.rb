@@ -65,35 +65,5 @@ module Flame
 				}
 			end
 		end
-
-		## Compare actions from routes and from controller
-		class ActionsValidator
-			def initialize(route_refine)
-				@routes_actions = route_refine.routes.map(&:action)
-				@ctrl = route_refine.ctrl
-			end
-
-			def valid?
-				no_extra_routes_actions? && no_extra_controller_actions?
-			end
-
-			private
-
-			def no_extra_routes_actions?
-				extra_routes_actions = @routes_actions - @ctrl.actions
-				return true if extra_routes_actions.empty?
-				raise Errors::RouterError::ExtraRoutesActionsError.new(
-					@ctrl, extra_routes_actions
-				)
-			end
-
-			def no_extra_controller_actions?
-				extra_ctrl_actions = @ctrl.actions - @routes_actions
-				return true if extra_ctrl_actions.empty?
-				raise Errors::RouterError::ExtraControllerActionsError.new(
-					@ctrl, extra_ctrl_actions
-				)
-			end
-		end
 	end
 end

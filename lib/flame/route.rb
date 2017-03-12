@@ -14,7 +14,9 @@ module Flame
 				@method = method.to_sym.upcase
 				## MAKE PATH
 				@path = path
-				Validators::ArgumentsValidator.new(@controller, @path, @action).valid?
+				Validators::RouteArgumentsValidator.new(
+					@controller, @path, @action
+				).valid?
 				@path_parts = @path.to_s.split('/').reject(&:empty?)
 				freeze
 			end

@@ -5,7 +5,7 @@ require_relative 'errors'
 module Flame
 	module Validators
 		## Compare arguments from path and from controller's action
-		class ArgumentsValidator
+		class RouteArgumentsValidator
 			def initialize(ctrl, path, action)
 				@ctrl = ctrl
 				@path = path
@@ -13,51 +13,56 @@ module Flame
 			end
 
 			def valid?
-				## Break path for ':arg' arguments
-				@path_args = path_arguments(@path)
-				## Take all and required arguments from Controller#action
-				@action_args = action_arguments(@action)
-				## Compare arguments from path and arguments from method
-				no_extra_path_arguments? && no_extra_action_arguments?
+				## Get hash of any extra arguments
+				extra = %i(req opt).find do |type|
+					found = extra_arguments(type).find do |place, args|
+						break { place: place, type: type, args: args } if args.any?
+					end
+					break found if found
+				end
+				## Return true if no any extra argument
+				return true unless extra
+				## Raise error with extra arguments
+				raise Errors::RouterError::RouteArgumentsError.new(
+					@ctrl, @action, @path, extra
+				)
 			end
 
 			private
 
 			## Split path to args array
-			def path_arguments(path)
-				args = path.split('/').select { |part| part[0] == Router::ARG_CHAR }
-				args.map do |arg|
-					opt_arg = arg[1] == Router::ARG_CHAR_OPT
-					arg[(opt_arg ? 2 : 1)..-1].to_sym
-				end
+			def path_arguments
+				@path_arguments ||= @path.split('/')
+					.each_with_object(req: [], opt: []) do |part, hash|
+						## Take only argument parts
+						next if part[0] != Router::ARG_CHAR
+						## Clean argument from special chars
+						clean_part = part.delete(
+							Router::ARG_CHAR + Router::ARG_CHAR_OPT
+						).to_sym
+						## Memorize arguments
+						hash[part[1] != Router::ARG_CHAR_OPT ? :req : :opt] << clean_part
+					end
 			end
 
 			## Take args from controller's action
-			def action_arguments(action)
-				parameters = @ctrl.instance_method(action).parameters
-				req_parameters = parameters.select { |par| par[0] == :req }
+			def action_arguments
+				return @action_arguments if @action_arguments
+				## Get all parameters (arguments) from method
+				## Than collect and sort parameters into hash
+				@ctrl.instance_method(@action).parameters
+					.each_with_object(req: [], opt: []) do |param, hash|
+						## Only required parameters must be in `:req`
+						hash[param[0]] << param[1]
+					end
+			end
+
+			## Calculate path and action extra arguments
+			def extra_arguments(type)
 				{
-					all: parameters.map { |par| par[1] },
-					req: req_parameters.map { |par| par[1] }
+					ctrl: action_arguments[type] - path_arguments[type],
+					path: path_arguments[type] - action_arguments[type]
 				}
-			end
-
-			def no_extra_path_arguments?
-				## Subtraction action args from path args
-				extra_path_args = @path_args - @action_args[:all]
-				return true if extra_path_args.empty?
-				raise Errors::RouterError::ExtraPathArgumentsError.new(
-					@ctrl, @action, @path, extra_path_args
-				)
-			end
-
-			def no_extra_action_arguments?
-				## Subtraction path args from action required args
-				extra_action_args = @action_args[:req] - @path_args
-				return true if extra_action_args.empty?
-				raise Errors::RouterError::ExtraActionArgumentsError.new(
-					@ctrl, @action, @path, extra_action_args
-				)
 			end
 		end
 

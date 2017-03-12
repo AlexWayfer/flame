@@ -26,31 +26,28 @@ module Flame
 				end
 			end
 
-			## Error for Flame::Router::RouteRefine.arguments_valid?
-			class ArgumentsError < StandardError
-				def initialize(ctrl, action, path, extra_args)
+			## Error for Route initialization
+			class RouteArgumentsError < StandardError
+				def initialize(ctrl, action, path, extra)
 					@ctrl = ctrl
 					@action = action
 					@path = path
-					@extra_args = extra_args
+					@extra = extra
+					@extra[:type_name] = {
+						req: 'required',
+						opt: 'optional'
+					}[@extra[:type]]
 				end
-			end
 
-			## Error if path has more arguments, than controller's method
-			class ExtraPathArgumentsError < ArgumentsError
 				def message
-					"Method '#{@action}' from controller '#{@ctrl}'" \
-					" does not know arguments '#{@extra_args.join(', ')}'" \
-					" from path '#{@path}'"
-				end
-			end
-
-			## Error if path has no arguments, that controller's method required
-			class ExtraActionArgumentsError < ArgumentsError
-				def message
-					"Path '#{@path}' does not contain required arguments" \
-					" '#{@extra_args.join(', ')}' of method '#{@action}'" \
-					" from controller '#{@ctrl}'"
+					case @extra[:place]
+					when :ctrl
+						"Path '#{@path}' has no #{@extra[:type_name]}" \
+							" arguments #{@extra[:args].inspect}"
+					when :path
+						"Action '#{@ctrl}##{@action}' has no #{@extra[:type_name]}" \
+							" arguments #{@extra[:args].inspect}"
+					end
 				end
 			end
 		end

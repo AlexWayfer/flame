@@ -38,7 +38,7 @@ module Flame
 			## @param args [Hash] arguments for assigning
 			def assign_arguments(args = {})
 				parts = @path_parts.map { |part| assign_argument(part, args) }.compact
-				self.class.path_merge(parts.unshift(''))
+				self.class.path_merge(parts.unshift(nil))
 			end
 
 			## Extract arguments from request_parts for `execute`

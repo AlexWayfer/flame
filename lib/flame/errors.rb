@@ -18,9 +18,11 @@ module Flame
 				def message
 					case @extra[:place]
 					when :ctrl
+						## Error if path has no arguments, that controller's method has
 						"Path '#{@path}' has no #{@extra[:type_name]}" \
 							" arguments #{@extra[:args].inspect}"
 					when :path
+						## Error if path has more arguments, than controller's method
 						"Action '#{@ctrl}##{@action}' has no #{@extra[:type_name]}" \
 							" arguments #{@extra[:args].inspect}"
 					end

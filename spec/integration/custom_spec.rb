@@ -11,9 +11,9 @@ class CustomController < Flame::Controller
 		"Hello, #{name}!"
 	end
 
-	def page(*path_parts)
-		path_parts.join '/'
-	end
+	# def page(*path_parts)
+	# 	path_parts.join '/'
+	# end
 
 	def error
 		raise StandardError

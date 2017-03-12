@@ -16,20 +16,22 @@ describe 'Flame::Errors' do
 
 		describe '#message' do
 			it 'should be correct for extra action required arguments' do
+				path = '/foo/:first/:?third'
 				@init.call(
-					path: '/foo/:first/:?third',
+					path: path,
 					extra: { place: :ctrl, type: :req, args: [:second] }
 				).message.should.equal(
-					"Path '/foo/:first/:?third' has no required arguments [:second]"
+					"Path '#{path}' has no required arguments [:second]"
 				)
 			end
 
 			it 'should be correct for extra action optional arguments' do
+				path = '/foo/:first/:second'
 				@init.call(
-					path: '/foo/:first/:second',
+					path: path,
 					extra: { place: :ctrl, type: :opt, args: [:third] }
 				).message.should.equal(
-					"Path '/foo/:first/:second' has no optional arguments [:third]"
+					"Path '#{path}' has no optional arguments [:third]"
 				)
 			end
 

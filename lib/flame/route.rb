@@ -37,7 +37,7 @@ module Flame
 			## Assign arguments to path for `Controller.path_to`
 			## @param args [Hash] arguments for assigning
 			def assign_arguments(args = {})
-				parts = @path_parts.map { |part| assign_argument(part, args) }
+				parts = @path_parts.map { |part| assign_argument(part, args) }.compact
 				self.class.path_merge(parts.unshift(''))
 			end
 

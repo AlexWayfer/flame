@@ -14,11 +14,15 @@ describe Flame::Request do
 		@request.should.be.kind_of Rack::Request
 	end
 
-	it 'should split path to parts' do
-		@request.path_parts.should.equal %w(hello great world)
+	describe '#path_parts' do
+		it 'should return parts of requested path' do
+			@request.path_parts.should.equal %w(hello great world)
+		end
 	end
 
-	it 'should overwrite HTTP-method by parameter' do
-		@request.http_method.should.equal 'PATCH'
+	describe '#http_method' do
+		it 'should have priority to return HTTP-method from parameter' do
+			@request.http_method.should.equal 'PATCH'
+		end
 	end
 end

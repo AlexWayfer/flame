@@ -28,7 +28,7 @@ module Flame
 			end
 		end
 
-		## Error for Flame::Router.find_path
+		## Error for Flame::Dispatcher.path_to
 		class RouteNotFoundError < StandardError
 			def initialize(ctrl, method)
 				@ctrl = ctrl
@@ -41,7 +41,7 @@ module Flame
 			end
 		end
 
-		## Error for Flame::Controller.path_to
+		## Error for Flame::Dispatcher.path_to
 		class ArgumentNotAssignedError < StandardError
 			def initialize(path, path_part)
 				@path = path

@@ -1,4 +1,6 @@
 # frozen_string_literal: true
+require_relative 'validators'
+
 module Flame
 	class Router
 		ARG_CHAR = ':'

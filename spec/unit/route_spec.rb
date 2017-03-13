@@ -134,6 +134,22 @@ describe Flame::Router::Route do
 		end
 	end
 
+	describe '#==' do
+		it 'should return true for another object with the same attributes' do
+			@init.call.should.equal @init.call
+		end
+
+		it 'should return true for another object with different slashes in path' do
+			other = @init.call path: 'foo/:first////:second/:?third//'
+			@init.call.should.equal other
+		end
+
+		it 'should return false for another object with another attributes' do
+			other = @init.call path: '/foo/:second/:first/:?third'
+			@init.call.should.not.equal other
+		end
+	end
+
 	describe '.path_merge' do
 		it 'should merge from array' do
 			Flame::Router::Route.path_merge(%w(foo bar baz))

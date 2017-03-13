@@ -52,18 +52,5 @@ module Flame
 				"Argument '#{@path_part}' for path '#{@path}' is not assigned"
 			end
 		end
-
-		## Error for Flame::Router.find_path
-		class UnexpectedTypeOfHookError < StandardError
-			def initialize(hook, route)
-				@hook = hook
-				@route = route
-			end
-
-			def message
-				"Unexpected hook-block class '#{@hook.class}'" \
-				" in route '#{@route}'"
-			end
-		end
 	end
 end

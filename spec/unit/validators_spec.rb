@@ -23,7 +23,7 @@ describe 'Flame::Validators' do
 			it 'should raise error for extra action required arguments' do
 				path = '/foo/:first/:?third'
 				-> { @init.call(path: path).valid? }
-					.should.raise(Flame::Errors::RouterError::RouteArgumentsError)
+					.should.raise(Flame::Errors::RouteArgumentsError)
 					.message.should.equal(
 						"Path '#{path}' has no required arguments [:second]"
 					)
@@ -32,7 +32,7 @@ describe 'Flame::Validators' do
 			it 'should raise error for extra action optional arguments' do
 				path = '/foo/:first/:second'
 				-> { @init.call(path: path).valid? }
-					.should.raise(Flame::Errors::RouterError::RouteArgumentsError)
+					.should.raise(Flame::Errors::RouteArgumentsError)
 					.message.should.equal(
 						"Path '#{path}' has no optional arguments [:third]"
 					)
@@ -40,7 +40,7 @@ describe 'Flame::Validators' do
 
 			it 'should raise error for extra path required arguments' do
 				-> { @init.call(path: '/foo/:first/:second/:fourth/:?third').valid? }
-					.should.raise(Flame::Errors::RouterError::RouteArgumentsError)
+					.should.raise(Flame::Errors::RouteArgumentsError)
 					.message.should.equal(
 						"Action 'ErrorsController#foo' has no required arguments [:fourth]"
 					)
@@ -48,7 +48,7 @@ describe 'Flame::Validators' do
 
 			it 'should raise error for extra path optional arguments' do
 				-> { @init.call(path: '/foo/:first/:second/:?third/:?fourth').valid? }
-					.should.raise(Flame::Errors::RouterError::RouteArgumentsError)
+					.should.raise(Flame::Errors::RouteArgumentsError)
 					.message.should.equal(
 						"Action 'ErrorsController#foo' has no optional arguments [:fourth]"
 					)

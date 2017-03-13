@@ -29,7 +29,7 @@ describe Flame::Router::Route do
 				/foo/:first/:second/:?third/:?four
 			).each do |path|
 				-> { @init.call(path: path) }
-					.should.raise(Flame::Errors::RouterError::RouteArgumentsError)
+					.should.raise(Flame::Errors::RouteArgumentsError)
 					.message.should.not.be.empty
 			end
 		end

@@ -1,31 +1,29 @@
 # frozen_string_literal: true
 module Flame
 	module Errors
-		module RouterError
-			## Error for Route initialization
-			class RouteArgumentsError < StandardError
-				def initialize(ctrl, action, path, extra)
-					@ctrl = ctrl
-					@action = action
-					@path = path
-					@extra = extra
-					@extra[:type_name] = {
-						req: 'required',
-						opt: 'optional'
-					}[@extra[:type]]
-				end
+		## Error for Route initialization
+		class RouteArgumentsError < StandardError
+			def initialize(ctrl, action, path, extra)
+				@ctrl = ctrl
+				@action = action
+				@path = path
+				@extra = extra
+				@extra[:type_name] = {
+					req: 'required',
+					opt: 'optional'
+				}[@extra[:type]]
+			end
 
-				def message
-					case @extra[:place]
-					when :ctrl
-						## Error if path has no arguments, that controller's method has
-						"Path '#{@path}' has no #{@extra[:type_name]}" \
-							" arguments #{@extra[:args].inspect}"
-					when :path
-						## Error if path has more arguments, than controller's method
-						"Action '#{@ctrl}##{@action}' has no #{@extra[:type_name]}" \
-							" arguments #{@extra[:args].inspect}"
-					end
+			def message
+				case @extra[:place]
+				when :ctrl
+					## Error if path has no arguments, that controller's method has
+					"Path '#{@path}' has no #{@extra[:type_name]}" \
+						" arguments #{@extra[:args].inspect}"
+				when :path
+					## Error if path has more arguments, than controller's method
+					"Action '#{@ctrl}##{@action}' has no #{@extra[:type_name]}" \
+						" arguments #{@extra[:args].inspect}"
 				end
 			end
 		end

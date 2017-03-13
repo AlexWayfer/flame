@@ -5,10 +5,10 @@ class ErrorsController < Flame::Controller
 end
 
 describe 'Flame::Errors' do
-	describe Flame::Errors::RouterError::RouteArgumentsError do
+	describe Flame::Errors::RouteArgumentsError do
 		before do
 			@init = proc do |path:, extra:|
-				Flame::Errors::RouterError::RouteArgumentsError.new(
+				Flame::Errors::RouteArgumentsError.new(
 					ErrorsController, :foo, path, extra
 				)
 			end

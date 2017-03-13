@@ -23,9 +23,7 @@ module Flame
 				## Return true if no any extra argument
 				return true unless extra
 				## Raise error with extra arguments
-				raise Errors::RouterError::RouteArgumentsError.new(
-					@ctrl, @action, @path, extra
-				)
+				raise Errors::RouteArgumentsError.new(@ctrl, @action, @path, extra)
 			end
 
 			private

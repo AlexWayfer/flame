@@ -2,12 +2,16 @@
 ## Test controller for Route
 class RouteController < Flame::Controller
 	def foo(first, second, third = nil); end
+
+	def bar(first, second, third = nil); end
+
+	def baz(first, second); end
 end
 
 describe Flame::Router::Route do
 	before do
-		@init = proc do |path: '/foo/:first/:second/:?third'|
-			Flame::Router::Route.new(RouteController, :foo, :GET, path)
+		@init = proc do |action: :foo, path: '/foo/:first/:second/:?third'|
+			Flame::Router::Route.new(RouteController, action, :GET, path)
 		end
 	end
 
@@ -147,6 +151,24 @@ describe Flame::Router::Route do
 		it 'should return false for another object with another attributes' do
 			other = @init.call path: '/foo/:second/:first/:?third'
 			@init.call.should.not.equal other
+		end
+	end
+
+	describe '#<=>' do
+		it 'should return -1 for other route with grater count of path parts' do
+			(@init.call <=> @init.call(action: :baz, path: '/baz/:first/:second'))
+				.should.equal(-1)
+		end
+
+		it 'should return 1 for other route with equal count of path parts' do
+			(@init.call(action: :baz, path: '/baz/:first/:second') <=> @init.call)
+				.should.equal 1
+		end
+
+		it 'should return 0 for other route with less count of path parts' do
+			bar_route = @init.call(action: :bar, path: '/bar/:first/:second/:?third')
+			(@init.call <=> bar_route)
+				.should.equal 0
 		end
 	end
 

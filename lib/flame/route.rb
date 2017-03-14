@@ -68,6 +68,11 @@ module Flame
 				end
 			end
 
+			## Compare by path parts count (more is matter)
+			def <=>(other)
+				other.path_parts.size <=> path_parts.size
+			end
+
 			def self.path_merge(*parts)
 				parts.join('/').gsub(%r{\/{2,}}, '/')
 			end

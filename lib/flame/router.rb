@@ -140,7 +140,7 @@ module Flame
 			def execute(&block)
 				instance_exec(&block) if block
 				defaults
-				@routes.sort! { |a, b| b.path <=> a.path }
+				@routes.sort!
 			end
 
 			def find_route_index(attrs)

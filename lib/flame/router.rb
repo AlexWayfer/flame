@@ -13,9 +13,9 @@ module Flame
 
 		## Add the controller with it's methods to routes
 		## @param ctrl [Flame::Controller] class of the controller which will be added
-		## @param path [String] root path for controller's methods
-		## @param block [Proc, nil] block for routes refine
-		def add_controller(ctrl, path, block = nil)
+		## @param path [String, nil] root path for controller's methods
+		## @yield block for routes refine
+		def add_controller(ctrl, path = nil, &block)
 			## @todo Add Regexp paths
 
 			## Add routes from controller to glob array
@@ -131,7 +131,7 @@ module Flame
 			## @yield Block of code for routes refine
 			def mount(ctrl, path = nil, &block)
 				path = Route.path_merge(@path, path || ctrl.default_path)
-				@router.add_controller(ctrl, path, block)
+				@router.add_controller(ctrl, path, &block)
 			end
 
 			private

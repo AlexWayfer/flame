@@ -57,7 +57,7 @@ module Flame
 		##     defaults
 		##   end
 		def self.mount(ctrl, path = nil, &block)
-			router.add_controller(ctrl, path, block)
+			router.add_controller(ctrl, path, &block)
 		end
 
 		## Router for routing

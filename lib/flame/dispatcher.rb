@@ -100,7 +100,7 @@ module Flame
 			params = Rack::Utils.build_nested_query args.delete(:params)
 			path = route.assign_arguments(args)
 			path = '/' if path.empty?
-			path << ("?#{params}" if params).to_s
+			URI::Generic.build(path: path, query: params).to_s
 		end
 
 		## Interrupt the execution of route, and set new optional data

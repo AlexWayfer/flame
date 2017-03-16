@@ -30,11 +30,6 @@ end
 class RouterApplication < Flame::Application
 end
 
-def match_words(*words)
-	regexp = words.map! { |word| "(?=.*#{Regexp.escape(word)})" }.join
-	->(obj) { obj.match(/#{regexp}/) }
-end
-
 describe Flame::Router do
 	before do
 		@router = Flame::Router.new(RouterApplication)

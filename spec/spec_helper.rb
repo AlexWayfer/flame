@@ -15,3 +15,8 @@ require_relative File.join('..', 'lib', 'flame')
 require 'bacon'
 require 'bacon/colored_output'
 require 'pry-byebug'
+
+def match_words(*words)
+	regexp = words.map! { |word| "(?=.*#{Regexp.escape(word)})" }.join
+	->(obj) { obj.match(/#{regexp}/) }
+end

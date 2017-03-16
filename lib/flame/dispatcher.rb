@@ -122,7 +122,7 @@ module Flame
 			end
 			# new_status.is_a?(String) ? () : (status new_status)
 			body new_body if new_body
-			default_body_of_nearest_route if body.empty?
+			body default_body_of_nearest_route if body.empty?
 			response.headers.merge!(new_headers)
 			throw :halt
 		end
@@ -184,7 +184,7 @@ module Flame
 			return default_body unless route
 			## Execute `default_body` method for the founded route
 			route.controller.new(self).send(:execute, :default_body)
-			body default_body if body.empty?
+			default_body if body.empty?
 		end
 	end
 end

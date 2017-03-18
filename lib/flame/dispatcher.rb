@@ -105,24 +105,21 @@ module Flame
 
 		## Interrupt the execution of route, and set new optional data
 		##   (otherwise using existing)
-		## @param new_status_or_body [Integer, String]
-		##   set new HTTP status code or new body
-		## @param new_body [String] set new body
-		## @param new_headers [String] merge new headers
+		## @param new_status [Integer, nil]
+		##   set new HTTP status code
+		## @param new_body [String, nil] set new body
+		## @param new_headers [Hash, nil] merge new headers
+		## @example Halt, no change status or body
+		##   halt
 		## @example Halt with 500, no change body
 		##   halt 500
 		## @example Halt with 404, render template
 		##   halt 404, render('errors/404')
 		## @example Halt with 200, set new headers
 		##   halt 200, 'Cats!', 'Content-Type' => 'animal/cat'
-		def halt(new_status_or_body = nil, new_body = nil, new_headers = {})
-			case new_status_or_body
-			when String then new_body = new_status_or_body
-			when Integer then status new_status_or_body
-			end
-			# new_status.is_a?(String) ? () : (status new_status)
-			body new_body if new_body
-			body default_body_of_nearest_route if body.empty?
+		def halt(new_status = nil, new_body = nil, new_headers = {})
+			status new_status if new_status
+			body new_body || (default_body_of_nearest_route if body.empty?)
 			response.headers.merge!(new_headers)
 			throw :halt
 		end

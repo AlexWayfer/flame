@@ -54,4 +54,36 @@ describe 'Flame::Errors' do
 			end
 		end
 	end
+
+	describe Flame::Errors::RouteNotFoundError do
+		before do
+			@error = Flame::Errors::RouteNotFoundError.new(ErrorsController, :bar)
+		end
+
+		describe '#message' do
+			it 'should be correct' do
+				@error.message.should.equal(
+					"Route with controller 'ErrorsController' and method 'bar'" \
+						' not found in application routes'
+				)
+			end
+		end
+	end
+
+	describe Flame::Errors::ArgumentNotAssignedError do
+		before do
+			@error = Flame::Errors::ArgumentNotAssignedError.new(
+				'/foo/:first/:second',
+				':second'
+			)
+		end
+
+		describe '#message' do
+			it 'should be correct' do
+				@error.message.should.equal(
+					"Argument ':second' for path '/foo/:first/:second' is not assigned"
+				)
+			end
+		end
+	end
 end

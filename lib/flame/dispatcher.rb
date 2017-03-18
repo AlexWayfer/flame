@@ -132,7 +132,7 @@ module Flame
 				"#{error.class} - #{error.message}:",
 				*error.backtrace
 			].join("\n\t")
-			@env['rack.errors'].puts(error_message)
+			@env[Rack::RACK_ERRORS].puts(error_message)
 		end
 
 		## Generate default body of error page

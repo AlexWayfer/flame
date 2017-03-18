@@ -37,19 +37,19 @@ module Flame
 
 			def message
 				"Route with controller '#{@ctrl}' and method '#{@method}'" \
-				' not found in application routes'
+					' not found in application routes'
 			end
 		end
 
 		## Error for Flame::Dispatcher.path_to
 		class ArgumentNotAssignedError < StandardError
-			def initialize(path, path_part)
+			def initialize(path, argument)
 				@path = path
-				@path_part = path_part
+				@argument = argument
 			end
 
 			def message
-				"Argument '#{@path_part}' for path '#{@path}' is not assigned"
+				"Argument '#{@argument}' for path '#{@path}' is not assigned"
 			end
 		end
 	end

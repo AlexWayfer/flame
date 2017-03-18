@@ -17,5 +17,5 @@ require 'pry-byebug'
 
 def match_words(*words)
 	regexp = words.map! { |word| "(?=.*#{Regexp.escape(word)})" }.join
-	->(obj) { obj.match(/#{regexp}/) }
+	->(obj) { obj.match(/#{regexp}/m) }
 end

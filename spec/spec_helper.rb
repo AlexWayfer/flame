@@ -13,7 +13,6 @@ end
 require_relative File.join('..', 'lib', 'flame')
 
 require 'bacon'
-require 'bacon/colored_output'
 require 'pry-byebug'
 
 def match_words(*words)

@@ -25,17 +25,30 @@ describe Flame::Router::Route do
 				.path_parts.any?(&:empty?).should.equal false
 		end
 
-		it 'should raise error with incorrect path arguments' do
-			%w(
-				/foo/:bar/:baz
-				/foo/:first
-				/foo/:first/:second/:third
-				/foo/:first/:second/:?third/:?four
-			).each do |path|
-				-> { @init.call(path: path) }
-					.should.raise(Flame::Errors::RouteArgumentsError)
-					.message.should.not.be.empty
-			end
+		it 'should raise error with wrong path arguments' do
+			path = '/foo/:bar/:baz'
+			-> { @init.call(path: path) }
+				.should.raise(Flame::Errors::RouteArgumentsError)
+				.message.should match_words(path, 'first', 'second')
+		end
+
+		it 'should raise error without required path arguments' do
+			path = '/foo/:first'
+			-> { @init.call(path: path) }
+				.should.raise(Flame::Errors::RouteArgumentsError)
+				.message.should match_words(path, 'second')
+		end
+
+		it 'should raise error with extra required path arguments' do
+			-> { @init.call(path: '/foo/:first/:second/:third') }
+				.should.raise(Flame::Errors::RouteArgumentsError)
+				.message.should match_words('RouteController', 'third')
+		end
+
+		it 'should raise error with extra optional path arguments' do
+			-> { @init.call(path: '/foo/:first/:second/:?third/:?four') }
+				.should.raise(Flame::Errors::RouteArgumentsError)
+				.message.should match_words('RouteController', 'four')
 		end
 	end
 
@@ -123,6 +136,7 @@ describe Flame::Router::Route do
 		it 'should not assign arguments without one required' do
 			-> { @init.call.assign_arguments(first: 'bar') }
 				.should.raise(Flame::Errors::ArgumentNotAssignedError)
+				.message.should match_words(':second', '/foo/:first/:second/:?third')
 		end
 	end
 

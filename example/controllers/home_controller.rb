@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 ## Demo casual controller
 class HomeController < Flame::Controller
 	def index

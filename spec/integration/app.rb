@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require_relative File.join('..', 'spec_helper')
 
 require 'rack/test'

@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 module Flame
 	class Dispatcher
 		## Helper class for cookies

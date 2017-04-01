@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 ## Test controller for Validators
 class ValidatorsController < Flame::Controller
 	def foo(first, second, third = nil); end

@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 describe 'Flame' do
 	it 'should require all files when flame required' do
 		Dir[

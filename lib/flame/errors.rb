@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 module Flame
 	module Errors
 		## Error for Route initialization

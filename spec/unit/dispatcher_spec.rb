@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 ## Test controller for Dispatcher
 class DispatcherController < Flame::Controller
 	def index; end

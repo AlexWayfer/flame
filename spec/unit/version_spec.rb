@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 describe 'Flame::VERSION' do
 	it 'should be String' do
 		Flame::VERSION.should.be.kind_of String

@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 describe Flame::Response do
 	before do
 		@response = Flame::Response.new

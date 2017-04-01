@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require_relative 'validators'
 
 module Flame
@@ -97,7 +98,7 @@ module Flame
 
 			def compare_path_parts(request_parts)
 				# p route_path
-				req_path_parts = @path_parts.select { |part| part[1] != ARG_CHAR_OPT }
+				req_path_parts = @path_parts.reject { |part| part[1] == ARG_CHAR_OPT }
 				return false if request_parts.count < req_path_parts.count
 				# compare_parts(request_parts, self[:path_parts])
 				request_parts.each_with_index do |request_part, i|

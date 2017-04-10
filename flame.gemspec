@@ -26,6 +26,7 @@ Gem::Specification.new do |s|
 	s.add_development_dependency 'rubocop', '~> 0'
 	s.add_development_dependency 'rake', '~> 12'
 	s.add_development_dependency 'bacon', '~> 1'
+	s.add_development_dependency 'bacon-colored_output', '~> 1', '>= 1.1.0'
 	s.add_development_dependency 'rack-test', '~> 0'
 	s.add_development_dependency 'simplecov', '~> 0'
 	s.add_development_dependency 'codecov', '~> 0'

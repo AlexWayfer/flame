@@ -78,12 +78,6 @@ module Flame
 			@app.config
 		end
 
-		## Access to Content-Type header of response
-		def content_type(ext = nil)
-			return response[Rack::CONTENT_TYPE] unless ext
-			response[Rack::CONTENT_TYPE] = Rack::Mime.mime_type(ext)
-		end
-
 		## Build a path to the given controller and action, with any expected params
 		##
 		## @param ctrl [Flame::Controller] class of controller

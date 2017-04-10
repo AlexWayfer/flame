@@ -21,7 +21,7 @@ module Flame
 			def return_static(file)
 				file_time = File.mtime(file)
 				halt 304 if static_cached?(file_time)
-				content_type File.extname(file)
+				response.content_type = File.extname(file)
 				response[Rack::CACHE_CONTROL] = 'no-cache'
 				response['Last-Modified'] = file_time.httpdate
 				body File.read(file)

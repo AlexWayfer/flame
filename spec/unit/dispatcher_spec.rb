@@ -161,18 +161,6 @@ describe Flame::Dispatcher do
 		end
 	end
 
-	describe '#content_type' do
-		it 'should set Content-Type header by extension' do
-			@dispatcher.content_type '.css'
-			@dispatcher.response[Rack::CONTENT_TYPE].should.equal 'text/css'
-		end
-
-		it 'should return Content-Type from response headers' do
-			@dispatcher.content_type '.css'
-			@dispatcher.content_type.should.equal 'text/css'
-		end
-	end
-
 	describe '#path_to' do
 		it 'should return path by controller and action' do
 			@dispatcher.path_to(DispatcherController, :foo)

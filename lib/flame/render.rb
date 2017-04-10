@@ -96,7 +96,7 @@ module Flame
 		## Find possible directories for the controller
 		def controller_dirs
 			parts = @ctrl.class.underscore.split('/').map do |part|
-				(part.split('_') - %w(controller controllers ctrl)).join('_')
+				(part.split('_') - %w[controller controllers ctrl]).join('_')
 			end
 			combine_parts(parts).map! { |path| path.join('/') }
 		end

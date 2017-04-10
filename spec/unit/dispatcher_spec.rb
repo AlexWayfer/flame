@@ -189,7 +189,7 @@ describe Flame::Dispatcher do
 				:foo,
 				params: {
 					name: 'world',
-					nested: { some: 'here', another: %w(there maybe) }
+					nested: { some: 'here', another: %w[there maybe] }
 				}
 			)
 				.should.equal '/foo?name=world' \

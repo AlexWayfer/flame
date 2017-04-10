@@ -212,7 +212,7 @@ describe Flame::Router do
 
 		it 'should return route by method and path parts' do
 			@router.add_controller RouterRESTController
-			@router.find_route(method: :PUT, path_parts: %w(router_rest 42))
+			@router.find_route(method: :PUT, path_parts: %w[router_rest 42])
 				.should.equal Flame::Router::Route.new(
 					RouterRESTController, :update, :PUT, '/router_rest/:id'
 				)
@@ -220,7 +220,7 @@ describe Flame::Router do
 
 		it 'should return route by path parts without optional argument' do
 			@router.add_controller RouterController
-			@router.find_route(path_parts: %w(router foo bar baz))
+			@router.find_route(path_parts: %w[router foo bar baz])
 				.should.equal Flame::Router::Route.new(
 					RouterController, :foo, :GET, '/router/foo/:first/:second/:?third'
 				)
@@ -232,7 +232,7 @@ describe Flame::Router do
 				controller: RouterRESTController,
 				action: :update,
 				method: :PUT,
-				path_parts: %w(router_rest 42)
+				path_parts: %w[router_rest 42]
 			)
 				.should.equal Flame::Router::Route.new(
 					RouterRESTController, :update, :PUT, '/router_rest/:id'
@@ -247,7 +247,7 @@ describe Flame::Router do
 
 		it 'should return nil by path parts without required argument' do
 			@router.add_controller RouterController
-			@router.find_route(path_parts: %w(router foo bar))
+			@router.find_route(path_parts: %w[router foo bar])
 				.should.equal nil
 		end
 	end
@@ -255,7 +255,7 @@ describe Flame::Router do
 	describe '#find_nearest_route' do
 		it 'should return route by path parts' do
 			@router.add_controller RouterController
-			@router.find_nearest_route(%w(router foo bar baz qux))
+			@router.find_nearest_route(%w[router foo bar baz qux])
 				.should.equal Flame::Router::Route.new(
 					RouterController, :foo, :GET, '/router/foo/:first/:second/:?third'
 				)
@@ -263,7 +263,7 @@ describe Flame::Router do
 
 		it 'should return route by path parts' do
 			@router.add_controller RouterController
-			@router.find_nearest_route(%w(router foo bar baz qux))
+			@router.find_nearest_route(%w[router foo bar baz qux])
 				.should.equal Flame::Router::Route.new(
 					RouterController, :foo, :GET, '/router/foo/:first/:second/:?third'
 				)
@@ -271,7 +271,7 @@ describe Flame::Router do
 
 		it 'should return route by path parts without optional argument' do
 			@router.add_controller RouterController
-			@router.find_nearest_route(%w(router foo bar baz))
+			@router.find_nearest_route(%w[router foo bar baz])
 				.should.equal Flame::Router::Route.new(
 					RouterController, :foo, :GET, '/router/foo/:first/:second/:?third'
 				)
@@ -279,13 +279,13 @@ describe Flame::Router do
 
 		it 'should return nil for not existing route' do
 			@router.add_controller RouterController
-			@router.find_nearest_route(%w(router bar))
+			@router.find_nearest_route(%w[router bar])
 				.should.equal nil
 		end
 
 		it 'should return nil by path parts without required argument' do
 			@router.add_controller RouterController
-			@router.find_nearest_route(%w(router foo bar))
+			@router.find_nearest_route(%w[router foo bar])
 				.should.equal nil
 		end
 	end

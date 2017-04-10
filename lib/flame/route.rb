@@ -62,7 +62,7 @@ module Flame
 
 			## Method for Routes comparison
 			def ==(other)
-				%i(controller action method path_parts).reduce(true) do |result, method|
+				%i[controller action method path_parts].reduce(true) do |result, method|
 					result && (
 						public_send(method) == other.public_send(method)
 					)

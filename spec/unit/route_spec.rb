@@ -18,7 +18,7 @@ describe Flame::Router::Route do
 
 	describe '#initialize' do
 		it 'should make path parts' do
-			@init.call.path_parts.should.equal %w(foo :first :second :?third)
+			@init.call.path_parts.should.equal %w[foo :first :second :?third]
 		end
 
 		it 'should clean empty parts from path parts' do
@@ -70,7 +70,7 @@ describe Flame::Router::Route do
 				action: :foo,
 				method: :GET,
 				path: '/foo/:first/:second/:?third',
-				path_parts: %w(foo bar baz bat)
+				path_parts: %w[foo bar baz bat]
 			}
 			@init.call.compare_attributes(attributes).should.equal attributes
 		end
@@ -81,7 +81,7 @@ describe Flame::Router::Route do
 				action: :foo,
 				method: :GET,
 				path: '/foo/:first/:second/:?third',
-				path_parts: %w(foo bar baz bat)
+				path_parts: %w[foo bar baz bat]
 			).should.equal false
 		end
 
@@ -91,7 +91,7 @@ describe Flame::Router::Route do
 				action: :bar,
 				method: :GET,
 				path: '/foo/:first/:second/:?third',
-				path_parts: %w(foo bar baz bat)
+				path_parts: %w[foo bar baz bat]
 			).should.equal false
 		end
 
@@ -101,7 +101,7 @@ describe Flame::Router::Route do
 				action: :foo,
 				method: :POST,
 				path: '/foo/:first/:second/:?third',
-				path_parts: %w(foo bar baz bat)
+				path_parts: %w[foo bar baz bat]
 			).should.equal false
 		end
 
@@ -111,7 +111,7 @@ describe Flame::Router::Route do
 				action: :foo,
 				method: :GET,
 				path: '/foo/:first/:second',
-				path_parts: %w(foo bar baz bat)
+				path_parts: %w[foo bar baz bat]
 			).should.equal false
 		end
 
@@ -121,7 +121,7 @@ describe Flame::Router::Route do
 				action: :foo,
 				method: :GET,
 				path: '/foo/:first/:second/:?third',
-				path_parts: %w(foo bar)
+				path_parts: %w[foo bar]
 			).should.equal false
 		end
 	end
@@ -143,12 +143,12 @@ describe Flame::Router::Route do
 
 	describe '#arguments' do
 		it 'should return arguments from path parts' do
-			@init.call.arguments(%w(foo bar baz))
+			@init.call.arguments(%w[foo bar baz])
 				.should.equal Hash[first: 'bar', second: 'baz']
 		end
 
 		it 'should return decoded arguments from path parts' do
-			@init.call.arguments(%w(foo another%20bar baz))
+			@init.call.arguments(%w[foo another%20bar baz])
 				.should.equal Hash[first: 'another bar', second: 'baz']
 		end
 	end
@@ -189,7 +189,7 @@ describe Flame::Router::Route do
 
 	describe '.path_merge' do
 		it 'should merge from array' do
-			Flame::Router::Route.path_merge(%w(foo bar baz))
+			Flame::Router::Route.path_merge(%w[foo bar baz])
 				.should.equal 'foo/bar/baz'
 		end
 

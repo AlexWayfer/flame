@@ -23,7 +23,7 @@ Gem::Specification.new do |s|
 	s.add_runtime_dependency 'gorilla-patch', '~> 2', '>= 2.0.0'
 	s.add_runtime_dependency 'thor', '~> 0'
 
-	s.add_development_dependency 'rubocop', '~> 0'
+	s.add_development_dependency 'rubocop', '~> 0.48'
 	s.add_development_dependency 'rake', '~> 12'
 	s.add_development_dependency 'bacon', '~> 1'
 	s.add_development_dependency 'bacon-colored_output', '~> 1', '>= 1.1.0'

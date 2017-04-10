@@ -76,7 +76,7 @@ module Flame
 				execute(&block)
 			end
 
-			%i(GET POST PUT PATCH DELETE).each do |request_method|
+			%i[GET POST PUT PATCH DELETE].each do |request_method|
 				## Define refine methods for all HTTP methods
 				## @overload post(path, action)
 				##   Execute action on requested path and HTTP method

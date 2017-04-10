@@ -17,7 +17,7 @@ describe Flame::Request do
 
 	describe '#path_parts' do
 		it 'should return parts of requested path' do
-			@request.path_parts.should.equal %w(hello great world)
+			@request.path_parts.should.equal %w[hello great world]
 		end
 	end
 

@@ -14,7 +14,7 @@ module Flame
 
 			def valid?
 				## Get hash of any extra arguments
-				extra = %i(req opt).find do |type|
+				extra = %i[req opt].find do |type|
 					found = extra_arguments(type).find do |place, args|
 						break { place: place, type: type, args: args } if args.any?
 					end

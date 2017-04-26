@@ -27,9 +27,9 @@ module Flame
 		## Start of execution the request
 		def run!
 			catch :halt do
-				try_route ||
-					try_static ||
+				try_static ||
 					try_static(File.join(__dir__, '..', '..', 'public')) ||
+					try_route ||
 					halt(404)
 			end
 			response.write body

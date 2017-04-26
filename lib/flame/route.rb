@@ -11,14 +11,14 @@ module Flame
 		class Route
 			attr_reader :method, :controller, :action, :path, :path_parts
 
-			def initialize(controller, action, method, path)
+			def initialize(controller, action, method, path, self_path)
 				@controller = controller
 				@action = action
 				@method = method.to_sym.upcase
 				## MAKE PATH
 				@path = path
 				Validators::RouteArgumentsValidator.new(
-					@controller, @path, @action
+					@controller, self_path, @action
 				).valid?
 				@path_parts = @path.to_s.split('/').reject(&:empty?)
 				freeze

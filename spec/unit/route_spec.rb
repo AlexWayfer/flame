@@ -11,8 +11,8 @@ end
 
 describe Flame::Router::Route do
 	before do
-		@init = proc do |action: :foo, path: '/foo/:first/:second/:?third'|
-			Flame::Router::Route.new(RouteController, action, :GET, path)
+		@init = proc do |action: :foo, ctrl_path: '/foo', action_path: ':first/:second/:?third'|
+			Flame::Router::Route.new(RouteController, action, :GET, ctrl_path, action_path)
 		end
 	end
 
@@ -22,32 +22,46 @@ describe Flame::Router::Route do
 		end
 
 		it 'should clean empty parts from path parts' do
-			@init.call(path: '/foo//:first///:second////:?third/////')
-				.path_parts.any?(&:empty?).should.equal false
+			@init.call(
+				ctrl_path: '/foo/',
+				action_path: '/:first///:second////:?third/////'
+			).path_parts.any?(&:empty?).should.equal false
 		end
 
 		it 'should raise error with wrong path arguments' do
-			path = '/foo/:bar/:baz'
-			-> { @init.call(path: path) }
+			action_path = ':bar/:baz'
+			-> { @init.call(
+				ctrl_path: '/foo/',
+				action_path: action_path
+			) }
 				.should.raise(Flame::Errors::RouteArgumentsError)
-				.message.should match_words(path, 'first', 'second')
+				.message.should match_words(action_path, 'first', 'second')
 		end
 
 		it 'should raise error without required path arguments' do
-			path = '/foo/:first'
-			-> { @init.call(path: path) }
+			action_path = ':first'
+			-> { @init.call(
+				ctrl_path: '/foo',
+				action_path: action_path
+			) }
 				.should.raise(Flame::Errors::RouteArgumentsError)
-				.message.should match_words(path, 'second')
+				.message.should match_words(action_path, 'second')
 		end
 
 		it 'should raise error with extra required path arguments' do
-			-> { @init.call(path: '/foo/:first/:second/:third') }
+			-> { @init.call(
+				ctrl_path: '/foo',
+				action_path: ':first/:second/:third'
+			) }
 				.should.raise(Flame::Errors::RouteArgumentsError)
 				.message.should match_words('RouteController', 'third')
 		end
 
 		it 'should raise error with extra optional path arguments' do
-			-> { @init.call(path: '/foo/:first/:second/:?third/:?four') }
+			-> { @init.call(
+				ctrl_path: '/foo',
+				action_path: ':first/:second/:?third/:?four'
+			) }
 				.should.raise(Flame::Errors::RouteArgumentsError)
 				.message.should match_words('RouteController', 'four')
 		end
@@ -159,29 +173,47 @@ describe Flame::Router::Route do
 		end
 
 		it 'should return true for another object with different slashes in path' do
-			other = @init.call path: 'foo/:first////:second/:?third//'
+			other = @init.call(
+				ctrl_path: 'foo',
+				action_path: ':first////:second/:?third//'
+			)
 			@init.call.should.equal other
 		end
 
 		it 'should return false for another object with another attributes' do
-			other = @init.call path: '/foo/:second/:first/:?third'
+			other = @init.call(
+				ctrl_path: '/foo',
+				action_path: ':second/:first/:?third'
+			)
 			@init.call.should.not.equal other
 		end
 	end
 
 	describe '#<=>' do
 		it 'should return -1 for other route with grater count of path parts' do
-			(@init.call <=> @init.call(action: :baz, path: '/baz/:first/:second'))
+			(@init.call <=> @init.call(
+				action: :baz,
+				ctrl_path: '/baz',
+				action_path: ':first/:second'
+			))
 				.should.equal(-1)
 		end
 
 		it 'should return 1 for other route with equal count of path parts' do
-			(@init.call(action: :baz, path: '/baz/:first/:second') <=> @init.call)
+			(@init.call(
+				action: :baz,
+				ctrl_path: '/baz',
+				action_path: ':first/:second'
+			) <=> @init.call)
 				.should.equal 1
 		end
 
 		it 'should return 0 for other route with less count of path parts' do
-			bar_route = @init.call(action: :bar, path: '/bar/:first/:second/:?third')
+			bar_route = @init.call(
+				action: :bar,
+				ctrl_path: '/bar',
+				action_path: ':first/:second/:?third'
+			)
 			(@init.call <=> bar_route)
 				.should.equal 0
 		end

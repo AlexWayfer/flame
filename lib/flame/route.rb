@@ -11,7 +11,8 @@ module Flame
 		class Route
 			attr_reader :method, :controller, :action, :path, :path_parts
 
-			def initialize(controller, action, method, path, self_path)
+			def initialize(controller, action, method, path, self_path = nil)
+				self_path = path unless self_path
 				@controller = controller
 				@action = action
 				@method = method.to_sym.upcase

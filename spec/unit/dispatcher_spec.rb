@@ -9,6 +9,10 @@ class DispatcherController < Flame::Controller
 	def hello(name)
 		"Hello, #{name}!"
 	end
+
+	def test
+		'Route content'
+	end
 end
 
 ## Test application for Dispatcher
@@ -79,6 +83,12 @@ describe Flame::Dispatcher do
 			respond.status.should.equal 200
 			favicon_file = File.join __dir__, '..', '..', 'public', 'favicon.ico'
 			respond.body.should.equal [File.read(favicon_file)]
+		end
+
+		it 'should return content of existing static file before route executing' do
+			respond = @init.call(path: 'test').run!.last
+			respond.status.should.equal 200
+			respond.body.should.equal ["Static file\n"]
 		end
 
 		it 'should return 404 if neither route nor static file was found' do

@@ -20,12 +20,12 @@ end
 
 def rest_routes(prefix = nil)
 	[
-		[:index,  :GET,    "#{prefix}/", '/'],
-		[:create, :POST,   "#{prefix}/", '/'],
-		[:show,   :GET,    "#{prefix}/", ":id"],
-		[:update, :PUT,    "#{prefix}/", ":id"],
-		[:delete, :DELETE, "#{prefix}/", ":id"]
-	].map{ |route| Flame::Router::Route.new(RouterRESTController, *route) }
+		[:index,  :GET,    prefix, '/'],
+		[:create, :POST,   prefix, '/'],
+		[:show,   :GET,    prefix, '/:id'],
+		[:update, :PUT,    prefix, '/:id'],
+		[:delete, :DELETE, prefix, '/:id']
+	].map { |route| Flame::Router::Route.new(RouterRESTController, *route) }
 end
 
 class RouterApplication < Flame::Application
@@ -57,7 +57,7 @@ describe Flame::Router do
 		it 'should add routes from controller without refinings' do
 			@router.add_controller RouterController
 			route = Flame::Router::Route.new(
-				RouterController, :foo, :GET, '/router/foo/', ':first/:second/:?third'
+				RouterController, :foo, :GET, '/router/foo', '/:first/:second/:?third'
 			)
 			@router.routes.should.equal [route]
 		end
@@ -65,7 +65,7 @@ describe Flame::Router do
 		it 'should add routes from controller with another path' do
 			@router.add_controller RouterController, '/another'
 			route = Flame::Router::Route.new(
-				RouterController, :foo, :GET, '/another/foo/', ':first/:second/:?third'
+				RouterController, :foo, :GET, '/another/foo', '/:first/:second/:?third'
 			)
 			@router.routes.should.equal [route]
 		end
@@ -81,7 +81,7 @@ describe Flame::Router do
 				post '/foo/:first/:second/:?third', :foo
 			end
 			route = Flame::Router::Route.new(
-				RouterController, :foo, :POST, '/router/foo/', ':first/:second/:?third'
+				RouterController, :foo, :POST, '/router/foo', '/:first/:second/:?third'
 			)
 			@router.routes.should.equal [route]
 		end
@@ -91,7 +91,7 @@ describe Flame::Router do
 				get '/bar/:first/:second/:?third', :foo
 			end
 			route = Flame::Router::Route.new(
-				RouterController, :foo, :GET, '/router/bar/', ':first/:second/:?third'
+				RouterController, :foo, :GET, '/router/bar', '/:first/:second/:?third'
 			)
 			@router.routes.should.equal [route]
 		end
@@ -101,7 +101,7 @@ describe Flame::Router do
 				get '/foo/:second/:first/:?third', :foo
 			end
 			route = Flame::Router::Route.new(
-				RouterController, :foo, :GET, '/router/foo/', ':second/:first/:?third'
+				RouterController, :foo, :GET, '/router/foo', '/:second/:first/:?third'
 			)
 			@router.routes.should.equal [route]
 		end
@@ -111,7 +111,7 @@ describe Flame::Router do
 				post '/bar/:second/:first/:?third', :foo
 			end
 			route = Flame::Router::Route.new(
-				RouterController, :foo, :POST, '/router/bar/', ':second/:first/:?third'
+				RouterController, :foo, :POST, '/router/bar', '/:second/:first/:?third'
 			)
 			@router.routes.should.equal [route]
 		end
@@ -174,7 +174,7 @@ describe Flame::Router do
 				post :foo
 			end
 			route = Flame::Router::Route.new(
-				RouterController, :foo, :POST, '/router/foo/', ':first/:second/:?third'
+				RouterController, :foo, :POST, '/router/foo', '/:first/:second/:?third'
 			)
 			@router.routes.should.equal [route]
 		end
@@ -189,12 +189,12 @@ describe Flame::Router do
 			routes.unshift(
 				Flame::Router::Route.new(
 					RouterController, :foo, :GET,
-					'/router/rest/router/foo/', ':first/:second/:?third'
+					'/router/rest/router/foo', '/:first/:second/:?third'
 				)
 			)
 			routes.push(
 				Flame::Router::Route.new(
-					RouterController, :foo, :GET, '/router/foo/', ':first/:second/:?third'
+					RouterController, :foo, :GET, '/router/foo', '/:first/:second/:?third'
 				)
 			)
 			@router.routes.should.equal routes
@@ -206,7 +206,7 @@ describe Flame::Router do
 			@router.add_controller RouterRESTController
 			@router.find_route(controller: RouterRESTController, action: :show)
 				.should.equal Flame::Router::Route.new(
-					RouterRESTController, :show, :GET, '/router_rest', ':id'
+					RouterRESTController, :show, :GET, '/router_rest', '/:id'
 				)
 		end
 
@@ -214,7 +214,7 @@ describe Flame::Router do
 			@router.add_controller RouterRESTController
 			@router.find_route(method: :PUT, path_parts: %w[router_rest 42])
 				.should.equal Flame::Router::Route.new(
-					RouterRESTController, :update, :PUT, '/router_rest', ':id'
+					RouterRESTController, :update, :PUT, '/router_rest', '/:id'
 				)
 		end
 
@@ -222,7 +222,7 @@ describe Flame::Router do
 			@router.add_controller RouterController
 			@router.find_route(path_parts: %w[router foo bar baz])
 				.should.equal Flame::Router::Route.new(
-					RouterController, :foo, :GET, '/router/foo/', ':first/:second/:?third'
+					RouterController, :foo, :GET, '/router/foo', '/:first/:second/:?third'
 				)
 		end
 
@@ -235,7 +235,7 @@ describe Flame::Router do
 				path_parts: %w[router_rest 42]
 			)
 				.should.equal Flame::Router::Route.new(
-					RouterRESTController, :update, :PUT, '/router_rest', ':id'
+					RouterRESTController, :update, :PUT, '/router_rest', '/:id'
 				)
 		end
 
@@ -257,7 +257,7 @@ describe Flame::Router do
 			@router.add_controller RouterController
 			@router.find_nearest_route(%w[router foo bar baz qux])
 				.should.equal Flame::Router::Route.new(
-					RouterController, :foo, :GET, '/router/foo/', ':first/:second/:?third'
+					RouterController, :foo, :GET, '/router/foo', '/:first/:second/:?third'
 				)
 		end
 
@@ -265,7 +265,7 @@ describe Flame::Router do
 			@router.add_controller RouterController
 			@router.find_nearest_route(%w[router foo bar baz qux])
 				.should.equal Flame::Router::Route.new(
-					RouterController, :foo, :GET, '/router/foo/', ':first/:second/:?third'
+					RouterController, :foo, :GET, '/router/foo', '/:first/:second/:?third'
 				)
 		end
 
@@ -273,7 +273,7 @@ describe Flame::Router do
 			@router.add_controller RouterController
 			@router.find_nearest_route(%w[router foo bar baz])
 				.should.equal Flame::Router::Route.new(
-					RouterController, :foo, :GET, '/router/foo/', ':first/:second/:?third'
+					RouterController, :foo, :GET, '/router/foo', '/:first/:second/:?third'
 				)
 		end
 

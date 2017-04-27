@@ -52,10 +52,10 @@ module Flame
 			## @param request_parts [Array] parts of the request (Array of String)
 			def arguments(request_parts)
 				@path_parts.each_with_index.with_object({}) do |(path_part, i), args|
-					request_part = request_parts[i]
+					request_part = request_parts[i].to_s
 					path_part_opt = path_part[1] == ARG_CHAR_OPT
 					next args unless path_part[0] == ARG_CHAR
-					break args if path_part_opt && request_part.nil?
+					break args if path_part_opt && request_part.empty?
 					args[
 						path_part[(path_part_opt ? 2 : 1)..-1].to_sym
 					] = URI.decode(request_part)
@@ -99,17 +99,26 @@ module Flame
 			end
 
 			def compare_path_parts(request_parts)
-				# p route_path
-				req_path_parts = @path_parts.reject { |part| part[1] == ARG_CHAR_OPT }
-				return false if request_parts.count < req_path_parts.count
-				# compare_parts(request_parts, self[:path_parts])
-				request_parts.each_with_index do |request_part, i|
-					path_part = @path_parts[i]
-					# p request_part, path_part
-					break false unless path_part
-					next if path_part[0] == ARG_CHAR
-					break false unless request_part == path_part
+				return false unless request_contain_required_path_parts?(request_parts)
+				[request_parts.size, @path_parts.size].max.times do |i|
+					break false unless compare_parts request_parts[i], @path_parts[i]
 				end
+			end
+
+			def compare_parts(request_part, path_part)
+				# p request_part, path_part
+				return unless path_part
+				return if request_part.nil? && path_part[1] != ARG_CHAR_OPT
+				# p request_part, path_part
+				return true if path_part[0] == ARG_CHAR
+				return true if request_part == path_part
+			end
+
+			def request_contain_required_path_parts?(request_parts)
+				req_path_parts = @path_parts.reject { |part| part[1] == ARG_CHAR_OPT }
+				fixed_path_parts = @path_parts.reject { |part| part[0] == ARG_CHAR }
+				(request_parts & fixed_path_parts) == fixed_path_parts &&
+					request_parts.count >= req_path_parts.count
 			end
 
 			## Helpers for `assign_arguments`

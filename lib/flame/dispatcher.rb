@@ -92,10 +92,11 @@ module Flame
 		def path_to(ctrl, action = :index, args = {})
 			route = @app.class.router.find_route(controller: ctrl, action: action)
 			raise Errors::RouteNotFoundError.new(ctrl, action) unless route
-			params = Rack::Utils.build_nested_query args.delete(:params)
+			query = Rack::Utils.build_nested_query args.delete(:params)
+			query = nil if query&.empty?
 			path = route.assign_arguments(args)
 			path = '/' if path.empty?
-			URI::Generic.build(path: path, query: params).to_s
+			URI::Generic.build(path: path, query: query).to_s
 		end
 
 		## Interrupt the execution of route, and set new optional data

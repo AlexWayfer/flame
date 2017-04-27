@@ -88,7 +88,7 @@ module Flame
 		## @param method [Symbol] name of the controller method
 		def execute(method)
 			# send method
-			body send(method, *select_args(method))
+			body send(method, *select_args(method).values)
 		end
 
 		## Default method for Internal Server Error, can be inherited
@@ -98,14 +98,13 @@ module Flame
 
 		private
 
-		def select_args(method)
-			parameters = self.class.instance_method(method).parameters
-			params_select = proc do |type|
-				params.values_at(
-					*parameters.select { |par| par.first == type }.map(&:last)
-				)
+		def select_args(action)
+			# p action, params, parameters
+			method(action).parameters.each_with_object({}) do |parameter, result|
+				key = parameter.last
+				next if params[key].nil?
+				result[key] = params[key]
 			end
-			params_select.call(:req) + params_select.call(:opt).compact
 		end
 
 		def add_controller_class(args)

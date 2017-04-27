@@ -12,6 +12,7 @@ module Flame
 			attr_reader :method, :controller, :action, :path, :path_parts
 
 			def initialize(controller, action, method, ctrl_path, action_path)
+				## Merge action path with controller path
 				path = self.class.path_merge(ctrl_path, action_path)
 				@controller = controller
 				@action = action

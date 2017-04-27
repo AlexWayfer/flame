@@ -98,9 +98,11 @@ module Flame
 					end
 					## Make path by controller method with parameners
 					path = default_action_path(action, path) if prefix || path.nil?
-					## Merge action path with controller path
+					## Init new Route
 					route = Route.new(@ctrl, action, method, @path, path)
+					## Try to find route with the same action
 					index = find_route_index(action: action)
+					## Overwrite route if needed
 					index ? @routes[index] = route : @routes.push(route)
 				end
 			end

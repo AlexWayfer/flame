@@ -10,7 +10,7 @@ describe 'Flame::Validators' do
 		before do
 			@init = proc do |path:|
 				Flame::Validators::RouteArgumentsValidator.new(
-					ErrorsController, path, :foo
+					ValidatorsController, path, :foo
 				)
 			end
 		end
@@ -43,7 +43,8 @@ describe 'Flame::Validators' do
 				-> { @init.call(path: '/foo/:first/:second/:fourth/:?third').valid? }
 					.should.raise(Flame::Errors::RouteArgumentsError)
 					.message.should.equal(
-						"Action 'ErrorsController#foo' has no required arguments [:fourth]"
+						"Action 'ValidatorsController#foo'" \
+							' has no required arguments [:fourth]'
 					)
 			end
 
@@ -51,7 +52,8 @@ describe 'Flame::Validators' do
 				-> { @init.call(path: '/foo/:first/:second/:?third/:?fourth').valid? }
 					.should.raise(Flame::Errors::RouteArgumentsError)
 					.message.should.equal(
-						"Action 'ErrorsController#foo' has no optional arguments [:fourth]"
+						"Action 'ValidatorsController#foo'" \
+							' has no optional arguments [:fourth]'
 					)
 			end
 		end

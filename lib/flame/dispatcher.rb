@@ -146,17 +146,17 @@ module Flame
 				path_parts: request.path_parts
 			)
 			return nil unless route
+			status 200
 			execute_route(route)
 		end
 
 		## Execute route
 		## @param route [Flame::Route] route that must be executed
-		def execute_route(route)
-			status 200
+		def execute_route(route, action = route.action)
 			params.merge!(route.arguments(request.path_parts))
 			# route.execute(self)
 			controller = route.controller.new(self)
-			controller.send(:execute, route.action)
+			controller.send(:execute, action)
 		rescue => exception
 			# p 'rescue from dispatcher'
 			dump_error(exception)
@@ -176,7 +176,7 @@ module Flame
 			##   or it's `default_body` method not defined
 			return default_body unless route
 			## Execute `default_body` method for the founded route
-			route.controller.new(self).send(:execute, :default_body)
+			execute_route(route, :default_body)
 			default_body if body.empty?
 		end
 	end

@@ -44,14 +44,21 @@ module Flame
 		##   @param path [String] path
 		##   @example Redirect to '/hello'
 		##     redirect '/hello'
+		## @overload redirect(uri)
+		##   Redirect to the URI location
+		##   @param uri [URI] URI object
+		##   @example Redirect to 'http://example.com'
+		##     redirect URI::HTTP.build(host: 'example.com')
 		## @overload redirect(*args)
 		##   Redirect to the path of `path_to` method
 		##   @param args arguments for `path_to` method
 		##   @example Redirect to `show` method of `ArticlesController` with id = 2
 		##     redirect ArticlesController, :show, id: 2
 		def redirect(*params)
+			probably_url = params.first
+			probably_url = probably_url.to_s if probably_url.is_a? URI
 			response.redirect(
-				params[0].is_a?(String) ? params[0] : path_to(*params)
+				probably_url.is_a?(String) ? probably_url : path_to(*params)
 			)
 		end
 

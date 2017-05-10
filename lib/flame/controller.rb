@@ -62,8 +62,15 @@ module Flame
 			)
 		end
 
-		# Set the Content-Disposition to "attachment" with the specified filename,
-		# instructing the user agents to prompt to save.
+		## Set the Content-Disposition to "attachment" with the specified filename,
+		## instructing the user agents to prompt to save,
+		## and set Content-Type by filename.
+		## @param filename [String, nil] filename of attachment
+		## @param disposition [Symbol, String] main content for Content-Disposition
+		## @example Set Content-Disposition header without filename
+		##   attachment
+		## @example Set Content-Disposition header with filename and Content-Type
+		##   attachment 'style.css'
 		def attachment(filename = nil, disposition = :attachment)
 			content_dis = 'Content-Disposition'
 			response[content_dis] = disposition.to_s

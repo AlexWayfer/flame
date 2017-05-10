@@ -88,7 +88,7 @@ module Flame
 		## @param method [Symbol] name of the controller method
 		def execute(method)
 			# send method
-			body send(method, *select_args(method).values)
+			body send(method, *extract_params_for(method).values)
 		end
 
 		## Default method for Internal Server Error, can be inherited
@@ -98,7 +98,7 @@ module Flame
 
 		private
 
-		def select_args(action)
+		def extract_params_for(action)
 			# p action, params, parameters
 			method(action).parameters.each_with_object({}) do |parameter, result|
 				key = parameter.last

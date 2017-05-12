@@ -61,16 +61,22 @@ describe Flame::Render do
 		it 'should find file priority by controller name' do
 			controller = @controller_init.call AnotherRenderController
 			render = Flame::Render.new(controller, :view)
-			render.render.should.be.equal(
-				"<body>\n\t<h1>I am from controller name!</h1>\n\n</body>\n"
-			)
+			render.render
+				.should.be.equal <<~CONTENT
+					<body>
+						<h1>I am from controller name!</h1>\n
+					</body>
+				CONTENT
 		end
 
 		it 'should render view with layout by default' do
 			render = Flame::Render.new(@controller, :view)
-			render.render.should.be.equal(
-				"<body>\n\t<h1>Hello, world!</h1>\n\n</body>\n"
-			)
+			render.render
+				.should.be.equal <<~CONTENT
+					<body>
+						<h1>Hello, world!</h1>\n
+					</body>
+				CONTENT
 		end
 
 		it 'should render view without layout by false option' do
@@ -123,9 +129,14 @@ describe Flame::Render do
 
 			it 'should render with nested layouts' do
 				render = Flame::Render.new(@controller, 'namespace/nested')
-				render.render.should.be.equal(
-					"<body>\n\t<div>\n\t<p>Double layout!</p>\n\n</div>\n\n</body>\n"
-				)
+				render.render
+					.should.be.equal <<~CONTENT
+						<body>
+							<div>
+							<p>Double layout!</p>\n
+						</div>\n
+						</body>
+					CONTENT
 			end
 
 			it 'should render cached plain template multiple times' \
@@ -133,9 +144,11 @@ describe Flame::Render do
 				render = Flame::Render.new(@controller, :plain)
 				result = nil
 				2.times { result = render.render(cache: true) }
-				result.should.be.equal(
-					"<body>\n\t<span>text</span>\n\n</body>\n"
-				)
+				result.should.be.equal <<~CONTENT
+					<body>
+						<span>text</span>\n
+					</body>
+				CONTENT
 			end
 		end
 	end

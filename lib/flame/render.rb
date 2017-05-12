@@ -11,17 +11,17 @@ require 'gorilla-patch/inflections'
 module Flame
 	## Helper for render functionality
 	class Render
-		def initialize(ctrl, path, options = {})
+		def initialize(controller, path, options = {})
 			## Take options for rendering
-			@ctrl = ctrl
-			@scope = options.delete(:scope) || @ctrl
+			@controller = controller
+			@scope = options.delete(:scope) || @controller
 			@layout = options.delete(:layout)
 			@layout = 'layout.*' if @layout.nil?
 			## And get the rest variables to locals
 			@locals = options.merge(options.delete(:locals) || {})
 			## Find filename
 			@filename = find_file(path)
-			# @ctrl.instance_exec { halt 404 } unless @filename
+			# @controller.instance_exec { halt 404 } unless @filename
 			return unless @filename
 			@layout = nil if File.basename(@filename)[0] == '_'
 		end
@@ -48,7 +48,7 @@ module Flame
 		end
 
 		def views_dir
-			@ctrl.config[:views_dir]
+			@controller.config[:views_dir]
 		end
 
 		## Compile file with Tilt engine
@@ -95,7 +95,7 @@ module Flame
 
 		## Find possible directories for the controller
 		def controller_dirs
-			parts = @ctrl.class.underscore.split('/').map do |part|
+			parts = @controller.class.underscore.split('/').map do |part|
 				(part.split('_') - %w[controller controllers ctrl]).join('_')
 			end
 			combine_parts(parts).map! { |path| path.join('/') }

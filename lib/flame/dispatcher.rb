@@ -137,6 +137,11 @@ module Flame
 			"<h1>#{Rack::Utils::HTTP_STATUS_CODES[status]}</h1>"
 		end
 
+		## All cached tilts (views) for application by Flame::Render
+		def cached_tilts
+			@app.class.cached_tilts
+		end
+
 		private
 
 		## Find route and try execute it

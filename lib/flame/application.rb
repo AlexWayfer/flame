@@ -79,6 +79,10 @@ module Flame
 			result
 		end
 
+		def self.cached_tilts
+			@cached_tilts ||= {}
+		end
+
 		## Class for Flame::Application.config
 		class Config < Hash
 			def initialize(app, hash = {})

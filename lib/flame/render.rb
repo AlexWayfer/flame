@@ -39,14 +39,6 @@ module Flame
 
 		private
 
-		class << self
-			# private
-
-			def tilts
-				@tilts ||= {}
-			end
-		end
-
 		def views_dir
 			@controller.config[:views_dir]
 		end
@@ -54,10 +46,10 @@ module Flame
 		## Compile file with Tilt engine
 		## @param filename [String] filename
 		def compile_file(filename = @filename)
-			cached = self.class.tilts[filename]
+			cached = @controller.cached_tilts[filename]
 			return cached if @cache && cached
 			compiled = Tilt.new(filename)
-			self.class.tilts[filename] ||= compiled if @cache
+			@controller.cached_tilts[filename] ||= compiled if @cache
 			compiled
 		end
 

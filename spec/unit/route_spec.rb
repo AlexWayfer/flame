@@ -100,6 +100,21 @@ describe Flame::Router::Route do
 			@init.call.compare_attributes(attributes).should.equal attributes
 		end
 
+		it 'should return true for path parts with duplicates' do
+			route = @init.call(
+				action: :foo,
+				ctrl_path: '/foo',
+				action_path: '/foo/:first/:second/:?third'
+			)
+			attributes = {
+				controller: RouteController,
+				action: :foo,
+				method: :GET,
+				path_parts: %w[foo foo first second]
+			}
+			route.compare_attributes(attributes).should.equal attributes
+		end
+
 		it 'should return false for incorrect controller' do
 			@init.call.compare_attributes(
 				controller: Flame::Controller,

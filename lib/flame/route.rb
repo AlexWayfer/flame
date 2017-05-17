@@ -117,7 +117,7 @@ module Flame
 			def request_contain_required_path_parts?(request_parts)
 				req_path_parts = @path_parts.reject { |part| part[1] == ARG_CHAR_OPT }
 				fixed_path_parts = @path_parts.reject { |part| part[0] == ARG_CHAR }
-				(request_parts & fixed_path_parts) == fixed_path_parts &&
+				(fixed_path_parts - request_parts).empty? &&
 					request_parts.count >= req_path_parts.count
 			end
 

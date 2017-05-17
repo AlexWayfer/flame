@@ -166,7 +166,7 @@ module Flame
 			# p 'rescue from dispatcher'
 			dump_error(exception)
 			status 500
-			controller.send(:server_error, exception)
+			controller&.send(:server_error, exception)
 			# p 're raise exception from dispatcher'
 			# raise exception
 		end

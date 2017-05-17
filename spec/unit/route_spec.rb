@@ -216,7 +216,7 @@ describe Flame::Router::Route do
 	end
 
 	describe '#<=>' do
-		it 'should return -1 for other route with grater count of path parts' do
+		it 'should return -1 for other route with less count of path parts' do
 			(@init.call <=> @init.call(
 				action: :baz,
 				ctrl_path: '/baz',
@@ -225,7 +225,7 @@ describe Flame::Router::Route do
 				.should.equal(-1)
 		end
 
-		it 'should return 1 for other route with equal count of path parts' do
+		it 'should return 1 for other route with greater count of path parts' do
 			(@init.call(
 				action: :baz,
 				ctrl_path: '/baz',
@@ -234,7 +234,7 @@ describe Flame::Router::Route do
 				.should.equal 1
 		end
 
-		it 'should return 0 for other route with less count of path parts' do
+		it 'should return 0 for other route with equal count of path parts' do
 			bar_route = @init.call(
 				action: :bar,
 				ctrl_path: '/bar',

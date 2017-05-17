@@ -73,7 +73,15 @@ module Flame
 
 			## Compare by path parts count (more is matter)
 			def <=>(other)
-				other.path_parts.size <=> path_parts.size
+				self_parts, other_parts = [self, other].map(&:path_parts)
+				path_parts_size = other_parts.size <=> self_parts.size
+				return path_parts_size unless path_parts_size.zero?
+				other_parts.zip(self_parts)
+					.reduce(0) do |result, (other_part, self_part)|
+						break 1 if part_arg?(self_part) && !part_arg?(other_part)
+						break -1 if part_arg?(other_part) && !part_arg?(self_part)
+						result
+					end
 			end
 
 			def self.path_merge(*parts)
@@ -81,6 +89,10 @@ module Flame
 			end
 
 			private
+
+			def part_arg?(part)
+				part.start_with? ARG_CHAR
+			end
 
 			## Helpers for `compare_attributes`
 			def compare_attribute(name, value)

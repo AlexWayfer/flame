@@ -7,6 +7,10 @@ class RouteController < Flame::Controller
 	def bar(first, second, third = nil); end
 
 	def baz(first, second); end
+
+	def show(id); end
+
+	def export_cards; end
 end
 
 describe Flame::Router::Route do
@@ -242,6 +246,21 @@ describe Flame::Router::Route do
 			)
 			(@init.call <=> bar_route)
 				.should.equal 0
+		end
+
+		it 'should return -1 for other route with arguments' do
+			export_route = @init.call(
+				action: :export_cards,
+				ctrl_path: '/route',
+				action_path: '/export_cards'
+			)
+			show_route = @init.call(
+				action: :show,
+				ctrl_path: '/route',
+				action_path: '/:id'
+			)
+			(export_route <=> show_route)
+				.should.equal(-1)
 		end
 	end
 

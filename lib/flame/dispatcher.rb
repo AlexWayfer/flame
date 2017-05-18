@@ -10,6 +10,8 @@ require_relative 'static'
 module Flame
 	## Helpers for dispatch Flame::Application#call
 	class Dispatcher
+		GEM_STATIC_FILES = File.join __dir__, '..', '..', 'public'
+
 		attr_reader :request, :response
 
 		include Flame::Dispatcher::Static
@@ -28,7 +30,7 @@ module Flame
 		def run!
 			catch :halt do
 				try_static ||
-					try_static(File.join(__dir__, '..', '..', 'public')) ||
+					try_static(GEM_STATIC_FILES) ||
 					try_route ||
 					halt(404)
 			end

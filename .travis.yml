@@ -2,3 +2,7 @@ language: ruby
 rvm:
   - 2.3.3
   - 2.4.0
+
+notifications:
+  email:
+    on_success: change

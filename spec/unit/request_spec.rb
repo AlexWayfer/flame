@@ -23,7 +23,11 @@ describe Flame::Request do
 
 	describe '#http_method' do
 		it 'should have priority to return HTTP-method from parameter' do
-			@request.http_method.should.equal 'PATCH'
+			@request.http_method.should.equal :PATCH
+		end
+
+		it 'should return upcased symbolized value' do
+			@request.http_method.should.equal :PATCH
 		end
 	end
 end

@@ -10,7 +10,7 @@ module Flame
 
 		## Override HTTP-method of the request if the param '_method' found
 		def http_method
-			params['_method'] || request_method
+			(params['_method'] || request_method).to_sym
 		end
 	end
 end

@@ -107,7 +107,7 @@ module Flame
 			end
 
 			def compare_method(request_method)
-				method.upcase.to_sym == request_method.upcase.to_sym
+				method.upcase.to_sym == request_method
 			end
 
 			def compare_path_parts(request_parts)

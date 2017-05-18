@@ -22,9 +22,9 @@ end
 
 describe Flame::Dispatcher do
 	before do
-		@init = lambda do |path: '/hello/world', query: nil|
+		@init = lambda do |method: 'GET', path: '/hello/world', query: nil|
 			@env = {
-				Rack::REQUEST_METHOD => 'GET',
+				Rack::REQUEST_METHOD => method,
 				Rack::PATH_INFO => path,
 				Rack::RACK_INPUT => StringIO.new,
 				Rack::RACK_ERRORS => StringIO.new,
@@ -95,6 +95,12 @@ describe Flame::Dispatcher do
 			respond = @init.call(path: 'bar').run!.last
 			respond.status.should.equal 404
 			respond.body.should.equal ['<h1>Not Found</h1>']
+		end
+
+		it 'should not return body for HEAD methods' do
+			respond = @init.call(method: 'HEAD').run!.last
+			respond.status.should.equal 200
+			respond.body.should.equal []
 		end
 	end
 

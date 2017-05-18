@@ -34,7 +34,7 @@ module Flame
 					try_route ||
 					halt(404)
 			end
-			response.write body
+			response.write body unless request.http_method == :HEAD
 			response.finish
 		end
 

@@ -107,6 +107,7 @@ module Flame
 			end
 
 			def compare_method(request_method)
+				request_method = :GET if request_method == :HEAD
 				method.upcase.to_sym == request_method
 			end
 

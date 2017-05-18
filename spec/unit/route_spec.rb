@@ -15,10 +15,13 @@ end
 
 describe Flame::Router::Route do
 	before do
-		@init = proc do |action: :foo, ctrl_path: '/foo', action_path: nil|
-			action_path ||= '/:first/:second/:?third'
+		@init = proc do |args = {}|
 			Flame::Router::Route.new(
-				RouteController, action, :GET, ctrl_path, action_path
+				RouteController,
+				args.fetch(:action,      :foo),
+				args.fetch(:method,      :GET),
+				args.fetch(:ctrl_path,   '/foo'),
+				args.fetch(:action_path, '/:first/:second/:?third')
 			)
 		end
 	end
@@ -102,6 +105,29 @@ describe Flame::Router::Route do
 				path_parts: %w[foo bar baz bat]
 			}
 			@init.call.compare_attributes(attributes).should.equal attributes
+		end
+
+		it 'should return true for HEAD request instead of GET' do
+			attributes = {
+				controller: RouteController,
+				action: :foo,
+				method: :HEAD,
+				path: '/foo/:first/:second/:?third',
+				path_parts: %w[foo bar baz bat]
+			}
+			@init.call.compare_attributes(attributes).should.equal attributes
+		end
+
+		it 'should return false for HEAD request instead of POST' do
+			route = @init.call(method: :POST)
+			attributes = {
+				controller: RouteController,
+				action: :foo,
+				method: :HEAD,
+				path: '/foo/:first/:second/:?third',
+				path_parts: %w[foo bar baz bat]
+			}
+			route.compare_attributes(attributes).should.equal false
 		end
 
 		it 'should return true for path parts with duplicates' do

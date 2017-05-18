@@ -72,4 +72,10 @@ describe CustomController do
 		last_response.should.be.server_error
 		last_response.body.should.equal 'Some page about 500 code; rescued is true'
 	end
+
+	it 'should return status and headers for HEAD request' do
+		head '/custom/foo'
+		last_response.should.be.ok
+		last_response.body.should.be.empty
+	end
 end

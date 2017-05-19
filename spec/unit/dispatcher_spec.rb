@@ -245,6 +245,15 @@ describe Flame::Dispatcher do
 			@dispatcher.body.should.equal 'Cats!'
 			@dispatcher.response.headers['Content-Type'].should.equal 'animal/cat'
 		end
+
+		it 'should take Controller#redirect method' do
+			url = 'http://example.com'
+			controller = DispatcherController.new(@dispatcher)
+			-> { @dispatcher.halt controller.redirect(url, 301) }
+				.should.throw(:halt)
+			@dispatcher.status.should.equal 301
+			@dispatcher.response.location.should.equal url
+		end
 	end
 
 	describe '#dump_error' do

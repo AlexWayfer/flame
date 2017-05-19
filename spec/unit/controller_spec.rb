@@ -1,0 +1,212 @@
+# frozen_string_literal: true
+
+## Controller for Controller tests
+class ControllerController < Flame::Controller
+	def foo(first, second = nil); end
+
+	def bar
+		view
+	end
+end
+
+## Another controller for Controller tests
+class AnotherControllerController < Flame::Controller
+	def index; end
+
+	def hello(name = 'world')
+		"Hello, #{name}!"
+	end
+
+	def baz; end
+end
+
+## Application for Controller tests
+class ControllerApplication < Flame::Application
+	mount ControllerController, '/'
+	mount AnotherControllerController, '/another'
+end
+
+describe Flame::Controller do
+	before do
+		env = {
+			Rack::RACK_URL_SCHEME => 'http',
+			Rack::SERVER_NAME => 'localhost',
+			Rack::SERVER_PORT => 3000,
+			Rack::RACK_INPUT => StringIO.new
+		}
+		@dispatcher = Flame::Dispatcher.new(ControllerApplication.new, env)
+		@controller = ControllerController.new(@dispatcher)
+	end
+
+	describe '.actions' do
+		it 'should return all public not-inherited methods of Controller' do
+			ControllerController.actions
+				.should.equal ControllerController.public_instance_methods(false)
+		end
+	end
+
+	describe 'delegators' do
+		it 'should delegate all needed methods' do
+			needed_methods = %i[
+				config request params halt session response status body
+				default_body
+			]
+			(needed_methods - @controller.methods).should.be.empty
+		end
+	end
+
+	describe '#initialize' do
+		it 'should take dispatcher' do
+			ControllerController.new(@dispatcher)
+				.instance_variable_get(:@dispatcher)
+				.should.equal @dispatcher
+		end
+	end
+
+	describe '#path_to' do
+		it 'should return path to another controller' do
+			@controller.path_to(AnotherControllerController, :baz)
+				.should.equal '/another/baz'
+		end
+
+		it 'should return path to index action of another controller by default' do
+			@controller.path_to(AnotherControllerController)
+				.should.equal '/another'
+		end
+
+		it 'should return path to self without controller argument' do
+			@controller.path_to(:bar)
+				.should.equal '/bar'
+		end
+
+		it 'should return path to self with arguments assigments' do
+			@controller.path_to(:foo, first: 'Alex')
+				.should.equal '/foo/Alex'
+		end
+	end
+
+	describe '#url_to' do
+		it 'should return URL by String path' do
+			path = '/some/path?with=args'
+			@controller.url_to(path)
+				.should.equal "http://localhost:3000#{path}"
+		end
+
+		it 'should return URL by controller and action' do
+			@controller.url_to(AnotherControllerController, :baz)
+				.should.equal 'http://localhost:3000/another/baz'
+		end
+
+		it 'should return URL by action from self' do
+			@controller.url_to(:foo, first: 'Alex')
+				.should.equal 'http://localhost:3000/foo/Alex'
+		end
+	end
+
+	describe '#redirect' do
+		it 'should write rediect to response by String' do
+			url = 'http://example.com/'
+			@controller.redirect(url)
+			@controller.status.should.equal 302
+			@controller.response.location.should.equal url
+		end
+
+		it 'should write rediect to response by controller and action' do
+			@controller.redirect(AnotherControllerController, :hello, name: 'Alex')
+			@controller.status.should.equal 302
+			@controller.response.location.should.equal '/another/hello/Alex'
+		end
+
+		it 'should receive URI object' do
+			@controller.redirect URI::HTTP.build(host: 'example.com')
+			@controller.status.should.equal 302
+			@controller.response.location.should.equal 'http://example.com'
+		end
+	end
+
+	describe '#attachment' do
+		it 'should set default Content-Disposition header' do
+			@controller.attachment
+			@controller.response['Content-Disposition']
+				.should.equal 'attachment'
+		end
+
+		it 'should set Content-Disposition header with filename' do
+			@controller.attachment 'style.css'
+			@controller.response['Content-Disposition']
+				.should.equal 'attachment; filename="style.css"'
+		end
+
+		it 'should set Content-Type header by filename' do
+			@controller.attachment 'style.css'
+			@controller.response['Content-Type']
+				.should.equal 'text/css'
+		end
+	end
+
+	describe '#view' do
+		it 'should render partial' do
+			@controller.view(:_partial)
+				.should.equal "<p>This is partial</p>\n"
+		end
+
+		it 'should render view with layout and instance variables' do
+			@controller.instance_variable_set(:@name, 'user')
+			@controller.view(:view)
+				.should.equal <<~CONTENT
+					<body>
+						<h1>Hello, user!</h1>\n
+					</body>
+				CONTENT
+		end
+
+		it 'should recieve options for Flame::Render' do
+			@controller.view(:view, layout: false)
+				.should.equal "<h1>Hello, world!</h1>\n"
+		end
+
+		describe 'cache' do
+			before do
+				ControllerApplication.cached_tilts.clear
+			end
+
+			it 'should not work for development environment' do
+				@controller.config[:environment] = 'development'
+				@controller.view(:view)
+				ControllerApplication.cached_tilts.should.be.empty
+			end
+
+			it 'should work for production environment' do
+				@controller.config[:environment] = 'production'
+				@controller.view(:view, layout: false)
+				ControllerApplication.cached_tilts.size.should.equal 1
+			end
+
+			it 'should not work with false value of cache option' do
+				@controller.config[:environment] = 'production'
+				@controller.view(:view, cache: false)
+				ControllerApplication.cached_tilts.should.be.empty
+			end
+
+			it 'should work with true value of cache option' do
+				@controller.config[:environment] = 'development'
+				@controller.view(:view, layout: false, cache: true)
+				ControllerApplication.cached_tilts.size.should.equal 1
+			end
+		end
+
+		it 'should take controller name as default path' do
+			@controller.bar
+				.should.equal <<~CONTENT
+					<body>
+						This is view for bar method of ControllerController\n
+					</body>
+				CONTENT
+		end
+
+		it 'should have `render` alias' do
+			@controller.view(:view)
+				.should.equal @controller.render(:view)
+		end
+	end
+end

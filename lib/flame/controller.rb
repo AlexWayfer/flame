@@ -39,30 +39,40 @@ module Flame
 		end
 
 		## Redirect for response
-		## @overload redirect(path)
+		## @overload redirect(path, status)
 		##   Redirect to the string path
 		##   @param path [String] path
+		##   @param status [Ingeter, nil] HTTP status
 		##   @return [nil]
 		##   @example Redirect to '/hello'
 		##     redirect '/hello'
-		## @overload redirect(uri)
+		##   @example Redirect to '/hello' with status 301
+		##     redirect '/hello', 301
+		## @overload redirect(uri, status)
 		##   Redirect to the URI location
 		##   @param uri [URI] URI object
+		##   @param status [Ingeter, nil] HTTP status
 		##   @return [nil]
 		##   @example Redirect to 'http://example.com'
 		##     redirect URI::HTTP.build(host: 'example.com')
-		## @overload redirect(*args)
+		##   @example Redirect to 'http://example.com' with status 301
+		##     redirect URI::HTTP.build(host: 'example.com'), 301
+		## @overload redirect(*args, status)
 		##   Redirect to the path of `path_to` method
 		##   @param args arguments for `path_to` method
+		##   @param status [Ingeter, nil] HTTP status
 		##   @return [nil]
 		##   @example Redirect to `show` method of `ArticlesController` with id = 2
 		##     redirect ArticlesController, :show, id: 2
-		def redirect(*params)
-			probably_url = params.first
-			probably_url = probably_url.to_s if probably_url.is_a? URI
-			response.redirect(
-				probably_url.is_a?(String) ? probably_url : path_to(*params)
-			)
+		##   @example Redirect to method of controller with status 301
+		##     redirect ArticlesController, :show, { id: 2 }, 301
+		def redirect(*args)
+			args[0] = args.first.to_s if args.first.is_a? URI
+			unless args.first.is_a? String
+				path_to_args_range = 0..(args.last.is_a?(Integer) ? -2 : -1)
+				args[path_to_args_range] = path_to(*args[path_to_args_range])
+			end
+			response.redirect(*args)
 			nil
 		end
 

@@ -104,30 +104,75 @@ describe Flame::Controller do
 	end
 
 	describe '#redirect' do
-		before do
-			@url = 'http://example.com/'
+		describe 'by String' do
+			before do
+				@url = 'http://example.com/'
+			end
+
+			it 'should write rediect to response' do
+				@controller.redirect(@url)
+				@controller.status.should.equal 302
+				@controller.response.location.should.equal @url
+			end
+
+			it 'should recieve status as last arument' do
+				@controller.redirect(@url, 301)
+				@controller.status.should.equal 301
+				@controller.response.location.should.equal @url
+			end
+
+			it 'should not mutate args as array' do
+				args = [@url, 302]
+				@controller.redirect(*args)
+				@controller.status.should.equal 302
+				@controller.response.location.should.equal @url
+				args.should.equal [@url, 302]
+			end
 		end
 
-		it 'should write rediect to response by String' do
-			@controller.redirect(@url)
-			@controller.status.should.equal 302
-			@controller.response.location.should.equal @url
+		describe 'by controller and action' do
+			it 'should write rediect to response' do
+				# binding.pry
+				@controller.redirect(AnotherControllerController, :hello, name: 'Alex')
+				@controller.status.should.equal 302
+				@controller.response.location.should.equal '/another/hello/Alex'
+			end
+
+			it 'should recieve status as last arument' do
+				@controller.redirect(
+					AnotherControllerController, :hello, { name: 'Alex' }, 301
+				)
+				@controller.status.should.equal 301
+				@controller.response.location.should.equal '/another/hello/Alex'
+			end
+
+			it 'should not mutate args as array' do
+				args = [AnotherControllerController, :hello, { name: 'Alex' }, 301]
+				@controller.redirect(*args)
+				@controller.status.should.equal 301
+				@controller.response.location.should.equal '/another/hello/Alex'
+				args.should.equal(
+					[AnotherControllerController, :hello, { name: 'Alex' }, 301]
+				)
+			end
 		end
 
-		it 'should write rediect to response by controller and action' do
-			@controller.redirect(AnotherControllerController, :hello, name: 'Alex')
-			@controller.status.should.equal 302
-			@controller.response.location.should.equal '/another/hello/Alex'
-		end
+		describe 'by URI object' do
+			it 'should write redirect to response' do
+				@controller.redirect URI::HTTP.build(host: 'example.com')
+				@controller.status.should.equal 302
+				@controller.response.location.should.equal 'http://example.com'
+			end
 
-		it 'should receive URI object' do
-			@controller.redirect URI::HTTP.build(host: 'example.com')
-			@controller.status.should.equal 302
-			@controller.response.location.should.equal 'http://example.com'
+			it 'should recieve status as last arument' do
+				@controller.redirect URI::HTTP.build(host: 'example.com'), 301
+				@controller.status.should.equal 301
+				@controller.response.location.should.equal 'http://example.com'
+			end
 		end
 
 		it 'should return nil' do
-			@controller.redirect(@url).should.be.nil
+			@controller.redirect('http://example.com/').should.be.nil
 		end
 	end
 

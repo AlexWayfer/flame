@@ -104,11 +104,14 @@ describe Flame::Controller do
 	end
 
 	describe '#redirect' do
+		before do
+			@url = 'http://example.com/'
+		end
+
 		it 'should write rediect to response by String' do
-			url = 'http://example.com/'
-			@controller.redirect(url)
+			@controller.redirect(@url)
 			@controller.status.should.equal 302
-			@controller.response.location.should.equal url
+			@controller.response.location.should.equal @url
 		end
 
 		it 'should write rediect to response by controller and action' do
@@ -121,6 +124,10 @@ describe Flame::Controller do
 			@controller.redirect URI::HTTP.build(host: 'example.com')
 			@controller.status.should.equal 302
 			@controller.response.location.should.equal 'http://example.com'
+		end
+
+		it 'should return nil' do
+			@controller.redirect(@url).should.be.nil
 		end
 	end
 

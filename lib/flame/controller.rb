@@ -42,16 +42,19 @@ module Flame
 		## @overload redirect(path)
 		##   Redirect to the string path
 		##   @param path [String] path
+		##   @return [nil]
 		##   @example Redirect to '/hello'
 		##     redirect '/hello'
 		## @overload redirect(uri)
 		##   Redirect to the URI location
 		##   @param uri [URI] URI object
+		##   @return [nil]
 		##   @example Redirect to 'http://example.com'
 		##     redirect URI::HTTP.build(host: 'example.com')
 		## @overload redirect(*args)
 		##   Redirect to the path of `path_to` method
 		##   @param args arguments for `path_to` method
+		##   @return [nil]
 		##   @example Redirect to `show` method of `ArticlesController` with id = 2
 		##     redirect ArticlesController, :show, id: 2
 		def redirect(*params)
@@ -60,6 +63,7 @@ module Flame
 			response.redirect(
 				probably_url.is_a?(String) ? probably_url : path_to(*params)
 			)
+			nil
 		end
 
 		## Set the Content-Disposition to "attachment" with the specified filename,

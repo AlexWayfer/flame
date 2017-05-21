@@ -261,4 +261,19 @@ describe Flame::Controller do
 				.should.equal @controller.render(:view)
 		end
 	end
+
+	describe 'ParentActions' do
+		it 'should define actions from parent' do
+			inherited_controller = Class.new(ControllerController)
+			inherited_controller.extend Flame::Controller::ParentActions
+			inherited_controller.actions.should.equal ControllerController.actions
+		end
+	end
+
+	describe '.with_actions' do
+		it 'should define actions from parent' do
+			inherited_controller = Class.new(ControllerController.with_actions)
+			inherited_controller.actions.should.equal ControllerController.actions
+		end
+	end
 end

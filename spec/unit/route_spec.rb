@@ -145,6 +145,24 @@ describe Flame::Router::Route do
 			route.compare_attributes(attributes).should.equal attributes
 		end
 
+		it 'should return true for downcased method' do
+			attributes = {
+				controller: RouteController,
+				action: :foo,
+				method: :get
+			}
+			@init.call.compare_attributes(attributes).should.equal attributes
+		end
+
+		it 'should return true for downcased HEAD request instead of GET' do
+			attributes = {
+				controller: RouteController,
+				action: :foo,
+				method: :head
+			}
+			@init.call.compare_attributes(attributes).should.equal attributes
+		end
+
 		it 'should return false for incorrect controller' do
 			@init.call.compare_attributes(
 				controller: Flame::Controller,

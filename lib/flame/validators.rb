@@ -8,7 +8,7 @@ module Flame
 		class RouteArgumentsValidator
 			def initialize(ctrl, path, action)
 				@ctrl = ctrl
-				@path = path
+				@path = Flame::Path.new(path)
 				@action = action
 			end
 
@@ -30,16 +30,12 @@ module Flame
 
 			## Split path to args array
 			def path_arguments
-				@path_arguments ||= @path.split('/')
+				@path_arguments ||= @path.parts
 					.each_with_object(req: [], opt: []) do |part, hash|
 						## Take only argument parts
-						next if part[0] != Router::ARG_CHAR
-						## Clean argument from special chars
-						clean_part = part.delete(
-							Router::ARG_CHAR + Router::ARG_CHAR_OPT
-						).to_sym
+						next unless part.arg?
 						## Memorize arguments
-						hash[part[1] != Router::ARG_CHAR_OPT ? :req : :opt] << clean_part
+						hash[part.opt_arg? ? :opt : :req] << part.clean.to_sym
 					end
 			end
 

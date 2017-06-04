@@ -21,9 +21,10 @@ describe Flame::Request do
 		@request.should.be.kind_of Rack::Request
 	end
 
-	describe '#path_parts' do
-		it 'should return parts of requested path' do
-			@request.path_parts.should.equal %w[hello great world]
+	describe '#path' do
+		it 'should return Flame::Path by requested path' do
+			@request.path.should.be.kind_of Flame::Path
+			@request.path.should.equal '/hello/great/world'
 		end
 	end
 

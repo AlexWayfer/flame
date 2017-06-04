@@ -45,6 +45,15 @@ describe Flame::Controller do
 		end
 	end
 
+	describe '.default_path' do
+		it 'should return downcased path based on controller name' do
+			ControllerController.default_path
+				.should.equal '/controller'
+			AnotherControllerController.default_path
+				.should.equal '/another_controller'
+		end
+	end
+
 	describe 'delegators' do
 		it 'should delegate all needed methods' do
 			needed_methods = %i[

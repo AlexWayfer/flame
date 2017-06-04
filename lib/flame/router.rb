@@ -32,12 +32,14 @@ module Flame
 			route.dup if route
 		end
 
-		## Find the nearest route by path parts
-		## @param path_parts [Array] parts of path for route finding
-		## @return [Flame::Route, nil] return the found nearest route, otherwise `nil`
-		def find_nearest_route(path_parts)
+		## Find the nearest route by path
+		## @param path [Flame::Path] path for route finding
+		## @return [Flame::Route, nil] return the found nearest route or `nil`
+		def find_nearest_route(path)
+			path = Flame::Path.new(path) if path.is_a? String
+			path_parts = path.parts.dup
 			while path_parts.size >= 0
-				route = find_route(path_parts: path_parts)
+				route = find_route path: Flame::Path.new(*path_parts)
 				break if route || path_parts.empty?
 				path_parts.pop
 			end
@@ -90,14 +92,12 @@ module Flame
 				##   @example Set method to :POST for action `goodbye`
 				##     post :goodbye
 				method = request_method.downcase
-				define_method(method) do |path, action = nil, prefix: false|
+				define_method(method) do |path, action = nil|
 					## Swap arguments if action in path variable
 					unless action
 						action = path.to_sym
 						path = nil
 					end
-					## Make path by controller method with parameners
-					path = default_action_path(action, path) if prefix || path.nil?
 					## Init new Route
 					route = Route.new(@ctrl, action, method, @path, path)
 					## Try to find route with the same action
@@ -123,7 +123,7 @@ module Flame
 					action = rest_route[:action]
 					next if !@ctrl.actions.include?(action) ||
 					        find_route_index(action: action)
-					send(*rest_route.values.map(&:downcase), prefix: true)
+					send(*rest_route.values.map(&:downcase))
 				end
 			end
 
@@ -132,7 +132,7 @@ module Flame
 			## @param path [String, nil] root path for mounting controller
 			## @yield Block of code for routes refine
 			def mount(ctrl, path = nil, &block)
-				path = Route.path_merge(@path, path || ctrl.default_path)
+				path = Flame::Path.merge(@path, path || ctrl.default_path)
 				@router.add_controller(ctrl, path, &block)
 			end
 
@@ -147,21 +147,6 @@ module Flame
 
 			def find_route_index(attrs)
 				@routes.find_index { |route| route.compare_attributes(attrs) }
-			end
-
-			## Build path for the action of controller
-			## @todo Add :arg:type support (:id:num, :name:str, etc.)
-			def default_action_path(action, prefix)
-				unshifted = prefix ? prefix : action_prefix(action)
-				parameters = @ctrl.instance_method(action).parameters
-				parameters.map! do |par|
-					":#{par[0] == :req ? '' : ARG_CHAR_OPT}#{par[1]}"
-				end
-				Route.path_merge(parameters.unshift(unshifted))
-			end
-
-			def action_prefix(action)
-				action == :index ? '/' : action
 			end
 		end
 	end

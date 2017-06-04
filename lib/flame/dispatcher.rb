@@ -96,7 +96,7 @@ module Flame
 			raise Errors::RouteNotFoundError.new(ctrl, action) unless route
 			query = Rack::Utils.build_nested_query args.delete(:params)
 			query = nil if query&.empty?
-			path = route.assign_arguments(args)
+			path = route.path.assign_arguments(args)
 			path = '/' if path.empty?
 			URI::Generic.build(path: path, query: query).to_s
 		end
@@ -150,7 +150,7 @@ module Flame
 		def try_route
 			route = @app.class.router.find_route(
 				method: request.http_method,
-				path_parts: request.path_parts
+				path: request.path
 			)
 			return nil unless route
 			status 200
@@ -160,7 +160,7 @@ module Flame
 		## Execute route
 		## @param route [Flame::Route] route that must be executed
 		def execute_route(route, action = route.action)
-			params.merge!(route.arguments(request.path_parts))
+			params.merge! route.path.extract_arguments(request.path)
 			# route.execute(self)
 			controller = route.controller.new(self)
 			controller.send(:execute, action)
@@ -178,7 +178,7 @@ module Flame
 			## Return nil if must be no body for current HTTP status
 			return if Rack::Utils::STATUS_WITH_NO_ENTITY_BODY.include?(status)
 			## Find the nearest route by the parts of requested path
-			route = @app.router.find_nearest_route(request.path_parts)
+			route = @app.router.find_nearest_route(request.path)
 			## Return nil if the route not found
 			##   or it's `default_body` method not defined
 			return default_body unless route

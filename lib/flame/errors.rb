@@ -19,6 +19,7 @@ module Flame
 				case @extra[:place]
 				when :ctrl
 					## Error if path has no arguments, that controller's method has
+					## NOTE: It isn't using because `Flame::Path#adopt`
 					"Path '#{@path}' has no #{@extra[:type_name]}" \
 						" arguments #{@extra[:args].inspect}"
 				when :path

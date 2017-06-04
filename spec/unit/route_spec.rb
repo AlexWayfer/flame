@@ -27,39 +27,10 @@ describe Flame::Router::Route do
 	end
 
 	describe '#initialize' do
-		it 'should make path parts' do
-			@init.call.path_parts.should.equal %w[foo :first :second :?third]
-		end
-
-		it 'should clean empty parts from path parts' do
-			@init.call(
-				ctrl_path: '/foo//',
-				action_path: '/:first///:second////:?third/////'
-			).path_parts.any?(&:empty?).should.equal false
-		end
-
-		it 'should raise error with wrong path arguments' do
-			action_path = '/:bar/:baz'
-			lambda {
-				@init.call(
-					ctrl_path: '/foo',
-					action_path: action_path
-				)
-			}
-				.should.raise(Flame::Errors::RouteArgumentsError)
-				.message.should match_words(action_path, 'first', 'second')
-		end
-
-		it 'should raise error without required path arguments' do
-			action_path = '/:first'
-			lambda {
-				@init.call(
-					ctrl_path: '/foo',
-					action_path: action_path
-				)
-			}
-				.should.raise(Flame::Errors::RouteArgumentsError)
-				.message.should match_words(action_path, 'second')
+		it 'should make path' do
+			route = @init.call
+			route.path.should.be.kind_of Flame::Path
+			route.path.should.equal '/foo/:first/:second/:?third'
 		end
 
 		it 'should raise error with extra required path arguments' do
@@ -89,10 +60,6 @@ describe Flame::Router::Route do
 		it 'should freeze path' do
 			@init.call.path.should.be.frozen
 		end
-
-		it 'should freeze path parts' do
-			@init.call.path_parts.should.be.frozen
-		end
 	end
 
 	describe '#compare_attributes' do
@@ -101,8 +68,7 @@ describe Flame::Router::Route do
 				controller: RouteController,
 				action: :foo,
 				method: :GET,
-				path: '/foo/:first/:second/:?third',
-				path_parts: %w[foo bar baz bat]
+				path: '/foo/first/second/third'
 			}
 			@init.call.compare_attributes(attributes).should.equal attributes
 		end
@@ -112,8 +78,7 @@ describe Flame::Router::Route do
 				controller: RouteController,
 				action: :foo,
 				method: :HEAD,
-				path: '/foo/:first/:second/:?third',
-				path_parts: %w[foo bar baz bat]
+				path: '/foo/first/second/third'
 			}
 			@init.call.compare_attributes(attributes).should.equal attributes
 		end
@@ -124,13 +89,12 @@ describe Flame::Router::Route do
 				controller: RouteController,
 				action: :foo,
 				method: :HEAD,
-				path: '/foo/:first/:second/:?third',
-				path_parts: %w[foo bar baz bat]
+				path: '/foo/first/second/third'
 			}
 			route.compare_attributes(attributes).should.equal false
 		end
 
-		it 'should return true for path parts with duplicates' do
+		it 'should return true for path with duplicates parts' do
 			route = @init.call(
 				action: :foo,
 				ctrl_path: '/foo',
@@ -140,7 +104,7 @@ describe Flame::Router::Route do
 				controller: RouteController,
 				action: :foo,
 				method: :GET,
-				path_parts: %w[foo foo first second]
+				path: '/foo/foo/first/second/third'
 			}
 			route.compare_attributes(attributes).should.equal attributes
 		end
@@ -168,8 +132,7 @@ describe Flame::Router::Route do
 				controller: Flame::Controller,
 				action: :foo,
 				method: :GET,
-				path: '/foo/:first/:second/:?third',
-				path_parts: %w[foo bar baz bat]
+				path: '/foo/first/second/third'
 			).should.equal false
 		end
 
@@ -178,8 +141,7 @@ describe Flame::Router::Route do
 				controller: RouteController,
 				action: :bar,
 				method: :GET,
-				path: '/foo/:first/:second/:?third',
-				path_parts: %w[foo bar baz bat]
+				path: '/foo/first/second/third'
 			).should.equal false
 		end
 
@@ -188,8 +150,7 @@ describe Flame::Router::Route do
 				controller: RouteController,
 				action: :foo,
 				method: :POST,
-				path: '/foo/:first/:second/:?third',
-				path_parts: %w[foo bar baz bat]
+				path: '/foo/first/second/third'
 			).should.equal false
 		end
 
@@ -198,46 +159,8 @@ describe Flame::Router::Route do
 				controller: RouteController,
 				action: :foo,
 				method: :GET,
-				path: '/foo/:first/:second',
-				path_parts: %w[foo bar baz bat]
+				path: '/foo/bar'
 			).should.equal false
-		end
-
-		it 'should return false for incorrect path parts' do
-			@init.call.compare_attributes(
-				controller: RouteController,
-				action: :foo,
-				method: :GET,
-				path: '/foo/:first/:second/:?third',
-				path_parts: %w[foo bar]
-			).should.equal false
-		end
-	end
-
-	describe '#assign_arguments' do
-		it 'should assign arguments' do
-			@init.call.assign_arguments(
-				first: 'bar',
-				second: 'baz'
-			).should.equal '/foo/bar/baz'
-		end
-
-		it 'should not assign arguments without one required' do
-			-> { @init.call.assign_arguments(first: 'bar') }
-				.should.raise(Flame::Errors::ArgumentNotAssignedError)
-				.message.should match_words(':second', '/foo/:first/:second/:?third')
-		end
-	end
-
-	describe '#arguments' do
-		it 'should return arguments from path parts' do
-			@init.call.arguments(%w[foo bar baz])
-				.should.equal Hash[first: 'bar', second: 'baz']
-		end
-
-		it 'should return decoded arguments from path parts' do
-			@init.call.arguments(%w[foo another%20bar baz])
-				.should.equal Hash[first: 'another bar', second: 'baz']
 		end
 	end
 
@@ -305,23 +228,6 @@ describe Flame::Router::Route do
 			)
 			(export_route <=> show_route)
 				.should.equal(-1)
-		end
-	end
-
-	describe '.path_merge' do
-		it 'should merge from array' do
-			Flame::Router::Route.path_merge(%w[foo bar baz])
-				.should.equal 'foo/bar/baz'
-		end
-
-		it 'should merge from multiple parts' do
-			Flame::Router::Route.path_merge('/foo/bar', '/baz/bat')
-				.should.equal '/foo/bar/baz/bat'
-		end
-
-		it 'should merge without extra slashes' do
-			Flame::Router::Route.path_merge('///foo/bar//', '//baz/bat///')
-				.should.equal '/foo/bar/baz/bat/'
 		end
 	end
 end

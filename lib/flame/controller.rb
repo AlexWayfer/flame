@@ -146,9 +146,10 @@ module Flame
 			## Default root path of the controller for requests
 			def default_path
 				modules = name.underscore.split('/')
-				parts = modules[-1].split('_') - %w[index controller ctrl]
-				return modules[-2] if parts.empty?
-				parts.join('_')
+				parts = modules[-1].split('_')
+				parts.shift if parts.first == 'index'
+				parts.pop if %w[controller ctrl].include? parts.last
+				Flame::Path.merge nil, parts.join('_')
 			end
 
 			## Re-define public instance method from parent

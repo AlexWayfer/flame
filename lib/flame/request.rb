@@ -3,9 +3,9 @@
 module Flame
 	## Class for requests
 	class Request < Rack::Request
-		## Split path of the request to parts (Array of String)
-		def path_parts
-			@path_parts ||= path_info.to_s.split('/').reject(&:empty?)
+		## Initialize Flame::Path
+		def path
+			@path ||= Flame::Path.new path_info
 		end
 
 		## Override HTTP-method of the request if the param '_method' found

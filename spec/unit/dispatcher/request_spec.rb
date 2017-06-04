@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-describe Flame::Request do
+describe Flame::Dispatcher::Request do
 	before do
 		@env_init = proc do |method: :PATCH|
 			{
@@ -12,7 +12,7 @@ describe Flame::Request do
 		end
 		@env = @env_init.call
 		@request_init = proc do |env = @env|
-			Flame::Request.new(env)
+			Flame::Dispatcher::Request.new(env)
 		end
 		@request = @request_init.call
 	end
@@ -43,7 +43,7 @@ describe Flame::Request do
 		end
 
 		it 'should cache computed value' do
-			custom_request_class = Class.new(Flame::Request)
+			custom_request_class = Class.new(Flame::Dispatcher::Request)
 			custom_request_class.class_exec do
 				attr_reader :params_execs
 

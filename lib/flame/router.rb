@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative 'route'
+require_relative 'router/route'
 
 module Flame
 	## Router class for routing

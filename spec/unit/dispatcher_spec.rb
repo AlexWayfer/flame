@@ -37,11 +37,11 @@ describe Flame::Dispatcher do
 
 	describe 'attrs' do
 		it 'should have request reader' do
-			@dispatcher.request.should.be.instance_of Flame::Request
+			@dispatcher.request.should.be.instance_of Flame::Dispatcher::Request
 		end
 
 		it 'should have response reader' do
-			@dispatcher.response.should.be.instance_of Flame::Response
+			@dispatcher.response.should.be.instance_of Flame::Dispatcher::Response
 		end
 	end
 
@@ -61,7 +61,7 @@ describe Flame::Dispatcher do
 		end
 
 		it 'should initialize @response variable' do
-			@dispatcher.response.should.be.instance_of Flame::Response
+			@dispatcher.response.should.be.instance_of Flame::Dispatcher::Response
 		end
 	end
 

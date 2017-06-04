@@ -2,10 +2,13 @@
 
 require 'gorilla-patch/symbolize'
 
-require_relative 'cookies'
-require_relative 'request'
-require_relative 'response'
-require_relative 'static'
+require_relative 'dispatcher/request'
+require_relative 'dispatcher/response'
+
+require_relative 'dispatcher/cookies'
+require_relative 'dispatcher/static'
+
+require_relative 'errors/route_not_found_error'
 
 module Flame
 	## Helpers for dispatch Flame::Application#call
@@ -22,8 +25,8 @@ module Flame
 		def initialize(app, env)
 			@app = app
 			@env = env
-			@request = Flame::Request.new(env)
-			@response = Flame::Response.new
+			@request = Flame::Dispatcher::Request.new(env)
+			@response = Flame::Dispatcher::Response.new
 		end
 
 		## Start of execution the request

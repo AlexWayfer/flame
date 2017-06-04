@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-describe Flame::Response do
+describe Flame::Dispatcher::Response do
 	before do
-		@response = Flame::Response.new
+		@response = Flame::Dispatcher::Response.new
 	end
 
 	it 'should be Rack::Response child' do

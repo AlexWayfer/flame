@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require_relative 'path'
-require_relative 'validators'
+require_relative '../path'
+require_relative '../validators'
 
 module Flame
 	class Router

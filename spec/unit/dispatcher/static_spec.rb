@@ -19,6 +19,12 @@ describe Flame::Dispatcher::Static do
 		@result.should.equal "Test static\n"
 	end
 
+	it 'should return content of symbolic link to file' do
+		@env[Rack::PATH_INFO] = '/symlink'
+		dispatcher = Flame::Dispatcher.new(@app, @env)
+		dispatcher.send(:try_static).should.equal "Test static\n"
+	end
+
 	it 'should return with no-cache' do
 		@dispatcher.response[Rack::CACHE_CONTROL].should.equal 'no-cache'
 	end

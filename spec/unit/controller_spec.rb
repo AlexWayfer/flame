@@ -77,6 +77,22 @@ module Nested
 	end
 end
 
+## Module for Controller tests
+module SomeActions
+	def mixed; end
+
+	def another_mixed; end
+
+	private
+
+	def private_mixed; end
+end
+
+## Controller with actions from module
+class MixedController < ControllerController
+	include with_actions SomeActions
+end
+
 ## Application for Controller tests
 class ControllerApplication < Flame::Application
 	mount ControllerController, '/'
@@ -381,6 +397,15 @@ describe Flame::Controller do
 		it 'should define actions from parent' do
 			inherited_controller = Class.new(ControllerController.with_actions)
 			inherited_controller.actions.should.equal ControllerController.actions
+		end
+
+		it 'should include actions from mixin module' do
+			MixedController.actions
+				.should include_all_actions %i[mixed another_mixed]
+		end
+		it 'should not include private methods from mixin module' do
+			MixedController.actions
+				.should.not include_any_action %i[private_mixed]
 		end
 	end
 end

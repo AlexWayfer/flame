@@ -34,7 +34,13 @@ module Flame
 
 		## Build a URI to the given controller and action, or path
 		def url_to(*args)
-			path = args.first.is_a?(String) ? args.first : path_to(*args)
+			first_arg = args.first
+			path =
+				if first_arg.is_a?(String) || first_arg.is_a?(Flame::Path)
+					first_arg
+				else
+					path_to(*args)
+				end
 			"#{request.scheme}://#{request.host_with_port}#{path}"
 		end
 

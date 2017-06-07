@@ -163,6 +163,12 @@ describe Flame::Controller do
 			@controller.url_to(:foo, first: 'Alex')
 				.should.equal 'http://localhost:3000/foo/Alex'
 		end
+
+		it 'should return URL by Flame::Path object' do
+			path = Flame::Path.new '/some/path?with=args'
+			@controller.url_to(path)
+				.should.equal "http://localhost:3000#{path}"
+		end
 	end
 
 	describe '#redirect' do

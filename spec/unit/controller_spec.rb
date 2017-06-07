@@ -63,6 +63,11 @@ class AnotherControllerController < Flame::Controller
 	end
 end
 
+module Nested
+	class IndexController < Flame::Controller
+	end
+end
+
 ## Application for Controller tests
 class ControllerApplication < Flame::Application
 	mount ControllerController, '/'
@@ -94,6 +99,11 @@ describe Flame::Controller do
 				.should.equal '/controller'
 			AnotherControllerController.default_path
 				.should.equal '/another_controller'
+		end
+
+		it 'should return downcased module name for index controller' do
+			Nested::IndexController.default_path
+				.should.equal '/nested'
 		end
 	end
 

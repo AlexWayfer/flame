@@ -159,10 +159,11 @@ module Flame
 
 			## Default root path of the controller for requests
 			def default_path
-				modules = name.underscore.split('/')
-				parts = modules[-1].split('_')
+				modules = underscore.split('/')
+				parts = modules.pop.split('_')
 				parts.shift if parts.first == 'index'
 				parts.pop if %w[controller ctrl].include? parts.last
+				parts = [modules.last] if parts.empty?
 				Flame::Path.merge nil, parts.join('_')
 			end
 

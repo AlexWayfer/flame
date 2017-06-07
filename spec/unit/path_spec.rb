@@ -182,4 +182,14 @@ describe Flame::Path do
 			@init.call('/foo', 'bar', '/baz').to_s.should.equal '/foo/bar/baz'
 		end
 	end
+
+	describe '#to_str' do
+		it 'should return full path as String' do
+			@init.call('/foo', 'bar', '/baz').to_str.should.equal '/foo/bar/baz'
+		end
+
+		it 'should allow concatenate Flame::Path object to Strings' do
+			('/foo' + @init.call('/bar', 'baz')).should.equal '/foo/bar/baz'
+		end
+	end
 end

@@ -90,6 +90,7 @@ module Flame
 		def to_s
 			@path
 		end
+		alias to_str to_s
 
 		private
 

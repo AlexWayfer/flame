@@ -53,7 +53,7 @@ module Flame
 				path_part = PathPart.new parameter_name, arg: parameter_type
 				path_part unless parts.include? path_part
 			end
-			self.class.new @path.empty? ? "/#{action}" : self, parameters
+			self.class.new @path.empty? ? "/#{action}" : self, *parameters
 		end
 
 		## Can recieve other as String

@@ -126,6 +126,20 @@ module Flame
 
 		private
 
+		## Execute any action from any controller
+		## @example Execute `new` action of `ArticlesController`
+		##   reroute ArticlesController, :new
+		## @example Execute `index` action of `ArticlesController`
+		##   reroute ArticlesController
+		## @example Execute `foo` action of current controller
+		##   reroute :foo
+		def reroute(*args)
+			add_controller_class(args)
+			ctrl, action = args[0..1]
+			ctrl_object = ctrl == self.class ? self : ctrl.new(@dispatcher)
+			ctrl_object.send :execute, action
+		end
+
 		def extract_params_for(action)
 			# p action, params, parameters
 			method(action).parameters.each_with_object({}) do |parameter, result|

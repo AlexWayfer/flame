@@ -7,17 +7,60 @@ class ControllerController < Flame::Controller
 	def bar
 		view
 	end
+
+	def baz
+		reroute AnotherControllerController, :baz
+	end
+
+	def object_hash
+		hash
+	end
+
+	def respond_for_reroute
+		'Hello from reroute'
+	end
+
+	def current_reroute
+		reroute :respond_for_reroute
+	end
+
+	def hash_reroute
+		reroute :object_hash
+	end
+
+	def index_reroute
+		reroute AnotherControllerController
+	end
+
+	def execute_reroute
+		reroute AnotherControllerController, :bar
+	end
 end
 
 ## Another controller for Controller tests
 class AnotherControllerController < Flame::Controller
-	def index; end
+	def index
+		'Another index'
+	end
 
 	def hello(name = 'world')
 		"Hello, #{name}!"
 	end
 
-	def baz; end
+	def bar
+		'Another bar'
+	end
+
+	def baz
+		'Another baz'
+	end
+
+	protected
+
+	def execute(method)
+		return 'Another execute' if method == :bar
+		super
+	end
 end
 
 ## Application for Controller tests
@@ -182,6 +225,28 @@ describe Flame::Controller do
 
 		it 'should return nil' do
 			@controller.redirect('http://example.com/').should.be.nil
+		end
+	end
+
+	describe '#reroute' do
+		it 'should call specified action of specified controller' do
+			@controller.baz.should.equal 'Another baz'
+		end
+
+		it 'should call specified action of current controller' do
+			@controller.current_reroute.should.equal 'Hello from reroute'
+		end
+
+		it 'should not recreate current controller' do
+			@controller.hash_reroute.should.equal @controller.object_hash
+		end
+
+		it 'should call index action by default' do
+			@controller.index_reroute.should.equal 'Another index'
+		end
+
+		it 'should call `execute` method of called controller' do
+			@controller.execute_reroute.should.equal 'Another execute'
 		end
 	end
 

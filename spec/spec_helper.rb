@@ -26,11 +26,3 @@ def equal_routes(*attrs_collection)
 	routes = attrs_collection.map! { |attrs| Flame::Router::Route.new(*attrs) }
 	->(array) { array.sort == routes.sort }
 end
-
-def include_all_actions(mixin_actions)
-	->(obj) { mixin_actions.all? { |action| obj.include? action } }
-end
-
-def include_any_action(mixin_actions)
-	->(obj) { mixin_actions.any? { |action| obj.include? action } }
-end

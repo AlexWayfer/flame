@@ -79,18 +79,13 @@ end
 
 ## Module for Controller tests
 module SomeActions
-	def mixed; end
+	def included_action; end
 
-	def another_mixed; end
+	def another_included_action; end
 
 	private
 
-	def private_mixed; end
-end
-
-## Controller with actions from module
-class MixedController < ControllerController
-	include with_actions SomeActions
+	def private_included_method; end
 end
 
 ## Application for Controller tests
@@ -399,13 +394,21 @@ describe Flame::Controller do
 			inherited_controller.actions.should.equal ControllerController.actions
 		end
 
-		it 'should include actions from mixin module' do
-			MixedController.actions
-				.should include_all_actions %i[mixed another_mixed]
-		end
-		it 'should not include private methods from mixin module' do
-			MixedController.actions
-				.should.not include_any_action %i[private_mixed]
+		describe 'include' do
+			before do
+				@controller_with_included_actions = Class.new(Flame::Controller) do
+					include with_actions SomeActions
+
+					def controller_action; end
+				end
+			end
+
+			it 'should include actions from included module' do
+				@controller_with_included_actions.actions
+					.should.equal %i[
+						included_action another_included_action controller_action
+					]
+			end
 		end
 	end
 end

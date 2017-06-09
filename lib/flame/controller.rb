@@ -178,20 +178,21 @@ module Flame
 			## @example Inherit controller with parent actions by method
 			##   class MyController < BaseController.with_actions
 			##   end
-			## @example Include actions from module in controller
+			## @example Define actions from module in controller
 			##   class MyController < BaseController
 			##     include with_actions Module1
 			##     include with_actions Module2
 			##     ....
 			##   end
 			def with_actions(mod = nil)
-				return mod.extend(IncludingActions) if mod
+				return mod.extend(ModuleActions) if mod
 				@with_actions ||= Class.new(self) { extend ParentActions }
 			end
 		end
 
-		## Extension to include modules for re-defining methods controller methods
-		module IncludingActions
+		## Extension for modules whose public methods will be defined as actions
+		## via including
+		module ModuleActions
 			def included(ctrl)
 				public_instance_methods.each do |meth|
 					ctrl.send :define_method, meth, public_instance_method(meth)

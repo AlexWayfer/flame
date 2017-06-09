@@ -144,6 +144,7 @@ module Flame
 			ctrl, action = args[0..1]
 			ctrl_object = ctrl == self.class ? self : ctrl.new(@dispatcher)
 			ctrl_object.send :execute, action
+			body
 		end
 
 		def extract_params_for(action)

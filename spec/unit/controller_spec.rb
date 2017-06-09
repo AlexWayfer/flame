@@ -35,6 +35,10 @@ class ControllerController < Flame::Controller
 	def execute_reroute
 		reroute AnotherControllerController, :bar
 	end
+
+	def hooks_reroute
+		reroute AnotherControllerController, :hooked
+	end
 end
 
 ## Another controller for Controller tests
@@ -55,11 +59,16 @@ class AnotherControllerController < Flame::Controller
 		'Another baz'
 	end
 
+	def hooked
+		'Another hooked'
+	end
+
 	protected
 
 	def execute(method)
-		return 'Another execute' if method == :bar
+		return body 'Another execute' if method == :bar
 		super
+		'after-hook' if method == :hooked
 	end
 end
 
@@ -267,6 +276,10 @@ describe Flame::Controller do
 
 		it 'should call `execute` method of called controller' do
 			@controller.execute_reroute.should.equal 'Another execute'
+		end
+
+		it 'should save result of action as body regardless of after-hooks' do
+			@controller.hooks_reroute.should.equal 'Another hooked'
 		end
 	end
 

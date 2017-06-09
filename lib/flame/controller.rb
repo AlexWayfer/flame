@@ -79,7 +79,7 @@ module Flame
 				args[path_to_args_range] = path_to(*args[path_to_args_range])
 			end
 			response.redirect(*args)
-			nil
+			status
 		end
 
 		## Set the Content-Disposition to "attachment" with the specified filename,

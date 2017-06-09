@@ -239,8 +239,12 @@ describe Flame::Controller do
 			end
 		end
 
-		it 'should return nil' do
-			@controller.redirect('http://example.com/').should.be.nil
+		it 'should return default status' do
+			@controller.redirect('http://example.com/').should.equal 302
+		end
+
+		it 'should return specified status' do
+			@controller.redirect('http://example.com/', 301).should.equal 301
 		end
 	end
 

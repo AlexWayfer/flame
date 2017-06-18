@@ -121,8 +121,7 @@ module Flame
 		## Execute the method of the controller with hooks (may be overloaded)
 		## @param method [Symbol] name of the controller method
 		def execute(method)
-			# send method
-			body send(method, *extract_params_for(method).values)
+			body send(method, *extract_params_for(method))
 		end
 
 		## Default method for Internal Server Error, can be inherited
@@ -148,12 +147,18 @@ module Flame
 		end
 
 		def extract_params_for(action)
-			# p action, params, parameters
-			method(action).parameters.each_with_object({}) do |parameter, result|
-				key = parameter.last
-				next if params[key].nil?
-				result[key] = params[key]
+			# Take parameters from action method
+			parameters = method(action).parameters
+			# Fill variables with values from params
+			req_values, opt_values = %i[req opt].map! do |type|
+				params.values_at(
+					*parameters.select { |key, _value| key == type }.map!(&:last)
+				)
 			end
+			# Remove nils from the end of optional values
+			opt_values.pop while opt_values.last.nil? && !opt_values.empty?
+			# Concat values
+			req_values + opt_values
 		end
 
 		def add_controller_class(args)

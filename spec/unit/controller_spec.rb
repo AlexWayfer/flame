@@ -386,6 +386,16 @@ describe Flame::Controller do
 			inherited_controller.extend Flame::Controller::ParentActions
 			inherited_controller.actions.should.equal ControllerController.actions
 		end
+
+		it 'should define actions from parent without forbidden actions' do
+			inherited_controller = Class.new(ControllerController)
+			inherited_controller::FORBIDDEN_ACTIONS = %i[
+				current_reroute hash_reroute index_reroute execute_reroute hooks_reroute
+			].freeze
+			inherited_controller.extend Flame::Controller::ParentActions
+			inherited_controller.actions
+				.should.equal %i[foo bar baz object_hash respond_for_reroute]
+		end
 	end
 
 	describe '.with_actions' do

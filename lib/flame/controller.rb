@@ -9,6 +9,8 @@ module Flame
 	class Controller
 		extend Forwardable
 
+		FORBIDDEN_ACTIONS = [].freeze
+
 		## Shortcut for not-inherited public methods: actions
 		def self.actions
 			public_instance_methods(false)
@@ -206,8 +208,10 @@ module Flame
 		end
 
 		## Module for public instance methods re-defining from superclass
-		## @example Inherit controller with parent actions by `extend`
+		## @example Inherit controller with parent actions without forbidden
+		## actions by `extend`
 		##   class MyController < BaseController
+		##     FORBIDDEN_ACTIONS = %[foo bar baz].freeze
 		##     extend Flame::Controller::ParentActions
 		##   end
 		module ParentActions
@@ -220,7 +224,7 @@ module Flame
 			end
 
 			def define_parent_actions
-				superclass.actions.each do |public_method|
+				(superclass.actions - self::FORBIDDEN_ACTIONS).each do |public_method|
 					um = superclass.public_instance_method(public_method)
 					define_method public_method, um
 				end

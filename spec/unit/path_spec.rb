@@ -95,30 +95,37 @@ describe Flame::Path do
 
 	describe '#adapt' do
 		before do
-			@init = proc do |path: nil, action: :baz|
+			@adapt_init = proc do |path: nil, action: :baz|
 				Flame::Path.new(path).adapt(PathController, action).to_s
 			end
 		end
 
 		it 'should complete path with action name and parameters' do
-			@init.call
+			@adapt_init.call
 				.should.equal '/baz/:first/:second/:?third'
 		end
 
 		it 'should complete path with parameters' do
-			@init.call(path: '/foo')
+			@adapt_init.call(path: '/foo')
 				.should.equal '/foo/:first/:second/:?third'
 		end
 
 		it 'should complete path with missing parameters' do
-			@init.call(path: '/foo/:second')
+			@adapt_init.call(path: '/foo/:second')
 				.should.equal '/foo/:second/:first/:?third'
 		end
 
 		it 'should complete path without ending slash' \
 		   ' if action has no parameters' do
-			@init.call(action: :foo)
+			@adapt_init.call(action: :foo)
 				.should.equal '/foo'
+		end
+
+		it 'should complete path without ending slash' \
+		   ' if initial path has all parameters' do
+			path = '/baz/:first/:second/:?third'
+			@adapt_init.call(path: path)
+				.should.equal path
 		end
 	end
 

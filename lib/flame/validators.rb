@@ -41,10 +41,9 @@ module Flame
 
 			## Take args from controller's action
 			def action_arguments
-				return @action_arguments if @action_arguments
 				## Get all parameters (arguments) from method
 				## Than collect and sort parameters into hash
-				@ctrl.instance_method(@action).parameters
+				@action_arguments ||= @ctrl.instance_method(@action).parameters
 					.each_with_object(req: [], opt: []) do |param, hash|
 						## Only required parameters must be in `:req`
 						hash[param[0]] << param[1]

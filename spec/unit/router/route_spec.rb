@@ -2,9 +2,9 @@
 
 ## Test controller for Route
 class RouteController < Flame::Controller
-	def foo(first, second, third = nil); end
+	def foo(first, second, third = nil, fourth = nil); end
 
-	def bar(first, second, third = nil); end
+	def bar(first, second, third = nil, fourth = nil); end
 
 	def baz(first, second); end
 
@@ -21,7 +21,7 @@ describe Flame::Router::Route do
 				args.fetch(:action,      :foo),
 				args.fetch(:method,      :GET),
 				args.fetch(:ctrl_path,   '/foo'),
-				args.fetch(:action_path, '/:first/:second/:?third')
+				args.fetch(:action_path, '/:first/:second/:?third/:?fourth')
 			)
 		end
 	end
@@ -30,7 +30,7 @@ describe Flame::Router::Route do
 		it 'should make path' do
 			route = @init.call
 			route.path.should.be.kind_of Flame::Path
-			route.path.should.equal '/foo/:first/:second/:?third'
+			route.path.should.equal '/foo/:first/:second/:?third/:?fourth'
 		end
 
 		it 'should raise error with extra required path arguments' do
@@ -40,7 +40,7 @@ describe Flame::Router::Route do
 					action_path: '/:first/:second/:third'
 				)
 			}
-				.should.raise(Flame::Errors::RouteArgumentsError)
+				.should.raise(Flame::Errors::RouteExtraArgumentsError)
 				.message.should match_words('RouteController', 'third')
 		end
 
@@ -48,11 +48,24 @@ describe Flame::Router::Route do
 			lambda {
 				@init.call(
 					ctrl_path: '/foo',
-					action_path: '/:first/:second/:?third/:?four'
+					action_path: '/:first/:second/:?third/:?fourth/:?fifth'
 				)
 			}
-				.should.raise(Flame::Errors::RouteArgumentsError)
-				.message.should match_words('RouteController', 'four')
+				.should.raise(Flame::Errors::RouteExtraArgumentsError)
+				.message.should match_words('RouteController', 'fifth')
+		end
+
+		it 'should raise error for wrong order of optional arguments' do
+			lambda {
+				@init.call(
+					ctrl_path: '/foo',
+					action_path: '/:first/:second/:?fourth/:?third'
+				)
+			}
+				.should.raise(Flame::Errors::RouteArgumentsOrderError)
+				.message.should match_words(
+					"'/:first/:second/:?fourth/:?third'", "third", "fourth"
+				)
 		end
 	end
 

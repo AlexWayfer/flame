@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
 describe 'Flame::Errors' do
-	describe Flame::Errors::RouteArgumentsError do
+	describe Flame::Errors::RouteExtraArgumentsError do
 		before do
 			@init = proc do |path:, extra:|
-				Flame::Errors::RouteArgumentsError.new(
+				Flame::Errors::RouteExtraArgumentsError.new(
 					ErrorsController, :foo, path, extra
 				)
 			end
@@ -12,7 +12,7 @@ describe 'Flame::Errors' do
 
 		describe '#message' do
 			it 'should be correct for extra action required arguments' do
-				path = '/foo/:first/:?third'
+				path = '/foo/:first/:?third/:?fourth'
 				@init.call(
 					path: path,
 					extra: { place: :ctrl, type: :req, args: [:second] }
@@ -42,10 +42,10 @@ describe 'Flame::Errors' do
 
 			it 'should be correct for extra path optional arguments' do
 				@init.call(
-					path: '/foo/:first/:second/:?third/:?fourth',
-					extra: { place: :path, type: :opt, args: [:fourth] }
+					path: '/foo/:first/:second/:?third/:?fourth/:?fifth',
+					extra: { place: :path, type: :opt, args: [:fifth] }
 				).message.should.equal(
-					"Action 'ErrorsController#foo' has no optional arguments [:fourth]"
+					"Action 'ErrorsController#foo' has no optional arguments [:fifth]"
 				)
 			end
 		end

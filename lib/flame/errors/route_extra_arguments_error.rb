@@ -3,7 +3,7 @@
 module Flame
 	module Errors
 		## Error for Route initialization
-		class RouteArgumentsError < StandardError
+		class RouteExtraArgumentsError < StandardError
 			def initialize(ctrl, action, path, extra)
 				@ctrl = ctrl
 				@action = action

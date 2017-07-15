@@ -17,40 +17,41 @@ describe Flame::Render do
 			controller_class.new(Flame::Dispatcher.new(RenderApp.new, {}))
 		end
 		@controller = @controller_init.call RenderController
+		@init = proc { |*args| Flame::Render.new(@controller, *args) }
 	end
 
 	describe '#initialize' do
 		it 'should have defaults' do
-			render = Flame::Render.new(@controller, :view)
+			render = @init.call(:view)
 			render.instance_variable_get(:@scope).should.be.same_as @controller
 			render.instance_variable_get(:@layout).should.be.equal 'layout.*'
 			render.instance_variable_get(:@locals).should.be.equal({})
 		end
 
 		it 'should accept locals' do
-			render = Flame::Render.new(@controller, :view, foo: :bar)
+			render = @init.call(:view, foo: :bar)
 			render.instance_variable_get(:@locals).should.be.equal foo: :bar
 		end
 
 		it 'should take scope from locals' do
-			render = Flame::Render.new(@controller, :view, scope: self, foo: :bar)
+			render = @init.call(:view, scope: self, foo: :bar)
 			render.instance_variable_get(:@locals).should.be.equal foo: :bar
 			render.instance_variable_get(:@scope).should.be.same_as self
 		end
 
 		it 'should take layout from locals' do
-			render = Flame::Render.new(@controller, :view, layout: 'some', foo: :bar)
+			render = @init.call(:view, layout: 'some', foo: :bar)
 			render.instance_variable_get(:@locals).should.be.equal foo: :bar
 			render.instance_variable_get(:@layout).should.be.equal 'some'
 		end
 
 		it 'should not have layout for partials' do
-			render = Flame::Render.new(@controller, '_partial')
+			render = @init.call('_partial')
 			render.instance_variable_get(:@layout).should.be.equal nil
 		end
 
 		it 'should find file' do
-			render = Flame::Render.new(@controller, :view)
+			render = @init.call(:view)
 			expected_file = File.join(__dir__, 'views', 'view.html.erb')
 			founded_file = File.realpath render.instance_variable_get(:@filename)
 			founded_file.should.be.equal expected_file
@@ -70,7 +71,7 @@ describe Flame::Render do
 		end
 
 		it 'should render view with layout by default' do
-			render = Flame::Render.new(@controller, :view)
+			render = @init.call(:view)
 			render.render
 				.should.be.equal <<~CONTENT
 					<body>
@@ -80,21 +81,21 @@ describe Flame::Render do
 		end
 
 		it 'should render view without layout by false option' do
-			render = Flame::Render.new(@controller, :view, layout: false)
+			render = @init.call(:view, layout: false)
 			render.render.should.be.equal(
 				"<h1>Hello, world!</h1>\n"
 			)
 		end
 
 		it 'should render partial without layout by default' do
-			render = Flame::Render.new(@controller, :_partial)
+			render = @init.call(:_partial)
 			render.render.should.be.equal(
 				"<p>This is partial</p>\n"
 			)
 		end
 
 		it 'should render with nested layouts' do
-			render = Flame::Render.new(@controller, 'namespace/nested')
+			render = @init.call('namespace/nested')
 			render.render
 				.should.be.equal <<~CONTENT
 					<body>
@@ -111,20 +112,20 @@ describe Flame::Render do
 			end
 
 			it 'should not cache with false option' do
-				first = Flame::Render.new(@controller, :view, layout: false)
+				first = @init.call(:view, layout: false)
 				first.render(cache: false)
 				@controller.cached_tilts.should.be.empty
-				second = Flame::Render.new(@controller, :view, layout: false)
+				second = @init.call(:view, layout: false)
 				@controller.cached_tilts.should.be.empty
 				second.render(cache: false)
 				@controller.cached_tilts.should.be.empty
 			end
 
 			it 'should cache with true option' do
-				first = Flame::Render.new(@controller, :view, layout: false)
+				first = @init.call(:view, layout: false)
 				first.render(cache: true)
 				@controller.cached_tilts.size.should.equal 1
-				second = Flame::Render.new(@controller, :view, layout: false)
+				second = @init.call(:view, layout: false)
 				@controller.cached_tilts.size.should.equal 1
 				second.render(cache: true)
 				@controller.cached_tilts.size.should.equal 1
@@ -132,7 +133,7 @@ describe Flame::Render do
 			end
 
 			it 'should cache with layout' do
-				render = Flame::Render.new(@controller, :view)
+				render = @init.call(:view)
 				render.render(cache: true)
 				@controller.cached_tilts.size.should.equal 2
 				paths = @controller.cached_tilts.keys
@@ -141,7 +142,7 @@ describe Flame::Render do
 
 			it 'should render cached plain template multiple times' \
 				' without multiple layouts' do
-				render = Flame::Render.new(@controller, :plain)
+				render = @init.call(:plain)
 				result = nil
 				2.times { result = render.render(cache: true) }
 				result.should.be.equal <<~CONTENT

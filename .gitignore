@@ -2,6 +2,7 @@
 extra/
 .*.rb
 Gemfile.lock
+tests/
 
 # Gem files
 *.gem

@@ -19,7 +19,7 @@ module Flame
 		def_delegators(
 			:@dispatcher,
 			:config, :request, :params, :halt, :session, :response, :status, :body,
-			:default_body, :cached_tilts
+			:default_body, :cached_tilts, :find_static
 		)
 
 		## Initialize the controller for request execution
@@ -35,13 +35,14 @@ module Flame
 		end
 
 		## Build a URI to the given controller and action, or path
-		def url_to(*args)
+		def url_to(*args, **options)
 			first_arg = args.first
 			path =
 				if first_arg.is_a?(String) || first_arg.is_a?(Flame::Path)
-					first_arg
+					static_file = find_static(first_arg)
+					static_file.path(with_version: options[:version])
 				else
-					path_to(*args)
+					path_to(*args, **options)
 				end
 			"#{request.scheme}://#{request.host_with_port}#{path}"
 		end

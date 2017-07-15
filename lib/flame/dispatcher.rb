@@ -33,7 +33,7 @@ module Flame
 		def run!
 			catch :halt do
 				try_static ||
-					try_static(GEM_STATIC_FILES) ||
+					try_static(dir: GEM_STATIC_FILES) ||
 					try_route ||
 					halt(404)
 			end

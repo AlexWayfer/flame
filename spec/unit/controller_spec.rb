@@ -189,6 +189,13 @@ describe Flame::Controller do
 			@controller.url_to(path)
 				.should.equal "http://localhost:3000#{path}"
 		end
+
+		it 'should return URL with mtime of static file in argmunet' do
+			file = 'test.txt'
+			mtime = File.mtime File.join(__dir__, 'public', file)
+			@controller.url_to("/#{file}", version: true)
+				.should.equal "http://localhost:3000/#{file}?v=#{mtime.to_i}"
+		end
 	end
 
 	describe '#redirect' do

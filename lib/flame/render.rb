@@ -8,6 +8,8 @@ require 'tilt/erb'
 
 require 'gorilla-patch/inflections'
 
+require_relative 'errors/template_not_found_error'
+
 module Flame
 	## Helper for render functionality
 	class Render
@@ -21,8 +23,9 @@ module Flame
 			@locals = options.merge(options.delete(:locals) || {})
 			## Find filename
 			@filename = find_file(path)
-			# @controller.instance_exec { halt 404 } unless @filename
-			return unless @filename
+			unless @filename
+				raise Flame::Errors::TemplateNotFoundError.new(controller, path)
+			end
 			@layout = nil if File.basename(@filename)[0] == '_'
 		end
 

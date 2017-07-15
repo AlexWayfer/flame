@@ -106,6 +106,14 @@ describe Flame::Render do
 				CONTENT
 		end
 
+		it 'should raise error if file not found' do
+			-> { @init.call(:nonexistent) }
+				.should.raise(Flame::Errors::TemplateNotFoundError)
+				.message.should.equal(
+					"Template 'nonexistent' not found for 'RenderController'"
+				)
+		end
+
 		describe 'cache' do
 			before do
 				@controller.cached_tilts.clear

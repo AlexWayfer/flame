@@ -335,6 +335,14 @@ describe Flame::Controller do
 				.should.equal "<h1>Hello, world!</h1>\n"
 		end
 
+		it 'should raise error if template file not found' do
+			-> { @controller.view(:nonexistent) }
+				.should.raise(Flame::Errors::TemplateNotFoundError)
+				.message.should.equal(
+					"Template 'nonexistent' not found for 'ControllerController'"
+				)
+		end
+
 		describe 'cache' do
 			before do
 				ControllerApplication.cached_tilts.clear

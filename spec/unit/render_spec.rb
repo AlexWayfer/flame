@@ -93,6 +93,18 @@ describe Flame::Render do
 			)
 		end
 
+		it 'should render with nested layouts' do
+			render = Flame::Render.new(@controller, 'namespace/nested')
+			render.render
+				.should.be.equal <<~CONTENT
+					<body>
+						<div>
+						<p>Double layout!</p>\n
+					</div>\n
+					</body>
+				CONTENT
+		end
+
 		describe 'cache' do
 			before do
 				@controller.cached_tilts.clear
@@ -125,18 +137,6 @@ describe Flame::Render do
 				@controller.cached_tilts.size.should.equal 2
 				paths = @controller.cached_tilts.keys
 				paths.any? { |path| path.include?('layout') }.should.equal true
-			end
-
-			it 'should render with nested layouts' do
-				render = Flame::Render.new(@controller, 'namespace/nested')
-				render.render
-					.should.be.equal <<~CONTENT
-						<body>
-							<div>
-							<p>Double layout!</p>\n
-						</div>\n
-						</body>
-					CONTENT
 			end
 
 			it 'should render cached plain template multiple times' \

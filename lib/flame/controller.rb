@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 require 'forwardable'
+
+require_relative 'controller/with_actions'
 require_relative 'render'
 
 module Flame
@@ -12,6 +14,7 @@ module Flame
 		FORBIDDEN_ACTIONS = [].freeze
 
 		## Shortcut for not-inherited public methods: actions
+		## @return [Array<Symbol>] array of actions (public instance methods)
 		def self.actions
 			public_instance_methods(false)
 		end
@@ -23,12 +26,12 @@ module Flame
 		)
 
 		## Initialize the controller for request execution
-		## @param dispatcher [Flame::Dispatcher] dispatcher object
+		## @param dispatcher [Flame::Dispatcher] host dispatcher
 		def initialize(dispatcher)
 			@dispatcher = dispatcher
 		end
 
-		## Helpers
+		## Look documentation at {Flame::Dispatcher#path_to}
 		def path_to(*args)
 			add_controller_class(args)
 			@dispatcher.path_to(*args)
@@ -150,17 +153,17 @@ module Flame
 		end
 
 		def extract_params_for(action)
-			# Take parameters from action method
+			## Take parameters from action method
 			parameters = method(action).parameters
-			# Fill variables with values from params
+			## Fill variables with values from params
 			req_values, opt_values = %i[req opt].map! do |type|
 				params.values_at(
 					*parameters.select { |key, _value| key == type }.map!(&:last)
 				)
 			end
-			# Remove nils from the end of optional values
+			## Remove nils from the end of optional values
 			opt_values.pop while opt_values.last.nil? && !opt_values.empty?
-			# Concat values
+			## Concat values
 			req_values + opt_values
 		end
 
@@ -180,55 +183,6 @@ module Flame
 				parts.pop if %w[controller ctrl].include? parts.last
 				parts = [modules.last] if parts.empty?
 				Flame::Path.merge nil, parts.join('_')
-			end
-
-			## Re-define public instance method from parent
-			## @example Inherit controller with parent actions by method
-			##   class MyController < BaseController.with_actions
-			##   end
-			## @example Define actions from module in controller
-			##   class MyController < BaseController
-			##     include with_actions Module1
-			##     include with_actions Module2
-			##     ....
-			##   end
-			def with_actions(mod = nil)
-				return mod.extend(ModuleActions) if mod
-				@with_actions ||= Class.new(self) { extend ParentActions }
-			end
-		end
-
-		## Extension for modules whose public methods will be defined as actions
-		## via including
-		module ModuleActions
-			def included(ctrl)
-				public_instance_methods.each do |meth|
-					ctrl.send :define_method, meth, public_instance_method(meth)
-				end
-			end
-		end
-
-		## Module for public instance methods re-defining from superclass
-		## @example Inherit controller with parent actions without forbidden
-		## actions by `extend`
-		##   class MyController < BaseController
-		##     FORBIDDEN_ACTIONS = %[foo bar baz].freeze
-		##     extend Flame::Controller::ParentActions
-		##   end
-		module ParentActions
-			def inherited(ctrl)
-				ctrl.define_parent_actions
-			end
-
-			def self.extended(ctrl)
-				ctrl.define_parent_actions
-			end
-
-			def define_parent_actions
-				(superclass.actions - self::FORBIDDEN_ACTIONS).each do |public_method|
-					um = superclass.public_instance_method(public_method)
-					define_method public_method, um
-				end
 			end
 		end
 	end

@@ -24,7 +24,7 @@ module Flame
 				app.config = Config.new(
 					app,
 					default_config_dirs(
-						root_dir: File.dirname(caller[0].split(':')[0])
+						root_dir: File.dirname(caller(1..1).first.split(':')[0])
 					).merge(
 						environment: ENV['RACK_ENV'] || 'development'
 					)

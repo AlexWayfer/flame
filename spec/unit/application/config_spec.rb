@@ -16,13 +16,13 @@ describe Flame::Application::Config do
 	end
 
 	describe '#initialize' do
-		it 'should recieve application' do
+		it 'should receive application' do
 			config = @init.call(app: @app_class)
 			config.instance_variable_get(:@app)
 				.should.equal @app_class
 		end
 
-		it 'should recieve hash' do
+		it 'should receive hash' do
 			config = @init.call(hash: @hash)
 			config.should.equal @hash
 		end

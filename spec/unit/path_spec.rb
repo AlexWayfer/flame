@@ -15,13 +15,20 @@ describe Flame::Path do
 	end
 
 	describe '.merge' do
-		it 'should merge from array' do
+		it 'should merge from Array of Strings' do
 			Flame::Path.merge(%w[foo bar baz])
 				.should.equal 'foo/bar/baz'
 		end
 
-		it 'should merge from multiple parts' do
+		it 'should merge from multiple parts as Strings' do
 			Flame::Path.merge('/foo/bar', '/baz/bat')
+				.should.equal '/foo/bar/baz/bat'
+		end
+
+		it 'should merge from multiple parts as Flame::Path' do
+			first_path = @init.call('/foo/bar')
+			second_path = @init.call('/baz/bat')
+			Flame::Path.merge(first_path, second_path)
 				.should.equal '/foo/bar/baz/bat'
 		end
 
@@ -32,12 +39,12 @@ describe Flame::Path do
 	end
 
 	describe '#initialize' do
-		it 'should recieve path as String' do
+		it 'should receive path as String' do
 			path = '/foo/bar'
 			@init.call(path).to_s.should.equal path
 		end
 
-		it 'should recieve many path parts' do
+		it 'should receive many path parts' do
 			@init.call('/foo', '/bar', 'baz').to_s.should.equal '/foo/bar/baz'
 		end
 	end
@@ -87,7 +94,7 @@ describe Flame::Path do
 				.should.equal true
 		end
 
-		it 'should recieve String' do
+		it 'should receive String' do
 			(@path == '/foo/:first/:second/:?third')
 				.should.equal true
 		end
@@ -126,32 +133,6 @@ describe Flame::Path do
 			path = '/baz/:first/:second/:?third'
 			@adapt_init.call(path: path)
 				.should.equal path
-		end
-	end
-
-	describe '#match?' do
-		it 'should return false for missing fixed parts' do
-			@path.match?('/none').should.equal false
-		end
-
-		it 'should return false for missing required arguments' do
-			@path.match?('/foo/bar').should.equal false
-		end
-
-		it 'should return false for long path' do
-			@path.match?('/foo/first/second/third/fourth').should.equal false
-		end
-
-		it 'should return true for all correct required arguments' do
-			@path.match?('/foo/first/second').should.equal true
-		end
-
-		it 'should return true for all correct required and optional arguments' do
-			@path.match?('/foo/first/second/third').should.equal true
-		end
-
-		it 'should receive Flame::Path' do
-			@path.match?(@init.call('/foo/first/second/third')).should.equal true
 		end
 	end
 
@@ -197,6 +178,16 @@ describe Flame::Path do
 
 		it 'should allow concatenate Flame::Path object to Strings' do
 			('/foo' + @init.call('/bar', 'baz')).should.equal '/foo/bar/baz'
+		end
+	end
+
+	describe '#to_routes_with_endpoint' do
+		it 'should return the nested Hash with path parts as keys with endpoint' do
+			path = @init.call('/foo/bar/baz')
+			routes, endpoint = path.to_routes_with_endpoint
+			routes.should.equal('foo' => { 'bar' => { 'baz' => {} } })
+			endpoint.should.equal({})
+			endpoint.should.be.same_as routes.dig(*path.parts)
 		end
 	end
 end

@@ -74,8 +74,3 @@ More at [Wiki](https://github.com/AlexWayfer/flame/wiki) and in `example/` direc
 ## Benchmark
 
 The last benchmark can be viewed [here](https://github.com/AlexWayfer/bench-micro).
-
-## TODO
-
-* Create a command-line utility (for the generation of the project)
-* ...

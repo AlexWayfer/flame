@@ -95,11 +95,11 @@ module Flame
 		##   path_to ArticlesController, :new, params: { author_id: 1 }
 		##   # => "/articles/new?author_id=1"
 		def path_to(ctrl, action = :index, args = {})
-			route = @app.class.router.find_route(controller: ctrl, action: action)
-			raise Errors::RouteNotFoundError.new(ctrl, action) unless route
+			path = @app.class.router.path_of(ctrl, action)
+			raise Errors::RouteNotFoundError.new(ctrl, action) unless path
 			query = Rack::Utils.build_nested_query args.delete(:params)
 			query = nil if query&.empty?
-			path = route.path.assign_arguments(args)
+			path = path.assign_arguments(args)
 			path = '/' if path.empty?
 			URI::Generic.build(path: path, query: query).to_s
 		end
@@ -117,7 +117,7 @@ module Flame
 		## @example Halt with 404, render template
 		##   halt 404, render('errors/404')
 		## @example Halt with 200, set new headers
-		##   halt 200, 'Cats!', 'Content-Type' => 'animal/cat'
+		##   halt 200, 'Cats!', 'Content-Type' # => 'animal/cat'
 		def halt(new_status = nil, new_body = nil, new_headers = {})
 			status new_status if new_status
 			body new_body || (default_body_of_nearest_route if body.empty?)
@@ -151,10 +151,7 @@ module Flame
 
 		## Find route and try execute it
 		def try_route
-			route = @app.class.router.find_route(
-				method: request.http_method,
-				path: request.path
-			)
+			route = @app.class.router.find_route(request.path, request.http_method)
 			return nil unless route
 			status 200
 			execute_route(route)
@@ -163,7 +160,7 @@ module Flame
 		## Execute route
 		## @param route [Flame::Route] route that must be executed
 		def execute_route(route, action = route.action)
-			params.merge! route.path.extract_arguments(request.path)
+			params.merge! @app.router.path_of(route).extract_arguments(request.path)
 			# route.execute(self)
 			controller = route.controller.new(self)
 			controller.send(:execute, action)

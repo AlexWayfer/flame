@@ -38,7 +38,7 @@ describe Flame::Application do
 	end
 
 	describe '.config=' do
-		it 'should recieve config' do
+		it 'should receive config' do
 			config = Flame::Application::Config.new(@app_class)
 			@app_class.config = config
 			@app_class.config.should.be.same_as config

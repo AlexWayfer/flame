@@ -14,7 +14,7 @@ describe Flame::Dispatcher::Cookies do
 	end
 
 	describe '#initialize' do
-		it 'should recieve cookies from Request object and Response object' do
+		it 'should receive cookies from Request object and Response object' do
 			-> { @init.call(@request.cookies, @response) }
 				.should.not.raise ArgumentError
 		end

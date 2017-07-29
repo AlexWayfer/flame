@@ -81,7 +81,7 @@ module Flame
 			def first_wrong_ordered_arguments
 				opt_arguments = action_arguments[:opt].zip(path_arguments[:opt])
 				opt_arguments.map! do |args|
-					args.map { |arg| Flame::Path::PathPart.new(arg, arg: :opt) }
+					args.map { |arg| Flame::Path::Part.new(arg, arg: :opt) }
 				end
 				opt_arguments.find do |action_argument, path_argument|
 					action_argument != path_argument

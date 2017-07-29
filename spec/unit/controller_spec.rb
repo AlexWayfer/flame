@@ -210,7 +210,7 @@ describe Flame::Controller do
 				@controller.response.location.should.equal @url
 			end
 
-			it 'should recieve status as last arument' do
+			it 'should receive status as last arument' do
 				@controller.redirect(@url, 301)
 				@controller.status.should.equal 301
 				@controller.response.location.should.equal @url
@@ -227,13 +227,12 @@ describe Flame::Controller do
 
 		describe 'by controller and action' do
 			it 'should write rediect to response' do
-				# binding.pry
 				@controller.redirect(AnotherControllerController, :hello, name: 'Alex')
 				@controller.status.should.equal 302
 				@controller.response.location.should.equal '/another/hello/Alex'
 			end
 
-			it 'should recieve status as last arument' do
+			it 'should receive status as last arument' do
 				@controller.redirect(
 					AnotherControllerController, :hello, { name: 'Alex' }, 301
 				)
@@ -259,7 +258,7 @@ describe Flame::Controller do
 				@controller.response.location.should.equal 'http://example.com'
 			end
 
-			it 'should recieve status as last arument' do
+			it 'should receive status as last arument' do
 				@controller.redirect URI::HTTP.build(host: 'example.com'), 301
 				@controller.status.should.equal 301
 				@controller.response.location.should.equal 'http://example.com'
@@ -337,7 +336,7 @@ describe Flame::Controller do
 				CONTENT
 		end
 
-		it 'should recieve options for Flame::Render' do
+		it 'should receive options for Flame::Render' do
 			@controller.view(:view, layout: false)
 				.should.equal "<h1>Hello, world!</h1>\n"
 		end

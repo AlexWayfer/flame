@@ -7,6 +7,9 @@ require_relative 'errors/argument_not_assigned_error'
 module Flame
 	## Class for working with paths
 	class Path
+		## Merge parts of path to one path
+		## @param parts [Array<String, Flame::Path>] parts of expected path
+		## @return [Flame::Path] path from parts
 		def self.merge(*parts)
 			parts.join('/').gsub(%r{\/{2,}}, '/')
 		end
@@ -16,11 +19,14 @@ module Flame
 			freeze
 		end
 
+		## Return parts of path, splitted by slash (`/`)
+		## @return [Array<Flame::Path::Part>] array of path parts
 		def parts
 			@parts ||= @path.to_s.split('/').reject(&:empty?)
-				.map! { |part| PathPart.new(part) }
+				.map! { |part| self.class::Part.new(part) }
 		end
 
+		## Freeze all strings in object
 		def freeze
 			@path.freeze
 			parts.each(&:freeze)
@@ -29,6 +35,8 @@ module Flame
 		end
 
 		## Compare by parts count and the first arg position
+		## @param other [Flame::Path] other path
+		## @return [-1, 0, 1] result of comparing
 		def <=>(other)
 			self_parts, other_parts = [self, other].map(&:parts)
 			parts_size = self_parts.size <=> other_parts.size
@@ -41,36 +49,32 @@ module Flame
 				end
 		end
 
+		## Compare with other path by parts
+		## @param other [Flame::Path, String] other path
+		## @return [true, false] equal or not
 		def ==(other)
 			other = self.class.new(other) if other.is_a? String
 			parts == other.parts
 		end
 
 		## Complete path for the action of controller
+		## @param ctrl [Flame::Controller] to which controller adapt
+		## @param action [Symbol] to which action of controller adapt
+		## @return [Flame::Path] adapted path
 		## @todo Add :arg:type support (:id:num, :name:str, etc.)
 		def adapt(ctrl, action)
 			parameters = ctrl.instance_method(action).parameters
 			parameters.map! do |parameter|
 				parameter_type, parameter_name = parameter
-				path_part = PathPart.new parameter_name, arg: parameter_type
+				path_part = self.class::Part.new parameter_name, arg: parameter_type
 				path_part unless parts.include? path_part
 			end
 			self.class.new @path.empty? ? "/#{action}" : self, *parameters.compact
 		end
 
-		## Can recieve other as String
-		def match?(other)
-			other = self.class.new(other) if other.is_a? String
-			return false unless other_contain_required_parts?(other)
-			result = [self, other].map { |path| path.parts.size }.max.times do |i|
-				break false unless compare_parts parts[i], other.parts[i]
-			end
-			result = true if result
-			result
-		end
-
 		## Extract arguments from other path with values at arguments
 		## @param other_path [Flame::Path] other path with values at arguments
+		## @return [Hash{Symbol => String}] hash of arguments from two paths
 		def extract_arguments(other_path)
 			parts.each_with_index.with_object({}) do |(part, i), args|
 				other_part = other_path.parts[i].to_s
@@ -89,28 +93,24 @@ module Flame
 			self.class.merge result_parts.unshift(nil)
 		end
 
+		## @return [String] path as String
 		def to_s
 			@path
 		end
 		alias to_str to_s
 
+		## Path parts as keys of nested Hashes
+		## @return [Array(Flame::Router::Routes, Flame::Router::Routes)]
+		##   whole Routes (parent) and the endpoint (most nested Routes)
+		def to_routes_with_endpoint
+			endpoint =
+				parts.reduce(result = Flame::Router::Routes.new) do |hash, part|
+					hash[part] ||= Flame::Router::Routes.new
+				end
+			[result, endpoint]
+		end
+
 		private
-
-		def other_contain_required_parts?(other)
-			other_parts = other.parts
-			req_path_parts = parts.reject(&:opt_arg?)
-			fixed_path_parts = parts.reject(&:arg?)
-			(fixed_path_parts - other_parts).empty? &&
-				other_parts.count >= req_path_parts.count
-		end
-
-		def compare_parts(part, other_part)
-			return unless part
-			return if other_part.nil? && !part.opt_arg?
-			# p other_part, part
-			return true if part.arg?
-			return true if other_part == part
-		end
 
 		## Helpers for `assign_arguments`
 		def assign_argument(part, args = {})
@@ -128,7 +128,7 @@ module Flame
 		end
 
 		## Class for one part of Path
-		class PathPart
+		class Part
 			extend Forwardable
 
 			def_delegators :@part, :[], :hash
@@ -138,6 +138,7 @@ module Flame
 
 			def initialize(part, arg: false)
 				@part = "#{ARG_CHAR if arg}#{ARG_CHAR_OPT if arg == :opt}#{part}"
+				freeze
 			end
 
 			def freeze
@@ -160,7 +161,11 @@ module Flame
 			end
 
 			def opt_arg?
-				@part[1] == ARG_CHAR_OPT
+				arg? && @part[1] == ARG_CHAR_OPT
+			end
+
+			def req_arg?
+				arg? && !opt_arg?
 			end
 
 			def clean

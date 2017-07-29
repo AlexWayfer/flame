@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'forwardable'
+
 require_relative 'errors/argument_not_assigned_error'
 
 module Flame

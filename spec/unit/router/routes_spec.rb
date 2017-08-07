@@ -84,5 +84,9 @@ describe Flame::Router::Routes do
 			routes = @init.call('/:first/:second/:?third')
 			routes.dig('foo', 'bar').should.equal(':?third' => {})
 		end
+
+		should 'works for root path' do
+			@routes.dig('/').should.equal('foo' => { 'bar' => { 'baz' => {} } })
+		end
 	end
 end

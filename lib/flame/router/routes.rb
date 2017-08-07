@@ -49,8 +49,8 @@ module Flame
 			##   routes = Flame::Router::Routes.new('/foo/:first/bar')
 			##   routes.dig('foo', 'value') # => { 'bar' => {} }
 			def dig(*path_parts)
-				return self if path_parts.empty?
 				path_parts = Flame::Path.new(*path_parts).parts
+				return self if path_parts.empty?
 				endpoint =
 					self[path_parts.first] ||
 					find { |key, _value| key.is_a?(Flame::Path::Part) && key.arg? }

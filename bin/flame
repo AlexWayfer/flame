@@ -2,70 +2,15 @@
 # frozen_string_literal: true
 
 require 'thor'
-require 'fileutils'
-require 'gorilla-patch/inflections'
-require 'erb'
 
-## CLI Application
-class FlameCLI < Thor
-	desc 'new APP', 'Generate new application directory with sub-directories'
-	def new(app_name)
-		FlameApp.new app_name
-	end
+require_relative 'new'
 
-	## Class for Flame Application
-	class FlameApp
-		def initialize(app_name)
-			@app_name = app_name
-			New.build @app_name
-			puts 'Done!'
-			puts "\nMoving to '#{@app_name}' directory by:\n\ncd #{@app_name}\n\n"
-		end
-
-		## Module for new application
-		module New
-			module_function
-
-			using GorillaPatch::Inflections
-
-			def build(app_name)
-				@app_name = app_name
-				@module_name = @app_name.camelize
-				make_dir do
-					copy_template
-				end
-			end
-
-			def make_dir(&block)
-				puts "Creating '#{@app_name}' directory..."
-				FileUtils.mkdir @app_name
-				FileUtils.cd @app_name, &block
-			end
-
-			def copy_template
-				puts 'Copy template directories and files...'
-				FileUtils.cp_r File.join(__dir__, '..', 'template', '.'), '.'
-				clean_dirs
-				render_templates
-			end
-
-			def clean_dirs
-				puts 'Clean directories...'
-				FileUtils.rm Dir[File.join('**', '*', '.keep')]
-			end
-
-			def render_templates
-				puts 'Replace module names in template...'
-				Dir[File.join('**', '*.erb')].each do |file|
-					basename = File.basename(file, '.*')
-					puts "- #{basename}"
-					content = ERB.new(File.read(file)).result(binding)
-					File.write(File.join(File.dirname(file), basename), content)
-					FileUtils.rm file
-				end
-			end
-		end
+module FlameCLI
+	## CLI Application
+	class Flame < Thor
+		desc 'new ENTITY ...ARGS', 'create new entity'
+		subcommand 'new', New
 	end
 end
 
-FlameCLI.start(ARGV)
+FlameCLI::Flame.start(ARGV)

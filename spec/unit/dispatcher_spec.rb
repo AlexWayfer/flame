@@ -6,6 +6,8 @@ class DispatcherController < Flame::Controller
 
 	def foo; end
 
+	def create; end
+
 	def hello(name)
 		"Hello, #{name}!"
 	end
@@ -101,6 +103,38 @@ describe Flame::Dispatcher do
 			respond = @init.call(method: 'HEAD').run!.last
 			respond.status.should.equal 200
 			respond.body.should.equal []
+		end
+
+		describe 'OPTIONS HTTP-method' do
+			before do
+				@respond = @init.call(method: 'OPTIONS').run!.last
+			end
+
+			should 'return 200 for existing route' do
+				@respond.status.should.equal 200
+			end
+
+			should 'return 404 for not-existing route' do
+				dispatcher = @init.call(method: 'OPTIONS', path: '/hello')
+				respond = dispatcher.run!.last
+				respond.status.should.equal 404
+			end
+
+			should 'not return body' do
+				@respond.body.should.equal ['']
+			end
+
+			should 'contain `Allow` header with appropriate HTTP-methods' do
+				dispatcher = @init.call(method: 'OPTIONS', path: '/')
+				respond = dispatcher.run!.last
+				respond.headers['Allow'].should.equal 'GET, POST, OPTIONS'
+			end
+
+			should 'not return `Allow` header for not-existing route' do
+				dispatcher = @init.call(method: 'OPTIONS', path: '/hello')
+				respond = dispatcher.run!.last
+				respond.headers.key?('Allow').should.be.false
+			end
 		end
 	end
 

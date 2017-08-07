@@ -65,6 +65,12 @@ module Flame
 				self[first_opt_arg_key]&.dig_through_opt_args || self
 			end
 
+			def allow
+				methods = keys.select { |key| key.is_a? Symbol }
+				return if methods.empty?
+				methods.push(:OPTIONS).join(', ')
+			end
+
 			private
 
 			%i[req opt].each do |type|

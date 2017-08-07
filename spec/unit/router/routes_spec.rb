@@ -89,4 +89,17 @@ describe Flame::Router::Routes do
 			@routes.dig('/').should.equal('foo' => { 'bar' => { 'baz' => {} } })
 		end
 	end
+
+	describe '#allow' do
+		should 'return correct String for multiple allow HTTP-methods' do
+			routes = @init.call('/foo/bar')
+			routes['foo']['bar'][:GET]  = 42
+			routes['foo']['bar'][:POST] = 84
+			routes['foo']['bar'].allow.should.equal 'GET, POST, OPTIONS'
+		end
+
+		should 'return nil for not-existing path' do
+			@routes['foo']['bar'].allow.should.be.nil
+		end
+	end
 end

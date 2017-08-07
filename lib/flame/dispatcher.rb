@@ -32,7 +32,8 @@ module Flame
 		## Start of execution the request
 		def run!
 			catch :halt do
-				try_static ||
+				try_options ||
+					try_static ||
 					try_static(dir: GEM_STATIC_FILES) ||
 					try_route ||
 					halt(404)
@@ -148,6 +149,14 @@ module Flame
 		end
 
 		private
+
+		## Return response if HTTP-method is OPTIONS
+		def try_options
+			return unless request.http_method == :OPTIONS
+			allow = @app.class.router.routes.dig(request.path)&.allow
+			halt 404 unless allow
+			response.headers['Allow'] = allow
+		end
 
 		## Find route and try execute it
 		def try_route

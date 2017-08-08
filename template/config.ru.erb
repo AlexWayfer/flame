@@ -1,20 +1,81 @@
 # frozen_string_literal: true
 
+environment = ENV['RACK_ENV'].to_sym
+
+is_development = environment == :development
+
 ## Require gems
 require 'bundler'
-Bundler.require
+Bundler.require :default, environment
+
+## Require libs
+# require 'money/bank/google_currency'
 
 ## Require project
-Dir[File.join(
-	__dir__, '{config,models,helpers,controllers}', '{,**}', '{_,}*.rb'
-)].each { |file| require file }
+require_dirs = proc do |dirs, ignore: %w[]|
+	dirs.each do |dir|
+		Dir[File.join(__dir__, "{#{dir}}", '**', '*.rb')]
+			.reject { |file| ignore.any? { |ignored| file.include? ignored } }
+			.sort_by { |s| [File.basename(s)[0], s] }
+			.each { |file| require file }
+	end
+end
 
 ## Require application
-require_relative './app'
+require_app = proc do
+	## Require dirs
+	require_dirs.call(
+		%w[config models helpers libs exports mailers services controllers],
+		ignore: %w[puma.rb]
+	)
 
-## Use middlewares
-use Rack::Session::Cookie, key: 'rack.session', secret: 'dummy_secret'
-use Rack::CommonLogger
+	require './app'
+end
+
+require_app.call
+
+## Use session middleware
+if <%= @short_module_name %>::Application.config[:session]
+	use Rack::Session::Cookie, <%= @short_module_name %>::Application.config[:session][:cookie]
+end
+
+## Logger
+require 'logger'
+logs_dir = File.join __dir__, <%= @short_module_name %>::Application.config[:server][:logs_dir]
+
+<%= @short_module_name %>::Application.config[:logger] = Logger.new(
+	is_development ? $stdout : File.join(logs_dir, 'stdout'),
+	'weekly'
+)
+
+## Access Logger
+unless is_development
+	use Rack::CommonLogger, Logger.new(
+		File.join(logs_dir, 'access'),
+		'weekly'
+	)
+end
+
+if <%= @short_module_name %>.const_defined?(:DB)
+	## SQL Logger
+	if is_development
+		<%= @short_module_name %>::DB.loggers <<
+			if ENV['RACK_CONSOLE_INTRO']
+				Logger.new($stdout)
+			else
+				<%= @short_module_name %>.logger
+			end
+	end
+
+	## Freeze DB (not for `rake console`)
+	<%= @short_module_name %>::DB.freeze unless ENV['RACK_CONSOLE_INTRO']
+end
+
+## Remove invalid UTF-8 characters from requests
+use Rack::UTF8Sanitizer
+
+## Remove trailing slashes from request path (and redirect)
+# use Rack::RemoveTrailingSlashes
 
 ## Run application
-run <%= @module_name %>::Application
+run <%= @short_module_name %>::Application

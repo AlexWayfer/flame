@@ -1,11 +1,25 @@
 # configuration
-config/*.yml
-!config/*example.yml
+config/**/*
+!config/**/*.example*
+!config/**/*.rb
+!config/**/*.erb
+!config/nginx
+!config/nginx/snippets
+!config/nginx/snippets/*.example*
+!config/nginx/snippets/ssl-params.conf
+!config/nginx/sites
+!config/nginx/sites/*.example*
 
 # temp
 log/
 tmp/
+#public/files
 *.bak
+*~
 
 # dumps
 *.sql
+
+# seo files
+#views/site/sitemap.html
+#public/robots.txt

@@ -1,0 +1,12 @@
+# frozen_string_literal: true
+
+module <%= @module_name %>
+	module Site
+		## Index controller for example
+		class IndexController < <%= @short_module_name %>::Site::Controller
+			def index
+				view
+			end
+		end
+	end
+end

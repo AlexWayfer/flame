@@ -1,0 +1,11 @@
+:environment: development
+# :environment: production
+:binds:
+  :tcp:
+    :host: '0.0.0.0'
+    :port: 3000
+  # :unix: 'tmp/sockets/puma.sock'
+:pids_dir: tmp/pids
+:logs_dir: log
+# :workers_count: 1
+# :threads_count: 4

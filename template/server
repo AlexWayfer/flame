@@ -1,5 +1,11 @@
 #!/usr/bin/env ruby
+
 # frozen_string_literal: true
+
+require 'shellwords'
+require 'yaml'
+
+FILEWATCHER_PATTERN = '**/{Gemfile,*.{rb,ru,yml}}'
 
 ## Functons
 def show_usage
@@ -7,41 +13,83 @@ def show_usage
 	puts 'COMMAND is one of:'
 	puts '    start - Start server'
 	puts '     stop - Stop server'
-	puts '  restart - Stop/Start server'
+	puts '     kill - Kill server (and filewatcher)'
+	puts '  restart - Restart server'
 	puts '  monitor - Show log'
-	puts '    devel - Restart/Monitor server'
+	puts '    devel - Restart and monitor server'
 end
 
-def start_server
-	system 'rm log/*'
-	system 'thin -C config/thin.yml start'
+def bash(command)
+	escaped_command = Shellwords.escape(command)
+	system "echo #{command}"
+	system "bash -c #{escaped_command}"
 end
 
-def stop_server
-	system 'thin -C config/thin.yml stop'
+def server(command)
+	exit if %i[start restart].include?(command) && !bundle_check
+	web_server(command)
 end
 
-def restart_server
-	stop_server
-	start_server
+def web_server(command)
+	pumactl_command = "pumactl #{command} -F #{puma_config_file}"
+	if environment == 'production' || command != :restart
+		waiting_mailing_lock if %i[stop restart].include?(command)
+		return bash pumactl_command
+	end
+	bash 'bundle exec "' \
+		"filewatcher -r -I '#{FILEWATCHER_PATTERN}' '#{pumactl_command}'" \
+	'"'
+end
+
+def server_config
+	@server_config ||= YAML.load_file(File.join(__dir__, 'config', 'server.yml'))
+end
+
+def puma_config_file
+	@puma_config_file ||= File.join(__dir__, 'config', 'puma.rb')
+end
+
+def environment
+	server_config[:environment]
+end
+
+def log_files
+	File.join(__dir__, %w[log {stdout,stderr}])
+end
+
+def waiting_mailing_lock
+	while Dir[File.join(__dir__, 'tmp', 'mailing_*')].any?
+		puts "\e[31m\e[1mMails sending in progress!\e[22m\e[0m\nWaiting..."
+		sleep 1
+	end
 end
 
 def monitor_server
-	system 'tail -f log/thin.*.log'
+	bash "tail -f #{log_files}"
+end
+
+def bundle_check
+	bash 'bundle check || bundle update'
 end
 
 ## Runtime
 case ARGV[0]
 when 'start'
-	start_server
+	server :start
 when 'stop'
-	stop_server
+	server :stop
 when 'restart'
-	restart_server
+	server :restart
+when 'kill'
+	server :stop
+	bash 'pkill -f filewatcher'
+	bash 'pkill -f puma'
 when 'monitor'
 	monitor_server
 when 'devel'
-	restart_server
+	server :restart
+	puts 'Waiting for logs...'
+	sleep 1.5
 	monitor_server
 else
 	puts "Unknown command #{ARGV[0]}"

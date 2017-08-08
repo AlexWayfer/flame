@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'net/http'
+
 describe 'FlameCLI::New::App' do
 	app_name = 'foo_bar'
 
@@ -23,11 +25,13 @@ describe 'FlameCLI::New::App' do
 				'Clean directories...',
 				'Replace module names in template...',
 				'- config.ru',
-				'- _base_controller.rb',
-				'- Rakefile',
-				'- sequel.rb',
-				'- config.rb',
 				'- app.rb',
+				'- Rakefile',
+				'- config/config.rb',
+				'- config/sequel.rb',
+				'- controllers/_controller.rb',
+				'- controllers/site/_controller.rb',
+				'- controllers/site/index_controller.rb',
 				'Done!'
 			)
 	end
@@ -42,6 +46,7 @@ describe 'FlameCLI::New::App' do
 		Dir[File.join(template_dir, '**', '*')].each do |filename|
 			filename_pathname = Pathname.new(filename)
 				.relative_path_from(template_dir_pathname)
+			next if File.dirname(filename).split(File::SEPARATOR).include? 'views'
 			if filename_pathname.extname == template_ext
 				filename_pathname = filename_pathname.sub_ext('')
 			end
@@ -59,28 +64,60 @@ describe 'FlameCLI::New::App' do
 		read_file = ->(*path_parts) { File.read File.join(app_name, *path_parts) }
 		execute_command.call
 		read_file.call('config.ru').should match_words(
-			'run FooBar::Application'
+			'use Rack::Session::Cookie, FB::Application.config[:session][:cookie]',
+			'File.join __dir__, FB::Application.config[:server][:logs_dir]',
+			'FB::Application.config[:logger] = Logger.new',
+			'FB::DB.loggers <<',
+			'FB.logger',
+			'FB::DB.freeze',
+			'run FB::Application'
 		)
 		read_file.call('app.rb').should match_words(
-			'module FooBar'
+			'module FooBar',
+			'include FB::Config'
 		)
 		read_file.call('Rakefile').should match_words(
-			'	FooBar::DB,',
-			'Sequel::Migrator.run(FooBar::DB, migrations_dir)',
-			'Sequel::Seeder.apply(FooBar::DB, seeds_dir)',
-			'	FooBar::DB.extension :schema_dumper',
-			'dump = FooBar::DB.dump_schema_migration',
-			'Sequel::Migrator.run(FooBar::DB, db_dir, target: 1)'
+			'FooBar::DB.loggers << Logger.new($stdout)',
+			'DB = FooBar::DB'
 		)
-		read_file.call('controllers', '_base_controller.rb').should match_words(
-			'module FooBar'
+		read_file.call('controllers', '_controller.rb').should match_words(
+			'module FooBar',
+			'FB.logger'
 		)
+		read_file.call('controllers', 'site', '_controller.rb').should match_words(
+			'module FooBar',
+			'class Controller < FB::Controller'
+		)
+		read_file.call('controllers', 'site', 'index_controller.rb')
+			.should match_words(
+				'module FooBar',
+				'class IndexController < FB::Site::Controller'
+			)
 		read_file.call('config', 'config.rb').should match_words(
 			'module FooBar',
-			"SITE_NAME = 'FooBar'.freeze"
+			"SITE_NAME = 'FooBar'",
+			"ORGANIZATION_NAME = 'FooBar LLC'",
+			'::FB = ::FooBar',
+			'FB::Application.config[:logger]'
 		)
 		read_file.call('config', 'sequel.rb').should match_words(
 			'module FooBar'
 		)
+	end
+
+	should 'generate working app' do
+		execute_command.call
+		Dir.chdir app_name
+		%w[server].each do |config|
+			FileUtils.cp "config/#{config}.example.yml", "config/#{config}.yml"
+		end
+		`bundle install --gemfile=./Gemfile`
+		pid = spawn './server start'
+		sleep 3
+		uri = URI('http://localhost:3000/')
+		Net::HTTP.get(uri).should.equal "<h1>Hello, world!</h1>\n"
+		`./server stop`
+		Process.wait pid
+		Dir.chdir '..'
 	end
 end

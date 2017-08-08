@@ -1,64 +1,487 @@
 # frozen_string_literal: true
 
+require 'yaml'
+
+def alias_task(name, old_name)
+	t = Rake::Task[old_name]
+	desc t.full_comment if t.full_comment
+	task name, *t.arg_names do |_, args|
+		# values_at is broken on Rake::TaskArguments
+		args = t.arg_names.map { |a| args[a] }
+		t.invoke(*args)
+	end
+end
+
+db_config_file = File.join(__dir__, 'config', 'database.yml')
+db_config = YAML.load_file db_config_file
+db_user = db_config[:user]
+db_access = "-U #{db_user} -h #{db_config[:host]}"
+
+check_pgpass = lambda do
+	pgpass_file = File.expand_path '~/.pgpass'
+	return if File.exist?(pgpass_file) && (
+		File.mtime(pgpass_file) >= File.mtime(db_config_file)
+	)
+	pgpass_content = db_config.values_at(
+		:host, :port, :database, :user, :password
+	).join(':')
+	File.write(pgpass_file, pgpass_content)
+	File.chmod(0o600, pgpass_file)
+end
+
 namespace :db do
 	## Require libs and config
+	require 'logger'
 	require 'sequel'
-	require File.join(__dir__, 'config', 'sequel.rb')
+	begin
+		require File.join(__dir__, 'config', 'sequel.rb')
+	rescue Sequel::DatabaseConnectionError => exception
+		puts exception.message
+	end
+	# <%= @module_name %>::DB.loggers << Logger.new($stdout)
 	## Default path to db-files
-	db_dir = File.join(__dir__, 'db')
+	DB = <%= @module_name %>::DB
+	DB_DIR = File.join(__dir__, 'db')
 
-	desc 'Run migrations'
-	task :migrate, [:version] do |_t, args|
-		Sequel.extension :migration
-		migrations_dir = File.join(db_dir, 'migrations')
+	namespace :migrations do
+		MIGRATIONS_DIR = File.join(DB_DIR, 'migrations')
 
-		if args[:version]
-			puts "Migrating to version #{args[:version]}"
-			Sequel::Migrator.run(
-				<%= @module_name %>::DB,
-				migrations_dir,
-				target: args[:version].to_i
-			)
-		else
-			puts 'Migrating to latest'
-			Sequel::Migrator.run(<%= @module_name %>::DB, migrations_dir)
+		## Migration file
+		class MigrationFile
+			MIGRATION_CONTENT =
+				<<~STR
+					# frozen_string_literal: true
+
+					Sequel.migration do
+						up do
+						end
+
+						down do
+						end
+					end
+				STR
+
+			DISABLING_EXT = '.bak'
+
+			def self.find(query, only_one: true, enabled: true, disabled: true)
+				filenames = Dir[File.join(MIGRATIONS_DIR, "*#{query}*")]
+				filenames.select! { |filename| File.file? filename }
+				files = filenames.map { |filename| new filename: filename }.sort!
+				files.reject!(&:disabled) unless disabled
+				files.select!(&:disabled) unless enabled
+				return files unless only_one
+				return files.first if files.size < 2
+				raise 'More than one file mathes the query'
+			end
+
+			attr_accessor :version, :name, :disabled
+
+			def initialize(filename: nil, name: nil)
+				self.filename = filename
+				self.name = name if name
+			end
+
+			## Accessors
+
+			def basename
+				File.basename(@filename)
+			end
+
+			def filename=(value)
+				parse_filename value if value.is_a? String
+				@filename = value
+			end
+
+			def name=(value)
+				@name = value.tr(' ', '_').downcase
+			end
+
+			def disabled=(value)
+				@disabled =
+					case value
+					when String
+						[DISABLING_EXT, DISABLING_EXT[1..-1]].include? value
+					else
+						value
+					end
+			end
+
+			def <=>(other)
+				version <=> other.version
+			end
+
+			## Behavior
+
+			def print
+				datetime = DateTime.parse(version).strftime('%F %R')
+				fullname = name.tr('_', ' ').capitalize
+				fullname = "#{fullname} (disabled)" if disabled
+				version_color, name_color =
+					disabled ? ["\e[37m", "\e[37m- "] : ["\e[36m", '']
+				puts "\e[37m[#{version}]\e[0m #{version_color}#{datetime}\e[0m" \
+					" #{name_color}#{fullname}\e[0m"
+			end
+
+			def generate
+				self.version = new_version
+				File.write new_filename, MIGRATION_CONTENT
+			end
+
+			def reversion
+				rename version: new_version
+			end
+
+			def disable
+				if disabled
+					puts 'Migration already disabled'
+					exit false
+				end
+				rename disabled: true
+			end
+
+			def enable
+				unless disabled
+					puts 'Migration already enabled'
+					exit false
+				end
+				rename disabled: false
+			end
+
+			private
+
+			def parse_filename(value = @filename)
+				basename = File.basename value
+				self.version, parts = basename.split('_', 2)
+				self.name, _ext, self.disabled = parts.split('.')
+			end
+
+			def new_version
+				Time.now.strftime('%Y%m%d%H%M')
+			end
+
+			def rename(vars = {})
+				vars.each { |key, value| send :"#{key}=", value }
+				return unless @filename.is_a? String
+				File.rename @filename, new_filename
+				self.filename = new_filename
+			end
+
+			def new_filename
+				new_basename = "#{version}_#{name}.rb#{DISABLING_EXT if disabled}"
+				File.join MIGRATIONS_DIR, new_basename
+			end
 		end
 
-		Rake::Task['db:schema:dump'].invoke('same_db=true')
+		desc 'Run migrations'
+		task :run, %i[target current] do |_t, args|
+			Rake::Task['db:dump'].invoke
+
+			Sequel.extension :migration
+			Sequel.extension :inflector
+
+			options = {
+				allow_missing_migration_files: env_true?(:ignore)
+			}
+			if args[:target]
+				file = MigrationFile.find args[:target], disabled: false
+				if file.nil?
+					puts 'Migration with this version not found'
+					exit false
+				end
+				puts "Migrating from #{args[:current] || 'current'} to #{file.version}"
+				options[:current] = args[:current].to_i
+				options[:target] = file.version.to_i
+			else
+				puts 'Migrating to latest'
+			end
+
+			DB.loggers << Logger.new($stdout)
+
+			Sequel::Migrator.run(
+				DB,
+				MIGRATIONS_DIR,
+				options
+			)
+		end
+
+		desc 'Create migration'
+		task :new, :name do |_t, args|
+			if args[:name].nil?
+				puts 'You must specify a migration name'
+				exit false
+			end
+
+			file = MigrationFile.new name: args[:name]
+			file.generate
+		end
+
+		desc 'Change version of migration to latest'
+		task :reversion, :filename do |_t, args|
+			if args[:filename].nil?
+				puts 'You must specify a migration name or version'
+				exit false
+			end
+
+			file = MigrationFile.find args[:filename]
+			file.reversion
+		end
+
+		desc 'Disable migration'
+		task :disable, :filename do |_t, args|
+			if args[:filename].nil?
+				puts 'You must specify a migration name or version'
+				exit false
+			end
+
+			file = MigrationFile.find args[:filename]
+			file.disable
+		end
+
+		desc 'Enable migration'
+		task :enable, :filename do |_t, args|
+			if args[:filename].nil?
+				puts 'You must specify a migration name or version'
+				exit false
+			end
+
+			file = MigrationFile.find args[:filename]
+			file.enable
+		end
+
+		desc 'Show all migrations'
+		task :list do |_t, _args|
+			files = MigrationFile.find '*', only_one: false
+			files.each(&:print)
+		end
+
+		desc 'Check applied migrations'
+		task :check do
+			applied_names = DB[:schema_migrations].select_map(:filename)
+			applied = applied_names.map { |one| MigrationFile.new filename: one }
+			existing = MigrationFile.find '*', only_one: false, disabled: false
+			existing_names = existing.map(&:basename)
+			a_not_e = applied.reject { |one| existing_names.include? one.basename }
+			e_not_a = existing.reject { |one| applied_names.include? one.basename }
+			if a_not_e.any?
+				puts 'Applied, but not existing'
+				a_not_e.each(&:print)
+				puts "\n" if e_not_a.any?
+			end
+			if e_not_a.any?
+				puts 'Existing, but not applied'
+				e_not_a.each(&:print)
+			end
+		end
 	end
 
+	alias_task :migrate, 'migrations:run'
+
 	desc 'Run seeds'
-	task :seed do |_t|
+	task :seed do
 		require 'sequel/extensions/seed'
-		seeds_dir = File.join(db_dir, 'seeds')
+		seeds_dir = File.join(DB_DIR, 'seeds')
 
 		## Doesn't support version yet
 		puts 'Seeding latest'
-		Sequel::Seeder.apply(<%= @module_name %>::DB, seeds_dir)
+		Sequel::Seeder.apply(DB, seeds_dir)
 	end
 
-	namespace :schema do
-		schema_filename = '001_schema.rb'
+	desc 'Make DB dump'
+	task :dump do
+		check_pgpass.call
+		timestamp = Time.now.strftime('%Y-%m-%d_%H-%M')
+		directory = File.expand_path File.join(__dir__, 'db', 'dumps')
+		filename = File.join directory, "#{db_config[:database]}_#{timestamp}.sql"
+		sh "mkdir -p #{directory}"
+		sh "pg_dump #{db_access} #{db_config[:database]} > #{filename}"
+	end
+end
 
-		desc 'Run schema dump'
-		task :dump do |_t|
-			<%= @module_name %>::DB.extension :schema_dumper
-			puts 'Dump latest schema'
-			dump = <%= @module_name %>::DB.dump_schema_migration(
-				same_db: env_true?('same_db')
-			)
-			File.write(File.join(db_dir, schema_filename), dump)
+namespace :check do
+	desc 'Check locales'
+	task :locales do
+		require 'yaml'
+		require 'json'
+
+		## Class for Locale file
+		class Locale
+			attr_reader :code, :hash
+
+			EXT = '.yml'
+
+			def self.load(locales_dir = 'locales')
+				Dir[File.join(__dir__, locales_dir, "*#{EXT}")].map do |file|
+					new File.basename(file, EXT), YAML.load_file(file)
+				end
+			end
+
+			def initialize(code, hash)
+				@code = code
+				@hash = hash
+			end
+
+			class HashCompare
+				def initialize(hash, other_hash)
+					@hash = hash
+					@other_hash = other_hash
+					@diff = {}
+				end
+
+				def different_keys
+					@hash.each_pair do |key, value|
+						other_value = @other_hash[key]
+						if value.is_a?(Hash) && other_value.is_a?(Hash)
+							add_differences_in_hash(value, other_value, key)
+						elsif value.is_a?(Array) && other_value.is_a?(Array)
+							add_differences_in_array(value, other_value, key)
+						elsif other_value.nil? || value.class != other_value.class
+							add_difference(value, key)
+						end
+					end
+					@diff
+				end
+
+				private
+
+				def add_difference(difference, key)
+					@diff[key] = difference unless difference.empty?
+				end
+
+				def add_differences_in_hash(hash, other_hash, key)
+					difference = self.class.new(hash, other_hash).different_keys
+					add_difference(difference, key)
+				end
+
+				def add_differences_in_array(array, other_array, key)
+					difference =
+						if array.size != other_array.size
+							array
+						else
+							differences_in_array(array, other_array)
+						end
+					add_difference(difference, key)
+				end
+
+				def differences_in_array(array, other_array)
+					array.each_with_object([]).with_index do |(object, diff), i|
+						other_object = other_array[i]
+						if object.is_a?(Hash) && other_object.is_a?(Hash)
+							difference = self.class.new(object, other_object).different_keys
+							diff << difference unless difference.empty?
+						end
+					end.compact
+				end
+			end
+
+			def diff(other)
+				HashCompare.new(hash, other.hash).different_keys
+			end
 		end
 
-		desc 'Run schema load'
-		task :load do |_t|
-			Sequel.extension :migration
-			puts 'Load latest schema'
-			Sequel::Migrator.run(<%= @module_name %>::DB, db_dir, target: 1)
+		locales = Locale.load
+
+		def compare_locales(locale, other_locale)
+			puts "#{locale.code.upcase} -> #{other_locale.code.upcase}:\n\n"
+			puts locale.diff(other_locale).to_yaml
+		end
+
+		locales.each_with_index do |locale, ind|
+			locales[ind..-1].each do |other_locale|
+				next if locale == other_locale
+				compare_locales(locale, other_locale)
+				compare_locales(other_locale, locale)
+			end
+		end
+	end
+
+	desc 'Check static files'
+	task :static do
+		Dir[File.join(__dir__, 'public', '**', '*')].each do |file|
+			basename = File.basename(file)
+			grep_options = '--exclude-dir={\.git,log} --color=always'
+			found = `grep -ir '#{basename}' ./ #{grep_options}`
+			next unless found.empty? && File.dirname(file) != @skipping_dir
+			filename = file.sub(__dir__, '')
+			puts "Delete #{filename} ? [y,n,s]"
+			answer = STDIN.gets.chomp
+			case answer
+			when 'y', 'Y', 'yes'
+				`git rm #{file.gsub(' ', '\ ')}`
+			when 's', 'S', 'skip'
+				@skipping_dir = File.dirname(file)
+			end
 		end
 	end
 end
 
+namespace :config do
+	desc 'Check config files'
+	task :check do
+		example_suffix = '.example'
+		Dir[
+			File.join(__dir__, 'config', '**', "*#{example_suffix}*")
+		].each do |file|
+			regular_filename = file.sub(example_suffix, '')
+			next if File.exist? regular_filename
+			FileUtils.cp file, regular_filename
+			sh "eval $EDITOR #{regular_filename}"
+		end
+	end
+end
+
+desc 'Start interactive console'
+task :console, :environment do |_t, args|
+	require 'rack/console'
+
+	args = args.to_hash
+	args[:environment] ||= 'development'
+	ARGV.clear
+	Rack::Console.new(args).start
+end
+
+desc 'Start psql'
+task :psql do
+	check_pgpass.call
+	sh "psql #{db_access} #{db_config[:database]}"
+end
+
+## Command for update server
+desc 'Update from git'
+task :update, :branch, :without_restart do |_t, args|
+	args = args.to_hash
+	args[:branch] ||= :master
+	server = './server'
+	sh "git checkout #{args[:branch]}"
+	sh "git pull origin #{args[:branch]}"
+	next if args[:without_restart]
+	sh 'bundle check || bundle update'
+	sh "#{server} stop"
+	sh 'rake db:migrate'
+	sh "#{server} start"
+end
+
+## Command before creating new branch
+desc 'Fetch origin and rebase branch from master'
+task :rebase do
+	sh 'git fetch origin'
+	sh 'git rebase origin/master'
+end
+
+## Command for deploy code from git to server
+## @example rake deploy
+##  Update from git with migrations and restart (for .rb and .erb files update)
+## @example rake deploy[true]
+##  Update from git without migrations and restart (for static files update)
+desc 'Deploy to production server'
+task :deploy, :without_restart do |_t, args|
+	servers = YAML.load_file File.join(__dir__, 'config', 'deploy.yml')
+	rake_command = "rake update[master#{',true' if args.without_restart}]"
+	servers.each do |server|
+		update_command = "cd #{server[:path]} && #{rake_command}"
+		sh "ssh -t #{server[:ssh]} 'bash --login -c \"#{update_command}\"'"
+	end
+end
+
 def env_true?(key)
-	%(true yes 1 y).include?(ENV[key].to_s.downcase)
+	%(true yes 1 y).include?(ENV[key.to_s].to_s.downcase)
 end

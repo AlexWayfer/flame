@@ -2,6 +2,9 @@
 
 module <%= @module_name %>
 	## Class for application (mounting controllers)
-	class Application
+	class Application < Flame::Application
+		include <%= @short_module_name %>::Config
+
+		mount Site::IndexController, '/'
 	end
 end

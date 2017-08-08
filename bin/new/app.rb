@@ -9,6 +9,8 @@ module FlameCLI
 			def initialize(app_name)
 				@app_name = app_name
 				@module_name = @app_name.camelize
+				@short_module_name = @module_name
+					.split(/([[:upper:]][[:lower:]]*)/).map! { |s| s[0] }.join
 
 				make_dir do
 					copy_template
@@ -41,13 +43,19 @@ module FlameCLI
 			def render_templates
 				puts 'Replace module names in template...'
 				Dir[File.join('**', '*.erb')].each do |file|
-					# file_pathname = Pathname.new(file)
-					basename = File.basename(file, '.*')
-					puts "- #{basename}"
-					content = ERB.new(File.read(file)).result(binding)
-					File.write(File.join(File.dirname(file), basename), content)
-					FileUtils.rm file
+					## Skip views
+					next if File.dirname(file).split(File::SEPARATOR).include? 'views'
+					render_template_file file
 				end
+			end
+
+			def render_template_file(file)
+				file_pathname = Pathname.new(file)
+				basename_pathname = file_pathname.sub_ext('')
+				puts "- #{basename_pathname}"
+				content = ERB.new(File.read(file)).result(binding)
+				File.write(basename_pathname, content)
+				FileUtils.rm file
 			end
 		end
 	end

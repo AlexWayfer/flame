@@ -2,14 +2,41 @@
 
 source 'https://rubygems.org'
 
-## Framework
+## system
+# gem 'gorilla-patch'
+# gem 'json'
+
+## server
 gem 'flame'
 # gem 'flame-flash'
 # gem 'flame-r18n'
+gem 'puma'
+# gem 'rack-slashenforce'
+gem 'rack-utf8_sanitizer'
 
-## Server
-gem 'thin'
+group :development do
+	gem 'filewatcher', git: 'https://github.com/thomasfl/filewatcher.git'
+	gem 'pry-byebug'
+end
 
-## DataBase
-gem 'sequel'
+group :linter do
+	# gem 'rubocop'
+end
+
+## database
 # gem 'pg'
+# gem 'sequel'
+# gem 'sequel_pg', require: 'sequel'
+
+## others
+# gem 'faker'
+# gem 'google_currency'
+# gem 'kramdown'
+# gem 'mail'
+# gem 'money'
+# gem 'sentry-raven'
+
+## tools
+gem 'pry'
+gem 'rack-console'
+gem 'rake'

@@ -1,0 +1,2 @@
+- :ssh: 'server alias from ~/.ssh/config (or user@host)'
+  :path: '/path/to/root/of/project'

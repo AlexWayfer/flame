@@ -1,14 +1,56 @@
 # frozen_string_literal: true
 
+## Module for Application configuration
 module <%= @module_name %>
 	## Constants
-	SITE_NAME = '<%= @module_name %>'.freeze
+	SITE_NAME = '<%= @module_name %>'
+	ORGANIZATION_NAME = '<%= @module_name %> LLC'
+	::<%= @short_module_name %> = ::<%= @module_name %>
+
+	## Helpers
+	def self.logger
+		<%= @short_module_name %>::Application.config[:logger]
+	end
 
 	## Configuration for application
 	module Config
 		def self.included(app)
 			## Translations
-			# Flame::R18n.config(app)
+			# app.include Flame::R18n::Configuration
+
+			## Mail
+			# app.include Config::Mail
+
+			## Sentry
+			# app.include Config::Sentry
+
+			## Threads (for mails)
+			Thread.abort_on_exception = true
+
+			## Currencies rates
+			# Money.default_bank = Money::Bank::GoogleCurrency.new
+			### https://github.com/RubyMoney/money#troubleshooting
+			# I18n.enforce_available_locales = false
+
+			## Required configs
+			load_configs(app, :server, require: true)
+
+			## Not-required configs
+			# load_configs(app, :google_maps_api)
+
+			## Mails directory
+			# app.config[:mails_dir] = proc { File.join config[:views_dir], 'mail' }
+		end
+
+		def self.load_configs(app, *keys, require: false)
+			keys.each do |key|
+				begin
+					app.config.load_yaml key
+				rescue => exception
+					next unless require
+					raise exception
+				end
+			end
 		end
 	end
 end

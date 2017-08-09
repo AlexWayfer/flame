@@ -77,6 +77,39 @@ describe Flame::Application do
 		end
 	end
 
+	describe '.require_dirs' do
+		before do
+			@requiring = lambda do
+				@app_class.require_dirs(
+					%w[config lib models helpers mailers services controllers]
+						.map! { |dir| File.join 'require_dirs', dir }
+				)
+			end
+		end
+
+		it 'should not raise any error' do
+			@requiring.should.not.raise
+		end
+
+		it 'should require all wanted files' do
+			@requiring.call
+			Dir[File.join(__dir__, 'require_dirs', '**', '*')]
+				.reject { |file| File.executable?(file) }
+				.each do |file|
+					require(file).should.be.false
+				end
+		end
+
+		it 'should not require executable files' do
+			@requiring.call
+			Dir[File.join(__dir__, 'require_dirs', '**', '*')]
+				.select { |file| File.file?(file) && File.executable?(file) }
+				.each do |file|
+					require(file).should.be.true
+				end
+		end
+	end
+
 	describe '.inherited' do
 		it 'should set default config' do
 			@app_class.config.should.be.kind_of Flame::Application::Config

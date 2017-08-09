@@ -21,18 +21,13 @@ require_dirs = proc do |dirs, ignore: %w[]|
 	end
 end
 
+## Require dirs
+Flame::Application.require_dirs(
+	%w[config models helpers lib exports mailers services controllers]
+)
+
 ## Require application
-require_app = proc do
-	## Require dirs
-	require_dirs.call(
-		%w[config models helpers libs exports mailers services controllers],
-		ignore: %w[puma.rb]
-	)
-
-	require './app'
-end
-
-require_app.call
+require './app'
 
 ## Use session middleware
 if <%= @short_module_name %>::Application.config[:session]

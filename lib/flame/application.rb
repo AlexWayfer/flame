@@ -19,12 +19,28 @@ module Flame
 				@cached_tilts ||= {}
 			end
 
+			## Require project directories, exclude executable files
+			## @param dirs [Array<String>] Array of directories names
+			## @example Regular require of project
+			##   Flame::Application.require_dirs(
+			##     %w[config lib models helpers mailers services controllers]
+			##	 )
+			def require_dirs(dirs)
+				caller_dir = File.dirname caller_file
+				dirs.each do |dir|
+					Dir[File.join(caller_dir, dir, '**', '*.rb')]
+						.reject { |file| File.executable?(file) }
+						.sort_by { |s| [File.basename(s)[0], s] }
+						.each { |file| require File.expand_path(file) }
+				end
+			end
+
 			## Generating application config when inherited
 			def inherited(app)
 				app.config = Config.new(
 					app,
 					default_config_dirs(
-						root_dir: File.dirname(caller(1..1).first.split(':')[0])
+						root_dir: File.dirname(caller_file)
 					).merge(
 						environment: ENV['RACK_ENV'] || 'development'
 					)
@@ -38,6 +54,12 @@ module Flame
 			end
 
 			private
+
+			## Get filename from caller of method
+			## @return [String] filename of caller
+			def caller_file
+				caller(2..2).first.split(':')[0]
+			end
 
 			## Mount controller in application class
 			## @param ctrl [Flame::Controller] the mounted controller class

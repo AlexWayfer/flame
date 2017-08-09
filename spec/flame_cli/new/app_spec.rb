@@ -108,6 +108,11 @@ describe 'FlameCLI::New::App' do
 	should 'generate working app' do
 		execute_command.call
 		Dir.chdir app_name
+		## HACK for newest unpublished features
+		File.write(
+			'Gemfile',
+			File.read('Gemfile').sub("gem 'flame'\n", "gem 'flame', path: '..'\n")
+		)
 		%w[server].each do |config|
 			FileUtils.cp "config/#{config}.example.yml", "config/#{config}.yml"
 		end

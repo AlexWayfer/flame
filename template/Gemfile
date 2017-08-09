@@ -7,7 +7,7 @@ source 'https://rubygems.org'
 # gem 'json'
 
 ## server
-gem 'flame', path: '..'
+gem 'flame'
 # gem 'flame-flash'
 # gem 'flame-r18n'
 gem 'puma'

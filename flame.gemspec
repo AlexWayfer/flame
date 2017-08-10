@@ -18,6 +18,7 @@ Gem::Specification.new do |s|
 	s.homepage    = 'https://github.com/AlexWayfer/flame'
 	s.license     = 'MIT'
 
+	s.add_runtime_dependency 'addressable', '~> 2.5'
 	s.add_runtime_dependency 'rack', '~> 2'
 	s.add_runtime_dependency 'tilt', '>= 2.0', '< 3'
 	s.add_runtime_dependency 'gorilla-patch', '~> 2.4'

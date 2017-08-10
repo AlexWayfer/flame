@@ -102,7 +102,7 @@ module Flame
 			query = nil if query&.empty?
 			path = path.assign_arguments(args)
 			path = '/' if path.empty?
-			URI::Generic.build(path: path, query: query).to_s
+			Addressable::URI.new(path: path, query: query).to_s
 		end
 
 		## Interrupt the execution of route, and set new optional data

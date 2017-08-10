@@ -43,12 +43,13 @@ module Flame
 			first_arg = args.first
 			path =
 				if first_arg.is_a?(String) || first_arg.is_a?(Flame::Path)
-					static_file = find_static(first_arg)
-					static_file.path(with_version: options[:version])
+					find_static(first_arg).path(with_version: options[:version])
 				else
 					path_to(*args, **options)
 				end
-			"#{request.scheme}://#{request.host_with_port}#{path}"
+			Addressable::URI.new(
+				scheme: request.scheme, host: request.host_with_port, path: path
+			).to_s
 		end
 
 		using GorillaPatch::Namespace

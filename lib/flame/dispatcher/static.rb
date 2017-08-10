@@ -19,7 +19,7 @@ module Flame
 
 			def return_static(file)
 				response[Rack::CACHE_CONTROL] = 'public, max-age=31536000' # one year
-				halt 304 if file.newer? request.env['HTTP_IF_MODIFIED_SINCE']
+				halt 304 unless file.newer? request.env['HTTP_IF_MODIFIED_SINCE']
 				response.content_type = file.extname
 				response['Last-Modified'] = file.mtime.httpdate
 				body file.content
@@ -45,7 +45,7 @@ module Flame
 				end
 
 				def newer?(http_since)
-					http_since && Time.httpdate(http_since).to_i >= mtime.to_i
+					!http_since || mtime.to_i > Time.httpdate(http_since).to_i
 				end
 
 				def content

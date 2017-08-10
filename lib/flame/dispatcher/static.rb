@@ -18,9 +18,9 @@ module Flame
 			end
 
 			def return_static(file)
+				response[Rack::CACHE_CONTROL] = 'public, max-age=31536000' # one year
 				halt 304 if file.newer? request.env['HTTP_IF_MODIFIED_SINCE']
 				response.content_type = file.extname
-				response[Rack::CACHE_CONTROL] = 'no-cache'
 				response['Last-Modified'] = file.mtime.httpdate
 				body file.content
 			end

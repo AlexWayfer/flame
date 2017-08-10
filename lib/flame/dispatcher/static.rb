@@ -57,6 +57,8 @@ module Flame
 					with_version ? "#{path}?v=#{mtime.to_i}" : path
 				end
 			end
+
+			private_constant :StaticFile
 		end
 	end
 end

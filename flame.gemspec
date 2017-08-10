@@ -1,13 +1,10 @@
 # frozen_string_literal: true
 
-require 'date'
-
 require_relative 'lib/flame/version'
 
 Gem::Specification.new do |s|
 	s.name        = 'flame'
 	s.version     = Flame::VERSION
-	s.date        = Date.today.to_s
 
 	s.summary     = 'Web-framework, based on MVC-pattern'
 	s.description = 'Use controller\'s classes with instance methods' \

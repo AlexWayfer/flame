@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'forwardable'
+require 'gorilla-patch/namespace'
 
 require_relative 'controller/with_actions'
 require_relative 'render'
@@ -48,6 +49,17 @@ module Flame
 					path_to(*args, **options)
 				end
 			"#{request.scheme}://#{request.host_with_port}#{path}"
+		end
+
+		using GorillaPatch::Namespace
+
+		## Path to previous page, or to index action, or to Index controller
+		## @return [String] path to previous page or to index
+		def path_to_back
+			back_path = request.referer
+			return back_path if back_path && back_path != request.url
+			return path_to :index if self.class.actions.include?(:index)
+			'/'
 		end
 
 		## Redirect for response

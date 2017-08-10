@@ -63,6 +63,10 @@ class AnotherControllerController < Flame::Controller
 		'Another hooked'
 	end
 
+	def back
+		path_to_back
+	end
+
 	protected
 
 	def execute(method)
@@ -74,6 +78,13 @@ end
 
 module Nested
 	class IndexController < Flame::Controller
+		def index; end
+	end
+
+	class NestedController < Flame::Controller
+		def back
+			path_to_back
+		end
 	end
 end
 
@@ -92,18 +103,23 @@ end
 class ControllerApplication < Flame::Application
 	mount ControllerController, '/'
 	mount AnotherControllerController, '/another'
+
+	mount Nested::IndexController do
+		mount Nested::NestedController
+	end
 end
 
 describe Flame::Controller do
 	before do
-		env = {
+		@env = {
 			Rack::RACK_URL_SCHEME => 'http',
 			Rack::SERVER_NAME => 'localhost',
 			Rack::SERVER_PORT => 3000,
 			Rack::RACK_INPUT => StringIO.new
 		}
-		@dispatcher = Flame::Dispatcher.new(ControllerApplication.new, env)
+		@dispatcher = Flame::Dispatcher.new(ControllerApplication.new, @env)
 		@controller = ControllerController.new(@dispatcher)
+		@another_controller = AnotherControllerController.new(@dispatcher)
 	end
 
 	describe '.actions' do
@@ -195,6 +211,42 @@ describe Flame::Controller do
 			mtime = File.mtime File.join(__dir__, 'public', file)
 			@controller.url_to("/#{file}", version: true)
 				.should.equal "http://localhost:3000/#{file}?v=#{mtime.to_i}"
+		end
+	end
+
+	describe '#path_to_back' do
+		should 'return referer URL if exist' do
+			referer = 'http://example.com/'
+			env = @env.merge(
+				'HTTP_REFERER' => referer
+			)
+			dispatcher = Flame::Dispatcher.new(ControllerApplication.new, env)
+			controller = AnotherControllerController.new(dispatcher)
+			controller.back.should.equal referer
+		end
+
+		should 'not return referer with the same URL' do
+			referer = 'http://localhost:3000/another/bar'
+			env = @env.merge(
+				Rack::PATH_INFO => '/another/bar',
+				'HTTP_REFERER' => referer
+			)
+			dispatcher = Flame::Dispatcher.new(ControllerApplication.new, env)
+			controller = AnotherControllerController.new(dispatcher)
+			controller.back.should.not.equal referer
+		end
+
+		should 'return path to index action of controller without referer' do
+			@another_controller.back.should.equal '/another'
+		end
+
+		should 'return root path without referer and index action' do
+			env = @env.merge(
+				Rack::PATH_INFO => '/nested/nested/back'
+			)
+			dispatcher = Flame::Dispatcher.new(ControllerApplication.new, env)
+			controller = Nested::NestedController.new(dispatcher)
+			controller.back.should.equal '/'
 		end
 	end
 

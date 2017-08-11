@@ -13,20 +13,18 @@ def alias_task(name, old_name)
 end
 
 db_config_file = File.join(__dir__, 'config', 'database.yml')
-db_config = YAML.load_file db_config_file
-db_user = db_config[:user]
-db_access = "-U #{db_user} -h #{db_config[:host]}"
+if File.exist? db_config_file
+	def db_config
+		@db_config ||= YAML.load_file db_config_file
+	end
 
-check_pgpass = lambda do
-	pgpass_file = File.expand_path '~/.pgpass'
-	return if File.exist?(pgpass_file) && (
-		File.mtime(pgpass_file) >= File.mtime(db_config_file)
-	)
-	pgpass_content = db_config.values_at(
-		:host, :port, :database, :user, :password
-	).join(':')
-	File.write(pgpass_file, pgpass_content)
-	File.chmod(0o600, pgpass_file)
+	def db_access
+		@db_access ||= "-U #{db_config[:user]} -h #{db_config[:host]}"
+	end
+
+	def db_connection
+		@db_connection ||= <%= @module_name %>::DB
+	end
 end
 
 namespace :db do
@@ -38,9 +36,8 @@ namespace :db do
 	rescue Sequel::DatabaseConnectionError => exception
 		puts exception.message
 	end
-	# <%= @module_name %>::DB.loggers << Logger.new($stdout)
+	# db_connection.loggers << Logger.new($stdout)
 	## Default path to db-files
-	DB = <%= @module_name %>::DB
 	DB_DIR = File.join(__dir__, 'db')
 
 	namespace :migrations do
@@ -195,10 +192,10 @@ namespace :db do
 				puts 'Migrating to latest'
 			end
 
-			DB.loggers << Logger.new($stdout)
+			db_connection.loggers << Logger.new($stdout)
 
 			Sequel::Migrator.run(
-				DB,
+				db_connection,
 				MIGRATIONS_DIR,
 				options
 			)
@@ -256,7 +253,7 @@ namespace :db do
 
 		desc 'Check applied migrations'
 		task :check do
-			applied_names = DB[:schema_migrations].select_map(:filename)
+			applied_names = db_connection[:schema_migrations].select_map(:filename)
 			applied = applied_names.map { |one| MigrationFile.new filename: one }
 			existing = MigrationFile.find '*', only_one: false, disabled: false
 			existing_names = existing.map(&:basename)
@@ -283,12 +280,11 @@ namespace :db do
 
 		## Doesn't support version yet
 		puts 'Seeding latest'
-		Sequel::Seeder.apply(DB, seeds_dir)
+		Sequel::Seeder.apply(db_connection, seeds_dir)
 	end
 
 	desc 'Make DB dump'
 	task :dump do
-		check_pgpass.call
 		timestamp = Time.now.strftime('%Y-%m-%d_%H-%M')
 		directory = File.expand_path File.join(__dir__, 'db', 'dumps')
 		filename = File.join directory, "#{db_config[:database]}_#{timestamp}.sql"
@@ -441,7 +437,6 @@ end
 
 desc 'Start psql'
 task :psql do
-	check_pgpass.call
 	sh "psql #{db_access} #{db_config[:database]}"
 end
 

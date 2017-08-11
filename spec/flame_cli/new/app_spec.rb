@@ -117,12 +117,27 @@ describe 'FlameCLI::New::App' do
 			FileUtils.cp "config/#{config}.example.yml", "config/#{config}.yml"
 		end
 		`bundle install --gemfile=./Gemfile`
-		pid = spawn './server start'
-		sleep 3
-		uri = URI('http://localhost:3000/')
-		Net::HTTP.get(uri).should.equal "<h1>Hello, world!</h1>\n"
-		`./server stop`
-		Process.wait pid
-		Dir.chdir '..'
+		begin
+			pid = spawn './server start'
+			sleep 3
+			uri = URI('http://localhost:3000/')
+			Net::HTTP.get(uri).should.equal <<~RESPONSE
+				<!DOCTYPE html>
+				<html>
+					<head>
+						<meta charset="utf-8" />
+						<title>FooBar</title>
+					</head>
+					<body>
+						<h1>Hello, world!</h1>
+
+					</body>
+				</html>
+			RESPONSE
+		ensure
+			`./server stop`
+			Process.wait pid
+			Dir.chdir '..'
+		end
 	end
 end

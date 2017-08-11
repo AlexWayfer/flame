@@ -43,19 +43,13 @@ module FlameCLI
 			def render_templates
 				puts 'Replace module names in template...'
 				Dir[File.join('**', '*.erb')].each do |file|
-					## Skip views
-					next if File.dirname(file).split(File::SEPARATOR).include? 'views'
-					render_template_file file
+					file_pathname = Pathname.new(file)
+					basename_pathname = file_pathname.sub_ext('')
+					puts "- #{basename_pathname}"
+					content = ERB.new(File.read(file)).result(binding)
+					File.write(basename_pathname, content)
+					FileUtils.rm file
 				end
-			end
-
-			def render_template_file(file)
-				file_pathname = Pathname.new(file)
-				basename_pathname = file_pathname.sub_ext('')
-				puts "- #{basename_pathname}"
-				content = ERB.new(File.read(file)).result(binding)
-				File.write(basename_pathname, content)
-				FileUtils.rm file
 			end
 		end
 	end

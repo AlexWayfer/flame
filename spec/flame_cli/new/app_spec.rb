@@ -77,8 +77,7 @@ describe 'FlameCLI::New::App' do
 			'include FB::Config'
 		)
 		read_file.call('Rakefile').should match_words(
-			'FooBar::DB.loggers << Logger.new($stdout)',
-			'DB = FooBar::DB'
+			'@db_connection ||= FooBar::DB'
 		)
 		read_file.call('controllers', '_controller.rb').should match_words(
 			'module FooBar',

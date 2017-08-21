@@ -23,7 +23,7 @@ if File.exist? db_config_file
 	end
 
 	def db_connection
-		@db_connection ||= <%= @module_name %>::DB
+		@db_connection ||= Sequel.connect db_config
 	end
 end
 
@@ -50,10 +50,7 @@ namespace :db do
 					# frozen_string_literal: true
 
 					Sequel.migration do
-						up do
-						end
-
-						down do
+						change do
 						end
 					end
 				STR
@@ -121,6 +118,7 @@ namespace :db do
 
 			def generate
 				self.version = new_version
+				FileUtils.mkdir_p File.dirname new_filename
 				File.write new_filename, MIGRATION_CONTENT
 			end
 

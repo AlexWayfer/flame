@@ -26,7 +26,6 @@ describe 'FlameCLI::New::App' do
 				'Replace module names in template...',
 				'- config.ru',
 				'- app.rb',
-				'- Rakefile',
 				'- config/config.rb',
 				'- config/sequel.rb',
 				'- controllers/_controller.rb',
@@ -75,9 +74,6 @@ describe 'FlameCLI::New::App' do
 		read_file.call('app.rb').should match_words(
 			'module FooBar',
 			'include FB::Config'
-		)
-		read_file.call('Rakefile').should match_words(
-			'@db_connection ||= FooBar::DB'
 		)
 		read_file.call('controllers', '_controller.rb').should match_words(
 			'module FooBar',

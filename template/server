@@ -38,7 +38,7 @@ def server(command)
 end
 
 def web_server(command)
-	pumactl_command = "pumactl #{command} -F #{puma_config_file}"
+	pumactl_command = "bundle exec pumactl #{command} -F #{puma_config_file}"
 	if environment == 'production' || command != :restart
 		waiting_mailing_lock if %i[stop restart].include?(command)
 		return bash pumactl_command

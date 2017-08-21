@@ -88,9 +88,11 @@ when 'monitor'
 	monitor_server
 when 'devel'
 	server :restart
-	puts 'Waiting for logs...'
-	sleep 1.5
-	monitor_server
+	if environment == 'production'
+		puts 'Waiting for logs...'
+		sleep 1.5
+		monitor_server
+	end
 else
 	puts "Unknown command #{ARGV[0]}"
 	show_usage

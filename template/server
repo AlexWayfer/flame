@@ -69,7 +69,7 @@ def monitor_server
 end
 
 def bundle_check
-	bash 'bundle check || bundle update'
+	bash 'bundle check || bundle install'
 end
 
 ## Runtime

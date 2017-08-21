@@ -55,12 +55,14 @@ rescue SystemExit, Interrupt
 end
 
 def filewatcher_command(execute)
-	'bundle exec "' \
-		'filewatcher -r ' \
-			"'**/{Gemfile,*.{rb,ru,yml}}' " \
-			"--exclude '**/{spec/**/*,config/**/*.example*}' " \
-			"'#{execute}'" \
-	'"'
+	<<-CMD.split.join(' ')
+		bundle exec "
+			filewatcher -r
+				'**/{Gemfile,*.{rb,ru,yml}}'
+				--exclude '**/{spec/**/*,config/**/*.example*}'
+				'#{execute}'
+		"
+	CMD
 end
 
 def server_config

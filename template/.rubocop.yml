@@ -1,0 +1,14 @@
+Layout/Tab:
+  Enabled: false
+Layout/IndentationWidth:
+  Width: 1
+Layout/MultilineMethodCallIndentation:
+  EnforcedStyle: indented
+
+AllCops:
+  TargetRubyVersion: 2.3
+
+Metrics/BlockLength:
+  Exclude:
+    - Rakefile
+    - db/migrations/*

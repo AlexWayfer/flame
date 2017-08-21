@@ -5,8 +5,6 @@
 require 'shellwords'
 require 'yaml'
 
-FILEWATCHER_PATTERN = '**/{Gemfile,*.{rb,ru,yml}}'
-
 ## Functons
 def show_usage
 	puts 'Usage: ./server COMMAND'
@@ -20,9 +18,18 @@ def show_usage
 end
 
 def bash(command)
-	escaped_command = Shellwords.escape(command)
 	system "echo #{command}"
-	system "bash -c #{escaped_command}"
+	system bash_command(command)
+end
+
+def bash_command(command)
+	escaped_command = Shellwords.escape(command)
+	"bash -c #{escaped_command}"
+end
+
+def bash_spawn(command)
+	system "echo spawn #{command}"
+	spawn bash_command(command)
 end
 
 def server(command)
@@ -36,8 +43,23 @@ def web_server(command)
 		waiting_mailing_lock if %i[stop restart].include?(command)
 		return bash pumactl_command
 	end
-	bash 'bundle exec "' \
-		"filewatcher -r -I '#{FILEWATCHER_PATTERN}' '#{pumactl_command}'" \
+	development_restart pumactl_command
+end
+
+def development_restart(pumactl_command)
+	filewatcher_pid = bash_spawn filewatcher_command(pumactl_command)
+	web_server :stop
+	web_server :start
+rescue SystemExit, Interrupt
+	bash "kill #{filewatcher_pid}"
+end
+
+def filewatcher_command(execute)
+	'bundle exec "' \
+		'filewatcher -r ' \
+			"'**/{Gemfile,*.{rb,ru,yml}}' " \
+			"--exclude '**/{spec/**/*,config/**/*.example*}' " \
+			"'#{execute}'" \
 	'"'
 end
 

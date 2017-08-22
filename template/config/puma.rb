@@ -11,6 +11,8 @@ directory root_dir
 
 prune_bundler
 
+exit unless system 'bundle check || bundle install'
+
 rackup 'config.ru'
 
 require 'fileutils'

@@ -9,6 +9,8 @@ is_production = config[:environment] == 'production'
 root_dir = File.join(__dir__, '..')
 directory root_dir
 
+prune_bundler
+
 rackup 'config.ru'
 
 require 'fileutils'

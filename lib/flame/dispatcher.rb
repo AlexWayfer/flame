@@ -164,7 +164,7 @@ module Flame
 			return nil unless route
 			status 200
 			execute_route(route)
-			!body.empty?
+			true
 		end
 
 		## Execute route

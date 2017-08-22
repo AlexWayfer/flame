@@ -91,6 +91,12 @@ describe Flame::Dispatcher do
 			respond.body.should.equal ['Body of action']
 		end
 
+		it 'should return status 200 for existing route with empty body' do
+			respond = @init.call(path: 'foo').run!.last
+			respond.status.should.equal 200
+			respond.body.should.equal ['']
+		end
+
 		it 'should return content of existing static file' do
 			respond = @init.call(path: 'test.txt').run!.last
 			respond.status.should.equal 200

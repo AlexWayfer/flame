@@ -111,12 +111,19 @@ describe 'FlameCLI::New::App' do
 		%w[server].each do |config|
 			FileUtils.cp "config/#{config}.example.yml", "config/#{config}.yml"
 		end
-		`bundle install --gemfile=./Gemfile`
 		begin
 			pid = spawn './server start'
-			sleep 3
 			uri = URI('http://localhost:3000/')
-			Net::HTTP.get(uri).should.equal <<~RESPONSE
+			number_of_attempts = 0
+			begin
+				number_of_attempts += 1
+				response = Net::HTTP.get(uri)
+			rescue Errno::ECONNREFUSED => e
+				sleep 1
+				retry if number_of_attempts < 10
+				raise e
+			end
+			response.should.equal <<~RESPONSE
 				<!DOCTYPE html>
 				<html>
 					<head>

@@ -15,6 +15,17 @@ class DispatcherController < Flame::Controller
 	def test
 		'Route content'
 	end
+
+	def action_with_after_hook
+		'Body of action'
+	end
+
+	protected
+
+	def execute(action)
+		super
+		nil if action == :action_with_after_hook
+	end
 end
 
 ## Test application for Dispatcher
@@ -72,6 +83,12 @@ describe Flame::Dispatcher do
 			respond = @dispatcher.run!.last
 			respond.status.should.equal 200
 			respond.body.should.equal ['Hello, world!']
+		end
+
+		it 'should return respond from existing route with nil in after-hook' do
+			respond = @init.call(path: 'action_with_after_hook').run!.last
+			respond.status.should.equal 200
+			respond.body.should.equal ['Body of action']
 		end
 
 		it 'should return content of existing static file' do

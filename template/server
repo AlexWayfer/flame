@@ -33,6 +33,11 @@ def bash_spawn(command)
 end
 
 def server(command)
+	exit if %i[start restart].include?(command) && !bundle_check
+	web_server(command)
+end
+
+def web_server(command)
 	pumactl_command = "bundle exec pumactl #{command} -F #{puma_config_file}"
 	if environment == 'production' || command != :restart
 		waiting_mailing_lock if %i[stop restart].include?(command)
@@ -43,8 +48,8 @@ end
 
 def development_restart(pumactl_command)
 	filewatcher_pid = bash_spawn filewatcher_command(pumactl_command)
-	server :stop
-	server :start
+	web_server :stop
+	web_server :start
 rescue SystemExit, Interrupt
 	bash "kill #{filewatcher_pid}"
 end
@@ -85,6 +90,10 @@ end
 
 def monitor_server
 	bash "tail -f #{log_files}"
+end
+
+def bundle_check
+	bash 'bundle check || bundle install'
 end
 
 ## Runtime

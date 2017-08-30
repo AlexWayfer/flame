@@ -184,11 +184,4 @@ describe Flame::Application do
 			-> { @app_class.new(another_app).call(@env) }.should.not.raise
 		end
 	end
-
-	describe '#router' do
-		it 'should return class router' do
-			@app.router.should.be.kind_of Flame::Router
-			@app.router.should.be.same_as @app.class.router
-		end
-	end
 end

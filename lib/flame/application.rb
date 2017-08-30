@@ -89,10 +89,6 @@ module Flame
 			end
 		end
 
-		def router
-			self.class.router
-		end
-
 		def initialize(app = nil)
 			@app = app
 		end

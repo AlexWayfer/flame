@@ -141,12 +141,6 @@ describe Flame::Application do
 		end
 	end
 
-	describe '#config' do
-		it 'should return config' do
-			@app.config.should.be.kind_of Flame::Application::Config
-		end
-	end
-
 	describe '#initialize' do
 		it 'should take app parameter' do
 			another_app = @init.call.new

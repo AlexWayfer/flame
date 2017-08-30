@@ -89,11 +89,6 @@ module Flame
 			end
 		end
 
-		## Framework configuration
-		def config
-			self.class.config
-		end
-
 		def router
 			self.class.router
 		end

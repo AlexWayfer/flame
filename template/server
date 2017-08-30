@@ -18,7 +18,7 @@ def show_usage
 end
 
 def bash(command)
-	system "echo #{command}"
+	puts command
 	system bash_command(command)
 end
 
@@ -28,7 +28,7 @@ def bash_command(command)
 end
 
 def bash_spawn(command)
-	system "echo spawn #{command}"
+	puts "spawn #{command}"
 	spawn bash_command(command)
 end
 

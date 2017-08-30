@@ -111,6 +111,7 @@ describe 'FlameCLI::New::App' do
 		%w[server].each do |config|
 			FileUtils.cp "config/#{config}.example.yml", "config/#{config}.yml"
 		end
+		system 'bundle install --gemfile=Gemfile'
 		begin
 			pid = spawn './server start'
 			uri = URI('http://localhost:3000/')

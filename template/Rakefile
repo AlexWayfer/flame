@@ -12,10 +12,14 @@ def alias_task(name, old_name)
 	end
 end
 
-db_config_file = File.join(__dir__, 'config', 'database.yml')
-if File.exist? db_config_file
+DB_CONFIG_FILE = File.join(__dir__, 'config', 'database.yml')
+if File.exist? DB_CONFIG_FILE
 	def db_config
-		@db_config ||= YAML.load_file db_config_file
+		return @db_config if defined? @db_config
+		@db_config = YAML.load_file DB_CONFIG_FILE
+		env_db_name = ENV['DB_NAME']
+		@db_config[:database] = env_db_name if env_db_name
+		@db_config
 	end
 
 	def db_access
@@ -31,11 +35,7 @@ namespace :db do
 	## Require libs and config
 	require 'logger'
 	require 'sequel'
-	begin
-		require File.join(__dir__, 'config', 'sequel.rb')
-	rescue Sequel::DatabaseConnectionError => exception
-		puts exception.message
-	end
+
 	# db_connection.loggers << Logger.new($stdout)
 	## Default path to db-files
 	DB_DIR = File.join(__dir__, 'db')
@@ -177,15 +177,21 @@ namespace :db do
 			options = {
 				allow_missing_migration_files: env_true?(:ignore)
 			}
-			if args[:target]
-				file = MigrationFile.find args[:target], disabled: false
-				if file.nil?
-					puts 'Migration with this version not found'
-					exit false
+			if (target = args[:target])
+				if target == '0'
+					puts 'Migrating all the way down'
+				else
+					file = MigrationFile.find target, disabled: false
+					if file.nil?
+						puts 'Migration with this version not found'
+						exit false
+					end
+					current = args[:current] || 'current'
+					puts "Migrating from #{current} to #{file.basename}"
+					target = file.version
 				end
-				puts "Migrating from #{args[:current] || 'current'} to #{file.version}"
 				options[:current] = args[:current].to_i
-				options[:target] = file.version.to_i
+				options[:target] = target.to_i
 			else
 				puts 'Migrating to latest'
 			end

@@ -117,7 +117,7 @@ describe Flame::Controller do
 			Rack::SERVER_PORT => 3000,
 			Rack::RACK_INPUT => StringIO.new
 		}
-		@dispatcher = Flame::Dispatcher.new(ControllerApplication.new, @env)
+		@dispatcher = Flame::Dispatcher.new(ControllerApplication, @env)
 		@controller = ControllerController.new(@dispatcher)
 		@another_controller = AnotherControllerController.new(@dispatcher)
 	end
@@ -220,7 +220,7 @@ describe Flame::Controller do
 			env = @env.merge(
 				'HTTP_REFERER' => referer
 			)
-			dispatcher = Flame::Dispatcher.new(ControllerApplication.new, env)
+			dispatcher = Flame::Dispatcher.new(ControllerApplication, env)
 			controller = AnotherControllerController.new(dispatcher)
 			controller.back.should.equal referer
 		end
@@ -231,7 +231,7 @@ describe Flame::Controller do
 				Rack::PATH_INFO => '/another/bar',
 				'HTTP_REFERER' => referer
 			)
-			dispatcher = Flame::Dispatcher.new(ControllerApplication.new, env)
+			dispatcher = Flame::Dispatcher.new(ControllerApplication, env)
 			controller = AnotherControllerController.new(dispatcher)
 			controller.back.should.not.equal referer
 		end
@@ -244,7 +244,7 @@ describe Flame::Controller do
 			env = @env.merge(
 				Rack::PATH_INFO => '/nested/nested/back'
 			)
-			dispatcher = Flame::Dispatcher.new(ControllerApplication.new, env)
+			dispatcher = Flame::Dispatcher.new(ControllerApplication, env)
 			controller = Nested::NestedController.new(dispatcher)
 			controller.back.should.equal '/'
 		end

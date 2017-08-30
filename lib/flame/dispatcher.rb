@@ -20,10 +20,10 @@ module Flame
 		include Flame::Dispatcher::Static
 
 		## Initialize Dispatcher from Application#call
-		## @param app [Flame::Application] application object
+		## @param app_class [Class] application class
 		## @param env Rack-environment object
-		def initialize(app, env)
-			@app = app
+		def initialize(app_class, env)
+			@app_class = app_class
 			@env = env
 			@request = Flame::Dispatcher::Request.new(env)
 			@response = Flame::Dispatcher::Response.new
@@ -81,7 +81,7 @@ module Flame
 
 		## Application-config object as Hash
 		def config
-			@app.config
+			@app_class.config
 		end
 
 		## Build a path to the given controller and action, with any expected params
@@ -96,7 +96,7 @@ module Flame
 		##   path_to ArticlesController, :new, params: { author_id: 1 }
 		##   # => "/articles/new?author_id=1"
 		def path_to(ctrl, action = :index, args = {})
-			path = @app.class.router.path_of(ctrl, action)
+			path = @app_class.router.path_of(ctrl, action)
 			raise Errors::RouteNotFoundError.new(ctrl, action) unless path
 			query = Rack::Utils.build_nested_query args.delete(:params)
 			query = nil if query&.empty?
@@ -145,7 +145,7 @@ module Flame
 
 		## All cached tilts (views) for application by Flame::Render
 		def cached_tilts
-			@app.class.cached_tilts
+			@app_class.cached_tilts
 		end
 
 		private
@@ -153,14 +153,14 @@ module Flame
 		## Return response if HTTP-method is OPTIONS
 		def try_options
 			return unless request.http_method == :OPTIONS
-			allow = @app.class.router.routes.dig(request.path)&.allow
+			allow = @app_class.router.routes.dig(request.path)&.allow
 			halt 404 unless allow
 			response.headers['Allow'] = allow
 		end
 
 		## Find route and try execute it
 		def try_route
-			route = @app.class.router.find_route(request.path, request.http_method)
+			route = @app_class.router.find_route(request.path, request.http_method)
 			return nil unless route
 			status 200
 			execute_route(route)
@@ -170,7 +170,9 @@ module Flame
 		## Execute route
 		## @param route [Flame::Route] route that must be executed
 		def execute_route(route, action = route.action)
-			params.merge! @app.router.path_of(route).extract_arguments(request.path)
+			params.merge!(
+				@app_class.router.path_of(route).extract_arguments(request.path)
+			)
 			# route.execute(self)
 			controller = route.controller.new(self)
 			controller.send(:execute, action)
@@ -188,7 +190,7 @@ module Flame
 			## Return nil if must be no body for current HTTP status
 			return if Rack::Utils::STATUS_WITH_NO_ENTITY_BODY.include?(status)
 			## Find the nearest route by the parts of requested path
-			route = @app.router.find_nearest_route(request.path)
+			route = @app_class.router.find_nearest_route(request.path)
 			## Return nil if the route not found
 			##   or it's `default_body` method not defined
 			return default_body unless route

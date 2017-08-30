@@ -43,7 +43,7 @@ describe Flame::Dispatcher do
 				Rack::RACK_ERRORS => StringIO.new,
 				Rack::QUERY_STRING => query
 			}
-			Flame::Dispatcher.new(DispatcherApplication.new, @env)
+			Flame::Dispatcher.new(DispatcherApplication, @env)
 		end
 		@dispatcher = @init.call
 	end
@@ -59,9 +59,9 @@ describe Flame::Dispatcher do
 	end
 
 	describe '#initialize' do
-		it 'should take @app variable' do
-			@dispatcher.instance_variable_get(:@app)
-				.should.be.instance_of DispatcherApplication
+		it 'should take @app_class variable' do
+			@dispatcher.instance_variable_get(:@app_class)
+				.should.equal DispatcherApplication
 		end
 
 		it 'should take @env variable' do
@@ -230,7 +230,7 @@ describe Flame::Dispatcher do
 	describe '#config' do
 		it 'should return config from app' do
 			@dispatcher.config
-				.should.be.same_as @dispatcher.instance_variable_get(:@app).config
+				.should.be.same_as @dispatcher.instance_variable_get(:@app_class).config
 		end
 	end
 

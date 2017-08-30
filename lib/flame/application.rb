@@ -105,7 +105,7 @@ module Flame
 		## Request recieving method
 		def call(env)
 			@app.call(env) if @app.respond_to? :call
-			Flame::Dispatcher.new(self, env).run!
+			Flame::Dispatcher.new(self.class, env).run!
 		end
 	end
 end

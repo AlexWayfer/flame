@@ -5,7 +5,7 @@ end
 
 describe Flame::Dispatcher::Static do
 	before do
-		@app = StaticApp.new
+		@app = StaticApp
 		@file = 'test.txt'
 		@env = {
 			Rack::REQUEST_METHOD => 'GET',

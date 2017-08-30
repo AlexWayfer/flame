@@ -14,7 +14,7 @@ end
 describe Flame::Render do
 	before do
 		@controller_init = proc do |controller_class|
-			controller_class.new(Flame::Dispatcher.new(RenderApp.new, {}))
+			controller_class.new(Flame::Dispatcher.new(RenderApp, {}))
 		end
 		@controller = @controller_init.call RenderController
 		@init = proc { |*args| Flame::Render.new(@controller, *args) }

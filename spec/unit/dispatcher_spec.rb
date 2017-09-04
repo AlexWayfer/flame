@@ -12,6 +12,10 @@ class DispatcherController < Flame::Controller
 		"Hello, #{name}!"
 	end
 
+	def baz(var = nil)
+		"Hello, #{var}!"
+	end
+
 	def test
 		'Route content'
 	end
@@ -128,6 +132,12 @@ describe Flame::Dispatcher do
 			respond.body.should.equal []
 		end
 
+		it 'should return 405 for not allowed HTTP-method with Allow header' do
+			respond = @init.call(method: 'POST').run!.last
+			respond.headers['Allow'].should.equal 'GET, OPTIONS'
+			respond.status.should.equal 405
+		end
+
 		describe 'OPTIONS HTTP-method' do
 			before do
 				@respond = @init.call(method: 'OPTIONS').run!.last
@@ -157,6 +167,12 @@ describe Flame::Dispatcher do
 				dispatcher = @init.call(method: 'OPTIONS', path: '/hello')
 				respond = dispatcher.run!.last
 				respond.headers.key?('Allow').should.be.false
+			end
+
+			should 'return `Allow` header for route with optional parameters' do
+				dispatcher = @init.call(method: 'OPTIONS', path: '/baz')
+				respond = dispatcher.run!.last
+				respond.headers.key?('Allow').should.be.true
 			end
 		end
 	end

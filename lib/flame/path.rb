@@ -11,7 +11,7 @@ module Flame
 		## @param parts [Array<String, Flame::Path>] parts of expected path
 		## @return [Flame::Path] path from parts
 		def self.merge(*parts)
-			parts.join('/').gsub(%r{\/{2,}}, '/')
+			parts.join('/').gsub(%r|/{2,}|, '/')
 		end
 
 		def initialize(*paths)

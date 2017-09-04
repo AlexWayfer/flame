@@ -266,58 +266,6 @@ describe Flame::Router do
 		end
 	end
 
-	describe '#find_route' do
-		it 'should receive path as String' do
-			@router.add_controller RouterRESTController
-			-> { @router.find_route('/router_rest/42', :PUT) }
-				.should.not.raise(NoMethodError)
-		end
-
-		it 'should return route by path and HTTP-method' do
-			@router.add_controller RouterRESTController
-			@router.find_route('/router_rest/42', :PUT)
-				.should.equal Flame::Router::Route.new(
-					RouterRESTController, :update
-				)
-		end
-
-		it 'should return route by path without optional argument' do
-			@router.add_controller RouterController
-			@router.find_route('/router/foo/bar/baz', :GET)
-				.should.equal Flame::Router::Route.new(
-					RouterController, :foo
-				)
-		end
-
-		it 'should return route by path without multiple optional arguments' do
-			@router.add_controller RouterController
-			@router.find_route('/router/foo/bar/baz', :GET)
-				.should.equal Flame::Router::Route.new(
-					RouterController, :foo
-				)
-		end
-
-		it 'should return route by HEAD HTTP-request instead of GET' do
-			@router.add_controller RouterRESTController
-			@router.find_route('/router_rest', :HEAD)
-				.should.equal Flame::Router::Route.new(
-					RouterRESTController, :index
-				)
-		end
-
-		it 'should return nil for not existing route' do
-			@router.add_controller RouterRESTController
-			@router.find_route(action: :foo)
-				.should.equal nil
-		end
-
-		it 'should return nil by path without required argument' do
-			@router.add_controller RouterController
-			@router.find_route(path: '/router/foo/bar')
-				.should.equal nil
-		end
-	end
-
 	describe '#find_nearest_route' do
 		it 'should return route by path' do
 			@router.add_controller RouterController

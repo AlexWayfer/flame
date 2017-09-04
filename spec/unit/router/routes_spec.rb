@@ -102,4 +102,18 @@ describe Flame::Router::Routes do
 			@routes['foo']['bar'].allow.should.be.nil
 		end
 	end
+
+	describe '#endpoint' do
+		should 'return nested routes from path' do
+			routes = @init.call(['/foo', '/:?var', '/bar'])
+			routes.endpoint('/foo').should.equal routes['foo'][':?var']
+			routes.endpoint('/foo/some').should.equal routes['foo'][':?var']
+			routes.endpoint('/foo/some/bar')
+				.should.equal routes['foo'][':?var']['bar']
+		end
+
+		should 'return nil for not-existing path' do
+			@routes.endpoint('/foo/baz').should.be.nil
+		end
+	end
 end

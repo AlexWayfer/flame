@@ -36,30 +36,14 @@ module Flame
 
 		using GorillaPatch::DigEmpty
 
-		## Find route by any attributes
-		## @param path [Flame::Path, String] path for route search
-		## @param http_method [Symbol, nil] HTTP-method
-		## @return [Flame::Route, nil] return the found route, otherwise `nil`
-		def find_route(path, http_method = nil)
-			path = Flame::Path.new(path) unless path.is_a?(Flame::Path)
-			endpoint = routes.dig(*path.parts)&.dig_through_opt_args
-			return unless endpoint
-			http_method = :GET if http_method == :HEAD
-			## For `find_nearest_route` with any method
-			route = http_method ? endpoint[http_method] : endpoint.values.first
-			route if route.is_a? Flame::Router::Route
-		end
-
 		## Find the nearest route by path
 		## @param path [Flame::Path] path for route finding
 		## @return [Flame::Route, nil] return the found nearest route or `nil`
 		def find_nearest_route(path)
-			path = Flame::Path.new(path) if path.is_a? String
-			path_parts = path.parts.dup
+			path_parts = Flame::Path.new(path).parts.dup
 			while path_parts.size >= 0
-				route = find_route Flame::Path.new(*path_parts)
-				break if route || path_parts.empty?
-				path_parts.pop
+				route = routes.endpoint(*path_parts)&.values&.first
+				break if route&.is_a?(Flame::Router::Route) || path_parts.pop.nil?
 			end
 			route.is_a?(Flame::Router::Routes) ? route[nil] : route
 		end

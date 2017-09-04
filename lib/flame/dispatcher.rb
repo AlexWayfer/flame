@@ -86,6 +86,13 @@ module Flame
 			@app_class.config
 		end
 
+		## Available routes endpoint
+		def available_endpoint
+			return @available_endpoint if defined? @available_endpoint
+			@available_endpoint =
+				@app_class.router.routes.endpoint(*request.path.parts)
+		end
+
 		## Build a path to the given controller and action, with any expected params
 		##
 		## @param ctrl [Flame::Controller] class of controller
@@ -155,7 +162,7 @@ module Flame
 		## Return response if HTTP-method is OPTIONS
 		def try_options
 			return unless request.http_method == :OPTIONS
-			allow = @app_class.router.routes.dig(request.path)&.allow
+			allow = available_endpoint&.allow
 			halt 404 unless allow
 			response.headers['Allow'] = allow
 		end

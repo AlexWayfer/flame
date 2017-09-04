@@ -71,6 +71,12 @@ module Flame
 				methods.push(:OPTIONS).join(', ')
 			end
 
+			## Move like '#dig' with '#dig_through_opt_args'
+			## @param path_parts [Array<String, Flame::Path, Flame::Path::Part>]
+			def endpoint(*path_parts)
+				dig(*path_parts)&.dig_through_opt_args
+			end
+
 			private
 
 			%i[req opt].each do |type|

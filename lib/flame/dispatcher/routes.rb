@@ -8,10 +8,13 @@ module Flame
 
 			## Find route and try execute it
 			def try_route
-				route = @app_class.router.find_route(request.path, request.http_method)
-				return nil unless route
+				http_method = request.http_method
+				http_method = :GET if http_method == :HEAD
+				return nil unless available_endpoint
+				route = available_endpoint[http_method]
+				halt(405, nil, 'Allow' => available_endpoint.allow) unless route
 				status 200
-				execute_route(route)
+				execute_route route
 				true
 			end
 

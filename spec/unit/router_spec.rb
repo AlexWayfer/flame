@@ -6,6 +6,8 @@ using GorillaPatch::DeepMerge
 
 ## Test controller for Router
 class RouterController < Flame::Controller
+	def index; end
+
 	def foo(first, second, third = nil, fourth = nil); end
 end
 
@@ -22,14 +24,26 @@ class RouterRESTController < Flame::Controller
 	def delete(id); end
 end
 
-def initialize_path_hash(
-	route:,
-	path: '/router/foo/:first/:second/:?third/:?fourth',
-	http_method: :GET
-)
-	path_routes, endpoint = Flame::Path.new(path).to_routes_with_endpoint
+def initialize_path_hash(controller:, action:, http_method: :GET, **options)
+	route = Flame::Router::Route.new(controller, action)
+	ctrl_path = options.fetch :ctrl_path, controller.default_path
+	action_path = Flame::Path.new(
+		options.fetch(:action_path, action == :index ? '/' : action)
+	).adapt(controller, action)
+	path_routes, endpoint =
+		Flame::Path.new(ctrl_path, action_path).to_routes_with_endpoint
 	endpoint[http_method] = route
 	path_routes
+end
+
+def initialize_path_hashes(controller, *actions, **actions_with_options)
+	actions.map { |action| [action, {}] }.to_h
+		.merge(actions_with_options)
+		.each_with_object({}) do |(action, options), result|
+			result.deep_merge! initialize_path_hash(
+				controller: controller, action: action, **options
+			)
+		end
 end
 
 def initialize_rest_route(action)
@@ -93,22 +107,26 @@ describe Flame::Router do
 	describe '#add_controller' do
 		it 'should add routes from controller without refinings' do
 			@router.add_controller RouterController
-			@router.routes.should.equal initialize_path_hash(
-				route: Flame::Router::Route.new(RouterController, :foo)
+
+			@router.routes.should.equal initialize_path_hashes(
+				RouterController, :index, :foo
 			)
 		end
 
 		it 'should add routes from controller with another path' do
 			@router.add_controller RouterController, '/another'
-			@router.routes.should.equal initialize_path_hash(
-				path: '/another/foo/:first/:second/:?third/:?fourth',
-				route: Flame::Router::Route.new(RouterController, :foo)
+
+			@router.routes.should.equal initialize_path_hashes(
+				RouterController,
+				index: { ctrl_path: '/another' },
+				foo:   { ctrl_path: '/another' }
 			)
 		end
 
 		it 'should add routes from controller with refining block' do
 			@router.add_controller RouterController do
 			end
+
 			@router.routes.should.be.any
 		end
 
@@ -116,9 +134,9 @@ describe Flame::Router do
 			@router.add_controller RouterController do
 				post '/foo/:first/:second/:?third', :foo
 			end
-			@router.routes.should.equal initialize_path_hash(
-				http_method: :POST,
-				route: Flame::Router::Route.new(RouterController, :foo)
+
+			@router.routes.should.equal initialize_path_hashes(
+				RouterController, :index, foo: { http_method: :POST }
 			)
 		end
 
@@ -126,9 +144,9 @@ describe Flame::Router do
 			@router.add_controller RouterController do
 				get '/bar/:first/:second/:?third/:?fourth', :foo
 			end
-			@router.routes.should.equal initialize_path_hash(
-				path: '/router/bar/:first/:second/:?third/:?fourth',
-				route: Flame::Router::Route.new(RouterController, :foo)
+
+			@router.routes.should.equal initialize_path_hashes(
+				RouterController, :index, foo: { action_path: '/bar' }
 			)
 		end
 
@@ -136,9 +154,11 @@ describe Flame::Router do
 			@router.add_controller RouterController do
 				get '/foo/:second/:first/:?third/:?fourth', :foo
 			end
-			@router.routes.should.equal initialize_path_hash(
-				path: '/router/foo/:second/:first/:?third/:?fourth',
-				route: Flame::Router::Route.new(RouterController, :foo)
+
+			@router.routes.should.equal initialize_path_hashes(
+				RouterController,
+				:index,
+				foo: { action_path: '/foo/:second/:first/:?third/:?fourth' }
 			)
 		end
 
@@ -146,10 +166,14 @@ describe Flame::Router do
 			@router.add_controller RouterController do
 				post '/bar/:second/:first/:?third/:?fourth', :foo
 			end
-			@router.routes.should.equal initialize_path_hash(
-				path: '/router/bar/:second/:first/:?third/:?fourth',
-				http_method: :POST,
-				route: Flame::Router::Route.new(RouterController, :foo)
+
+			@router.routes.should.equal initialize_path_hashes(
+				RouterController,
+				:index,
+				foo: {
+					action_path: '/bar/:second/:first/:?third/:?fourth',
+					http_method: :POST
+				}
 			)
 		end
 
@@ -157,10 +181,14 @@ describe Flame::Router do
 			@router.add_controller RouterController do
 				post '/bar', :foo
 			end
-			@router.routes.should.equal initialize_path_hash(
-				path: '/router/bar/:first/:second/:?third/:?fourth',
-				http_method: :POST,
-				route: Flame::Router::Route.new(RouterController, :foo)
+
+			@router.routes.should.equal initialize_path_hashes(
+				RouterController,
+				:index,
+				foo: {
+					action_path: '/bar/:first/:second/:?third/:?fourth',
+					http_method: :POST
+				}
 			)
 		end
 
@@ -168,10 +196,14 @@ describe Flame::Router do
 			@router.add_controller RouterController do
 				post '/bar/:second', :foo
 			end
-			@router.routes.should.equal initialize_path_hash(
-				path: '/router/bar/:second/:first/:?third/:?fourth',
-				http_method: :POST,
-				route: Flame::Router::Route.new(RouterController, :foo)
+
+			@router.routes.should.equal initialize_path_hashes(
+				RouterController,
+				:index,
+				foo: {
+					action_path: '/bar/:second/:first/:?third/:?fourth',
+					http_method: :POST
+				}
 			)
 		end
 
@@ -179,10 +211,14 @@ describe Flame::Router do
 			@router.add_controller RouterController do
 				post '/bar/:second/:first', :foo
 			end
-			@router.routes.should.equal initialize_path_hash(
-				path: '/router/bar/:second/:first/:?third/:?fourth',
-				http_method: :POST,
-				route: Flame::Router::Route.new(RouterController, :foo)
+
+			@router.routes.should.equal initialize_path_hashes(
+				RouterController,
+				:index,
+				foo: {
+					action_path: '/bar/:second/:first/:?third/:?fourth',
+					http_method: :POST
+				}
 			)
 		end
 
@@ -248,9 +284,9 @@ describe Flame::Router do
 				get :foo
 				post :foo
 			end
-			@router.routes.should.equal initialize_path_hash(
-				http_method: :POST,
-				route: Flame::Router::Route.new(RouterController, :foo)
+
+			@router.routes.should.equal initialize_path_hashes(
+				RouterController, :index, foo: { http_method: :POST }
 			)
 		end
 
@@ -258,26 +294,51 @@ describe Flame::Router do
 			@router.add_controller RouterController do
 				mount RouterRESTController, '/rest'
 			end
-			routes = rest_routes('/router/rest')
-			routes.deep_merge! initialize_path_hash(
-				route: Flame::Router::Route.new(RouterController, :foo)
+
+			@router.routes.should.equal rest_routes('/router/rest').deep_merge!(
+				initialize_path_hashes(RouterController, :index, :foo)
 			)
-			@router.routes.should.equal routes
 		end
 	end
 
 	describe '#find_nearest_route' do
 		it 'should return route by path' do
 			@router.add_controller RouterController
-			@router.find_nearest_route('/router/foo/bar/baz/qux')
+
+			path = Flame::Path.new('/router/foo/bar/baz/qux')
+			@router.find_nearest_route(path)
 				.should.equal Flame::Router::Route.new(
 					RouterController, :foo
 				)
 		end
 
+		it 'should return root route if there is no such actions' do
+			@router.add_controller RouterController
+
+			path = Flame::Path.new('/router/bar')
+			@router.find_nearest_route(path)
+				.should.equal Flame::Router::Route.new(
+					RouterController, :index
+				)
+		end
+
+		it 'should return root route for controller with nested controller' do
+			@router.add_controller RouterController do
+				mount RouterRESTController
+			end
+
+			path = Flame::Path.new('/router/foo')
+			@router.find_nearest_route(path)
+				.should.equal Flame::Router::Route.new(
+					RouterController, :index
+				)
+		end
+
 		it 'should return route by path parts without optional argument' do
 			@router.add_controller RouterController
-			@router.find_nearest_route('/router/foo/bar/baz')
+
+			path = Flame::Path.new('/router/foo/bar/baz')
+			@router.find_nearest_route(path)
 				.should.equal Flame::Router::Route.new(
 					RouterController, :foo
 				)
@@ -285,14 +346,20 @@ describe Flame::Router do
 
 		it 'should return nil for not existing route' do
 			@router.add_controller RouterController
-			@router.find_nearest_route('/router/bar')
+
+			path = Flame::Path.new('/another')
+			@router.find_nearest_route(path)
 				.should.equal nil
 		end
 
-		it 'should return nil by path parts without required argument' do
+		it 'should not return route by path parts without required argument' do
 			@router.add_controller RouterController
-			@router.find_nearest_route('/router/foo/bar')
-				.should.equal nil
+
+			path = Flame::Path.new('/router/foo/bar')
+			@router.find_nearest_route(path)
+				.should.not.equal Flame::Router::Route.new(
+					RouterController, :foo
+				)
 		end
 	end
 

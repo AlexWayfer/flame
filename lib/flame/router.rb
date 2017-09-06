@@ -40,12 +40,11 @@ module Flame
 		## @param path [Flame::Path] path for route finding
 		## @return [Flame::Route, nil] return the found nearest route or `nil`
 		def find_nearest_route(path)
-			path_parts = Flame::Path.new(path).parts.dup
-			while path_parts.size >= 0
-				route = routes.endpoint(*path_parts)&.values&.first
-				break if route&.is_a?(Flame::Router::Route) || path_parts.pop.nil?
+			path_parts = path.parts.dup
+			loop do
+				route = routes.endpoint(*path_parts)&.values&.grep(Route)&.first
+				break route if route || path_parts.pop.nil?
 			end
-			route.is_a?(Flame::Router::Routes) ? route[nil] : route
 		end
 
 		## Find the path of route

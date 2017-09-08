@@ -1,5 +1,6 @@
 Gemfile.lock
 tests/
+.ruby-version
 
 # Gem files
 *.gem

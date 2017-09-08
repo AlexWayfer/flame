@@ -3,6 +3,7 @@
 require 'gorilla-patch/deep_merge'
 require 'gorilla-patch/inflections'
 require 'gorilla-patch/namespace'
+require 'gorilla-patch/transform'
 
 require_relative 'router/routes'
 require_relative 'router/route'
@@ -142,6 +143,7 @@ module Flame
 			end
 
 			using GorillaPatch::Namespace
+			using GorillaPatch::Transform
 			using GorillaPatch::DeepMerge
 
 			## Mount controller inside other (parent) controller

@@ -34,6 +34,10 @@ module Flame
 			super
 		end
 
+		def +(other)
+			self.class.new(self, other)
+		end
+
 		## Compare by parts count and the first arg position
 		## @param other [Flame::Path] other path
 		## @return [-1, 0, 1] result of comparing

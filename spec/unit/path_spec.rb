@@ -66,6 +66,57 @@ describe Flame::Path do
 		end
 	end
 
+	describe '#+' do
+		describe 'with Flame::Path argument' do
+			before do
+				@part = Flame::Path.new('/:?fourth')
+			end
+
+			should 'return new concatenated Flame::Path' do
+				result = @path + @part
+				expected = Flame::Path.new('/foo/:first/:second/:?third/:?fourth')
+				result.should.equal expected
+			end
+
+			should 'return new instance of Flame::Path' do
+				result = @path + @part
+				result.should.be.kind_of Flame::Path
+			end
+
+			should 'not be the same as the first part' do
+				result = @path + @part
+				result.should.not.be.same_as @path
+			end
+
+			should 'not be the same as the second part' do
+				result = @path + @part
+				result.should.not.be.same_as @part
+			end
+		end
+
+		describe 'with String argument' do
+			before do
+				@part = '/:?fourth'
+			end
+
+			should 'return new concatenated Flame::Path' do
+				result = @path + @part
+				expected = Flame::Path.new('/foo/:first/:second/:?third/:?fourth')
+				result.should.equal expected
+			end
+
+			should 'return new instance of Flame::Path' do
+				result = @path + @part
+				result.should.be.kind_of Flame::Path
+			end
+
+			should 'not be the same as the first part' do
+				result = @path + @part
+				result.should.not.be.same_as @path
+			end
+		end
+	end
+
 	describe '#<=>' do
 		it 'should return 1 for other route with less count of path parts' do
 			(@path <=> @init.call('/bar/:first/:second'))

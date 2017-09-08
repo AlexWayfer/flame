@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 require 'gorilla-patch/deep_merge'
-require 'gorilla-patch/dig_empty'
+require 'gorilla-patch/inflections'
+require 'gorilla-patch/namespace'
 
 require_relative 'router/routes'
 require_relative 'router/route'
@@ -17,24 +18,6 @@ module Flame
 			@routes = Flame::Router::Routes.new
 			@reverse_routes = {}
 		end
-
-		using GorillaPatch::DeepMerge
-
-		## Add the controller with it's methods to routes
-		## @param ctrl [Flame::Controller] class of the controller which will be added
-		## @param path [String, nil] root path for controller's methods
-		## @yield block for routes refine
-		def add_controller(ctrl, path = nil, &block)
-			## @todo Add Regexp paths
-
-			## Add routes from controller to glob array
-			routes_refine = RoutesRefine.new(self, ctrl, path, block)
-
-			routes.deep_merge!(routes_refine.routes)
-			reverse_routes.merge!(routes_refine.reverse_routes)
-		end
-
-		using GorillaPatch::DigEmpty
 
 		## Find the nearest route by path
 		## @param path [Flame::Path] path for route finding
@@ -65,11 +48,10 @@ module Flame
 
 		## Helper class for controller routing refine
 		class RoutesRefine
-			attr_accessor :rest_routes
-			attr_reader :ctrl, :routes, :reverse_routes
+			attr_reader :routes, :reverse_routes
 
 			## Defaults REST routes (methods, pathes, controllers actions)
-			def rest_routes
+			def self.rest_routes
 				@rest_routes ||= [
 					{ method: :GET,     path: '/',  action: :index  },
 					{ method: :POST,    path: '/',  action: :create },
@@ -79,19 +61,31 @@ module Flame
 				]
 			end
 
-			def initialize(router, ctrl, path, block)
+			def initialize(router, namespace_name, controller_name, path, &block)
 				@router = router
-				@ctrl = ctrl
-				@path = path || @ctrl.default_path
-				@routes = Flame::Router::Routes.new
+				@controller = constantize_controller namespace_name, controller_name
+				@path = Flame::Path.new(path || @controller.default_path)
+				@routes, @endpoint = @path.to_routes_with_endpoint
 				@reverse_routes = {}
 				execute(&block)
 			end
 
 			private
 
-			using GorillaPatch::DeepMerge
-			using GorillaPatch::DigEmpty
+			using GorillaPatch::Inflections
+
+			def constantize_controller(namespace_name, controller_name)
+				controller_name = controller_name.to_s.camelize
+				namespace =
+					namespace_name.empty? ? Object : Object.const_get(namespace_name)
+				if namespace.const_defined?(controller_name)
+					controller = namespace.const_get(controller_name)
+					return controller if controller < Flame::Controller
+					controller::IndexController
+				else
+					namespace.const_get("#{controller_name}Controller")
+				end
+			end
 
 			%i[GET POST PUT PATCH DELETE].each do |http_method|
 				## Define refine methods for all HTTP methods
@@ -113,9 +107,9 @@ module Flame
 						action_path = nil
 					end
 					## Initialize new route
-					route = Route.new(@ctrl, action)
+					route = Route.new(@controller, action)
 					## Make path by controller method with parameners
-					action_path = Flame::Path.new(action_path).adapt(@ctrl, action)
+					action_path = Flame::Path.new(action_path).adapt(@controller, action)
 					## Validate action path
 					validate_action_path(action, action_path)
 					## Merge action path with controller path
@@ -131,7 +125,7 @@ module Flame
 			##   to defaults pathes and HTTP methods
 			def defaults
 				rest
-				@ctrl.actions.each do |action|
+				@controller.actions.each do |action|
 					next if find_reverse_route(action)
 					send(:GET.downcase, action)
 				end
@@ -139,21 +133,33 @@ module Flame
 
 			## Assign methods of the controller to REST architecture
 			def rest
-				rest_routes.each do |rest_route|
+				self.class.rest_routes.each do |rest_route|
 					action = rest_route[:action]
-					next if !@ctrl.actions.include?(action) ||
+					next if !@controller.actions.include?(action) ||
 					        find_reverse_route(action)
 					send(*rest_route.values.map(&:downcase))
 				end
 			end
 
+			using GorillaPatch::Namespace
+			using GorillaPatch::DeepMerge
+
 			## Mount controller inside other (parent) controller
-			## @param ctrl [Flame::Controller] class of mounting controller
+			## @param controller [Flame::Controller] class of mounting controller
 			## @param path [String, nil] root path for mounting controller
 			## @yield Block of code for routes refine
-			def mount(ctrl, path = nil, &block)
-				path = Flame::Path.merge(@path, path || ctrl.default_path)
-				@router.add_controller(ctrl, path, &block)
+			def mount(controller_name, path = nil, &block)
+				routes_refine = self.class.new(
+					@router, @controller.deconstantize, controller_name, path, &block
+				)
+
+				@endpoint.deep_merge! routes_refine.routes
+
+				@reverse_routes.merge!(
+					routes_refine.reverse_routes.transform_values do |hash|
+						hash.transform_values { |action_path| @path + action_path }
+					end
+				)
 			end
 
 			# private
@@ -165,17 +171,17 @@ module Flame
 			end
 
 			def find_reverse_route(action)
-				@reverse_routes.dig(@ctrl.to_s, action)
+				@reverse_routes.dig(@controller.to_s, action)
 			end
 
 			def validate_action_path(action, action_path)
 				Validators::RouteArgumentsValidator.new(
-					@ctrl, action_path, action
+					@controller, action_path, action
 				).valid?
 			end
 
 			def remove_old_routes(action, new_route)
-				return unless (old_path = @reverse_routes[@ctrl.to_s]&.delete(action))
+				return unless (old_path = @reverse_routes[@controller.to_s]&.delete(action))
 				@routes.dig(*old_path.parts)
 					.delete_if { |_method, old_route| old_route == new_route }
 			end
@@ -184,10 +190,8 @@ module Flame
 				path_routes, endpoint = path.to_routes_with_endpoint
 				endpoint[http_method] = route
 				@routes.deep_merge!(path_routes)
-				(@reverse_routes[@ctrl.to_s] ||= {})[action] = path
+				(@reverse_routes[@controller.to_s] ||= {})[action] = path
 			end
 		end
-
-		private_constant :RoutesRefine
 	end
 end

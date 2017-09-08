@@ -11,7 +11,7 @@ end
 
 ## Mount example controller to app
 class IntegrationApp
-	mount IndexController, '/'
+	mount :index, '/'
 end
 
 describe IndexController do

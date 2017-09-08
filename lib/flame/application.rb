@@ -61,22 +61,46 @@ module Flame
 				caller(2..2).first.split(':')[0]
 			end
 
+			using GorillaPatch::DeepMerge
+
 			## Mount controller in application class
-			## @param ctrl [Flame::Controller] the mounted controller class
+			## @param controller [Symbol] the snake-cased name of mounted controller
+			##   (without `Controller` or `::IndexController` for namespaces)
 			## @param path [String, nil] root path for the mounted controller
 			## @yield refine defaults pathes for a methods of the mounted controller
 			## @example Mount controller with defaults
-			##   mount ArticlesController
+			##   mount :articles # ArticlesController
 			## @example Mount controller with specific path
-			##   mount HomeController, '/welcome'
+			##   mount :home, '/welcome' # HomeController
 			## @example Mount controller with specific path of methods
-			##   mount HomeController do
+			##   mount :home do # HomeController
 			##     get '/bye', :goodbye
 			##     post '/greetings', :new
 			##     defaults
 			##   end
-			def mount(ctrl, path = nil, &block)
-				router.add_controller(ctrl, path, &block)
+			## @example Mount controller with nested controllers
+			##   mount :cabinet do # Cabinet::IndexController
+			##     mount :articles # Cabinet::ArticlesController
+			##   end
+			def mount(controller_name, path = nil, &block)
+				## Add routes from controller to glob array
+
+				routes_refine = Router::RoutesRefine.new(
+					router, namespace, controller_name, path, &block
+				)
+
+				router.routes.deep_merge! routes_refine.routes
+				router.reverse_routes.merge! routes_refine.reverse_routes
+			end
+
+			using GorillaPatch::Namespace
+
+			def namespace
+				namespace = self
+				while namespace.name.nil? && namespace.superclass != Flame::Application
+					namespace = superclass
+				end
+				namespace.deconstantize
 			end
 
 			## Initialize default for config directories

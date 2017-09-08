@@ -27,7 +27,7 @@ end
 
 ## Mount example controller to app
 class IntegrationApp
-	mount CRUDController
+	mount :CRUD
 end
 
 describe 'CRUD Controller' do

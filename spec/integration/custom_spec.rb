@@ -39,7 +39,7 @@ end
 
 ## Mount example controller to app
 class IntegrationApp
-	mount CustomController
+	mount :custom
 end
 
 describe CustomController do

@@ -453,7 +453,7 @@ task :update, :branch, :without_restart do |_t, args|
 	sh "git checkout #{args[:branch]}"
 	sh "git pull origin #{args[:branch]}"
 	next if args[:without_restart]
-	sh 'bundle check || bundle update'
+	sh 'bundle check || bundle install'
 	sh "#{server} stop"
 	sh 'rake db:migrate'
 	sh "#{server} start"

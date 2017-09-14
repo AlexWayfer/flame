@@ -1,8 +1,8 @@
-Style/Tab:
+Layout/Tab:
   Enabled: false
-Style/IndentationWidth:
+Layout/IndentationWidth:
   Width: 1
-Style/MultilineMethodCallIndentation:
+Layout/MultilineMethodCallIndentation:
   EnforcedStyle: indented
 
 AllCops:

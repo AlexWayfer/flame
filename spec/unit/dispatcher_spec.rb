@@ -126,6 +126,12 @@ describe Flame::Dispatcher do
 			respond.body.should.equal ['<h1>Not Found</h1>']
 		end
 
+		it 'should return 404 for route with required argument by path without' do
+			respond = @init.call(path: 'hello').run!.last
+			respond.status.should.equal 404
+			respond.body.should.equal ['<h1>Not Found</h1>']
+		end
+
 		it 'should not return body for HEAD methods' do
 			respond = @init.call(method: 'HEAD').run!.last
 			respond.status.should.equal 200

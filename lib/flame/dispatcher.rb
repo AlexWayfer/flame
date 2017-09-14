@@ -90,7 +90,7 @@ module Flame
 		def available_endpoint
 			return @available_endpoint if defined? @available_endpoint
 			@available_endpoint =
-				@app_class.router.routes.endpoint(*request.path.parts)
+				@app_class.router.routes.navigate(*request.path.parts)
 		end
 
 		## Build a path to the given controller and action, with any expected params

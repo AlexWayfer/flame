@@ -19,44 +19,40 @@ module Flame
 				self[path.parts.first] = nested_routes
 			end
 
-			## Move into Hash by equal key or through argument-key
+			## Move into Hash by equal key
 			## @param path_part [String, Flame::Path::Part, Symbol] requested key
 			## @return [Flame::Router::Routes, Flame::Router::Route, nil] found value
 			## @example Move by static path part
 			##   routes = Flame::Router::Routes.new('/foo/bar/baz')
 			##   routes['foo'] # => { 'bar' => { 'baz' => {} } }
-			## @example Move by argument
-			##   routes = Flame::Router::Routes.new('/foo/:first/bar')
-			##   routes['foo']['value'] # => { 'bar' => {} }
 			## @example Move by HTTP-method
 			##   routes = Flame::Router::Routes.new('/foo/bar')
 			##   routes['foo']['bar'][:GET] = 42
 			##   routes['foo']['bar'][:GET] # => 42
-			def [](path_part)
-				if path_part.is_a? String
-					path_part = Flame::Path::Part.new(path_part)
-				elsif !path_part.is_a?(Flame::Path::Part) && !path_part.is_a?(Symbol)
+			def [](key)
+				if key.is_a? String
+					key = Flame::Path::Part.new(key)
+				elsif !key.is_a?(Flame::Path::Part) && !key.is_a?(Symbol)
 					return
 				end
-				super(path_part) ||
-					(super(first_req_arg_key) if path_part.is_a?(Path::Part))
+				super
 			end
 
-			## Move like multiple `#[]`
+			## Navigate to Routes or Route through static parts or arguments
 			## @param path_parts [Array<String, Flame::Path, Flame::Path::Part>]
-			##   path or path parts as keys for digging
+			##   path or path parts as keys for navigating
 			## @return [Flame::Router::Routes, Flame::Router::Route, nil] found value
 			## @example Move by static path part and argument
 			##   routes = Flame::Router::Routes.new('/foo/:first/bar')
-			##   routes.dig('foo', 'value') # => { 'bar' => {} }
-			def dig(*path_parts)
+			##   routes.navigate('foo', 'value') # => { 'bar' => {} }
+			def navigate(*path_parts)
 				path_parts = Flame::Path.new(*path_parts).parts
-				return self if path_parts.empty?
+				return dig_through_opt_args if path_parts.empty?
 				endpoint =
 					self[path_parts.first] ||
 					find { |key, _value| key.is_a?(Flame::Path::Part) && key.arg? }
 						&.last
-				endpoint&.dig(*path_parts[1..-1])
+				endpoint&.navigate(*path_parts[1..-1])
 			end
 
 			## Dig through optional arguments as keys
@@ -72,19 +68,11 @@ module Flame
 				methods.push(:OPTIONS).join(', ')
 			end
 
-			## Move like '#dig' with '#dig_through_opt_args'
-			## @param path_parts [Array<String, Flame::Path, Flame::Path::Part>]
-			def endpoint(*path_parts)
-				dig(*path_parts)&.dig_through_opt_args
-			end
-
 			private
 
-			%i[req opt].each do |type|
-				define_method "first_#{type}_arg_key" do
-					keys.find do |key|
-						key.is_a?(Flame::Path::Part) && key.public_send("#{type}_arg?")
-					end
+			def first_opt_arg_key
+				keys.find do |key|
+					key.is_a?(Flame::Path::Part) && key.opt_arg?
 				end
 			end
 		end

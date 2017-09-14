@@ -46,22 +46,6 @@ describe Flame::Router::Routes do
 			@routes['foo'].should.equal('bar' => { 'baz' => {} })
 		end
 
-		it 'should works with Path Part for key which is argument' do
-			path_part = Flame::Path::Part.new('value')
-			routes = @init.call('/:first/:second')
-			routes[path_part].should.equal(':second' => {})
-		end
-
-		it 'should works with String for key which is argument' do
-			routes = @init.call('/:first/:second')
-			routes['value'].should.equal(':second' => {})
-		end
-
-		it 'should not works with Symbol for key which is argument' do
-			routes = @init.call('/:first/:second')
-			routes[:GET].should.be.nil
-		end
-
 		it 'should works for HTTP-methods as Symbol keys' do
 			routes = @init.call('/foo/bar')
 			routes['foo']['bar'][:GET] = 42
@@ -69,29 +53,41 @@ describe Flame::Router::Routes do
 		end
 	end
 
-	describe '#dig' do
+	describe '#navigate' do
 		it 'should works with Path Part for Path Parts which are not arguments' do
 			path = Flame::Path.new('/foo/bar')
-			@routes.dig(*path.parts).should.equal('baz' => {})
+			@routes.navigate(*path.parts).should.equal('baz' => {})
 		end
 
 		it 'should works with String for Path Parts which are not arguments' do
-			@routes.dig('foo', 'bar').should.equal('baz' => {})
+			@routes.navigate('foo', 'bar').should.equal('baz' => {})
 		end
 
 		it 'should works with Path Part for Path Parts which are arguments' do
-			path = Flame::Path.new('/foo/bar')
-			routes = @init.call('/:first/:second/:?third')
-			routes.dig(*path.parts).should.equal(':?third' => {})
+			path = Flame::Path.new('/foo')
+			routes = @init.call('/:first/:second')
+			routes.navigate(*path.parts).should.equal(':second' => {})
 		end
 
 		it 'should works with String for Path Parts which are arguments' do
-			routes = @init.call('/:first/:second/:?third')
-			routes.dig('foo', 'bar').should.equal(':?third' => {})
+			routes = @init.call('/:first/:second')
+			routes.navigate('foo').should.equal(':second' => {})
 		end
 
 		should 'works for root path' do
-			@routes.dig('/').should.equal('foo' => { 'bar' => { 'baz' => {} } })
+			@routes.navigate('/').should.equal('foo' => { 'bar' => { 'baz' => {} } })
+		end
+
+		should 'return nested routes from path' do
+			routes = @init.call(['/foo', '/:?var', '/bar'])
+			routes.navigate('/foo').should.equal routes['foo'][':?var']
+			routes.navigate('/foo/some').should.equal routes['foo'][':?var']
+			routes.navigate('/foo/some/bar')
+				.should.equal routes['foo'][':?var']['bar']
+		end
+
+		should 'return nil for not-existing path' do
+			@routes.navigate('/foo/baz').should.be.nil
 		end
 	end
 
@@ -105,20 +101,6 @@ describe Flame::Router::Routes do
 
 		should 'return nil for not-existing path' do
 			@routes['foo']['bar'].allow.should.be.nil
-		end
-	end
-
-	describe '#endpoint' do
-		should 'return nested routes from path' do
-			routes = @init.call(['/foo', '/:?var', '/bar'])
-			routes.endpoint('/foo').should.equal routes['foo'][':?var']
-			routes.endpoint('/foo/some').should.equal routes['foo'][':?var']
-			routes.endpoint('/foo/some/bar')
-				.should.equal routes['foo'][':?var']['bar']
-		end
-
-		should 'return nil for not-existing path' do
-			@routes.endpoint('/foo/baz').should.be.nil
 		end
 	end
 end

@@ -10,8 +10,9 @@ module Flame
 			def try_route
 				http_method = request.http_method
 				http_method = :GET if http_method == :HEAD
-				return nil unless available_endpoint
+				return unless available_endpoint
 				route = available_endpoint[http_method]
+				return unless route || available_endpoint.allow
 				halt(405, nil, 'Allow' => available_endpoint.allow) unless route
 				status 200
 				execute_route route

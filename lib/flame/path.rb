@@ -168,9 +168,9 @@ module Flame
 				arg? && @part[1] == ARG_CHAR_OPT
 			end
 
-			def req_arg?
-				arg? && !opt_arg?
-			end
+			# def req_arg?
+			# 	arg? && !opt_arg?
+			# end
 
 			def clean
 				@part.delete ARG_CHAR + ARG_CHAR_OPT

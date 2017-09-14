@@ -537,6 +537,42 @@ describe Flame::Application do
 			)
 		end
 
+		it 'should mount neighboring controllers with root-with-argument action' do
+			@app_class.class_exec do
+				mount :application do
+					get '/', :baz
+
+					mount :application_REST, '/rest'
+				end
+			end
+
+			@app_class.router.routes.should.equal(
+				rest_routes('/application/rest').deep_merge!(
+					initialize_path_hashes(
+						ApplicationController, :index, :foo, :bar, :view,
+						baz: { action_path: '/:first/:second/:?third/:?fourth' }
+					)
+				)
+			)
+
+			@app_class.router.reverse_routes.should.equal(
+				'ApplicationController' => {
+					index: '/application/',
+					foo: '/application/foo',
+					bar: '/application/bar',
+					view: '/application/view',
+					baz: '/application/:first/:second/:?third/:?fourth'
+				},
+				'ApplicationRESTController' => {
+					index: '/application/rest/',
+					create: '/application/rest/',
+					show: '/application/rest/:id',
+					update: '/application/rest/:id',
+					delete: '/application/rest/:id'
+				}
+			)
+		end
+
 		it 'should mount controller from the same namespace as application' do
 			app_class = Class.new(ApplicationNamespace::Application)
 

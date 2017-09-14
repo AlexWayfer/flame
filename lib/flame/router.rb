@@ -26,7 +26,7 @@ module Flame
 		def find_nearest_route(path)
 			path_parts = path.parts.dup
 			loop do
-				route = routes.endpoint(*path_parts)&.values&.grep(Route)&.first
+				route = routes.navigate(*path_parts)&.values&.grep(Route)&.first
 				break route if route || path_parts.pop.nil?
 			end
 		end

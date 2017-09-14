@@ -38,7 +38,8 @@ module Flame
 				elsif !path_part.is_a?(Flame::Path::Part) && !path_part.is_a?(Symbol)
 					return
 				end
-				super(path_part) || super(first_req_arg_key)
+				super(path_part) ||
+					(super(first_req_arg_key) if path_part.is_a?(Path::Part))
 			end
 
 			## Move like multiple `#[]`

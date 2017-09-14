@@ -57,6 +57,11 @@ describe Flame::Router::Routes do
 			routes['value'].should.equal(':second' => {})
 		end
 
+		it 'should not works with Symbol for key which is argument' do
+			routes = @init.call('/:first/:second')
+			routes[:GET].should.be.nil
+		end
+
 		it 'should works for HTTP-methods as Symbol keys' do
 			routes = @init.call('/foo/bar')
 			routes['foo']['bar'][:GET] = 42

@@ -28,7 +28,7 @@ module Flame
 				# route.execute(self)
 				controller = route.controller.new(self)
 				controller.send(:execute, action)
-			rescue => exception
+			rescue StandardError => exception
 				# p 'rescue from dispatcher'
 				dump_error(exception)
 				status 500

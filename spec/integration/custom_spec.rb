@@ -24,7 +24,7 @@ class CustomController < Flame::Controller
 
 	def execute(method)
 		super
-	rescue => exception
+	rescue StandardError => exception
 		@rescued = true
 		body default_body
 		raise exception

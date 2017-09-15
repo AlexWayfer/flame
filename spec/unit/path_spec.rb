@@ -199,6 +199,12 @@ describe Flame::Path do
 				@init.call('/foo/another%20bar/baz')
 			).should.equal Hash[first: 'another bar', second: 'baz']
 		end
+
+		it 'should return arguments with spaces instead of `+` from other path' do
+			@path.extract_arguments(
+				@init.call('/foo/another+bar/baz')
+			).should.equal Hash[first: 'another bar', second: 'baz']
+		end
 	end
 
 	describe '#assign_arguments' do

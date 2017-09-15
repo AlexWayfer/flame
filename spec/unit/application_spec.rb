@@ -147,7 +147,7 @@ describe Flame::Application do
 			app_class.call(env).first.should.equal 200
 			app_class.cached_tilts.size.should.equal 2
 			app_class.cached_tilts.keys.should.equal view_names
-			app_class.cached_tilts.values.each do |value|
+			app_class.cached_tilts.each_value do |value|
 				value.should.be.kind_of Tilt::Template
 			end
 		end

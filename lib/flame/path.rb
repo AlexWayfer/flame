@@ -86,7 +86,7 @@ module Flame
 				break args if part.opt_arg? && other_part.empty?
 				args[
 					part[(part.opt_arg? ? 2 : 1)..-1].to_sym
-				] = URI.decode(other_part)
+				] = URI.decode_www_form_component(other_part)
 			end
 		end
 

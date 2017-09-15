@@ -34,6 +34,20 @@ describe Flame::Dispatcher::Static do
 			dispatcher.send(:try_static).should.equal "Test static\n"
 		end
 
+		it 'should return content of file by URL-encoded request' do
+			@env[Rack::PATH_INFO] =
+				'/%D1%82%D0%B5%D1%81%D1%82%D0%BE%D0%B2%D1%8B%D0%B9%20' \
+				'%D1%84%D0%B0%D0%B9%D0%BB'
+			dispatcher = Flame::Dispatcher.new(@app, @env)
+			dispatcher.send(:try_static).should.equal "Тестовый файл\n"
+		end
+
+		it 'should return content of file by request with `+` instead of spaces' do
+			@env[Rack::PATH_INFO] = '/тестовый+файл'
+			dispatcher = Flame::Dispatcher.new(@app, @env)
+			dispatcher.send(:try_static).should.equal "Тестовый файл\n"
+		end
+
 		it 'should return with Last-Modified' do
 			file_mtime = File.mtime File.join(__dir__, 'public', @file)
 			@dispatcher.response['Last-Modified'].should.equal file_mtime.httpdate

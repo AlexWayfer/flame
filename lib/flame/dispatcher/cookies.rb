@@ -23,10 +23,11 @@ module Flame
 			## @example Delete `cat` cookie
 			##   cookies['cat'] = nil
 			def []=(key, new_value)
-				# rubocop:disable Lint/ReturnInVoidContext
-				## https://github.com/bbatsov/rubocop/issues/4735
-				return @response.delete_cookie(key.to_s, path: '/') if new_value.nil?
-				@response.set_cookie(key.to_s, value: new_value, path: '/')
+				if new_value.nil?
+					@response.delete_cookie(key.to_s, path: '/')
+				else
+					@response.set_cookie(key.to_s, value: new_value, path: '/')
+				end
 			end
 		end
 	end

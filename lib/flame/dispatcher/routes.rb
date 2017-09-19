@@ -43,12 +43,10 @@ module Flame
 				return if Rack::Utils::STATUS_WITH_NO_ENTITY_BODY.include?(status)
 				## Find the nearest route by the parts of requested path
 				route = @app_class.router.find_nearest_route(request.path)
-				## Return nil if the route not found
-				##   or it's `default_body` method not defined
+				## Return standard `default_body` if the route not found
 				return default_body unless route
 				## Execute `default_body` method for the founded route
-				execute_route(route, :default_body)
-				default_body if body.empty?
+				body route.controller.new(self).send(:default_body)
 			end
 		end
 	end

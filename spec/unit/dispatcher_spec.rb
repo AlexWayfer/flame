@@ -24,9 +24,14 @@ class DispatcherController < Flame::Controller
 		'Body of action'
 	end
 
+	def redirect_from_before; end
+
 	protected
 
 	def execute(action)
+		request.env[:execute_before_called] ||= 0
+		request.env[:execute_before_called] += 1
+		halt redirect :foo if action == :redirect_from_before
 		super
 		nil if action == :action_with_after_hook
 	end
@@ -361,6 +366,12 @@ describe Flame::Dispatcher do
 
 			@dispatcher.status 500
 			@dispatcher.default_body.should.equal '<h1>Internal Server Error</h1>'
+		end
+
+		should 'not be called from `execute`' do
+			dispatcher = @init.call(path: 'redirect_from_before')
+			dispatcher.run!
+			dispatcher.request.env[:execute_before_called].should.equal 1
 		end
 	end
 end

@@ -186,6 +186,7 @@ namespace :db do
 
 			Sequel.extension :migration
 			Sequel.extension :inflector
+			# db_connection.extension :pg_enum
 
 			options = {
 				allow_missing_migration_files: env_true?(:ignore)

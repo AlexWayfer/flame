@@ -29,6 +29,19 @@ if File.exist? DB_CONFIG_FILE
 	def db_connection
 		@db_connection ||= Sequel.connect db_config
 	end
+
+	def update_pgpass
+		pgpass_file = File.expand_path File.join('~', '.pgpass')
+		pgpass_line =
+			db_config
+				.fetch_values(:host, :port, :database, :user, :password) { |_key| '*' }
+				.join(':')
+		pgpass_lines =
+			File.exist?(pgpass_file) ? File.read(pgpass_file).split($RS) : []
+		return if pgpass_lines&.include? pgpass_line
+		File.write pgpass_file, pgpass_lines.push(pgpass_line, nil).join($RS)
+		File.chmod(0o600, pgpass_file)
+	end
 end
 
 namespace :db do
@@ -289,6 +302,7 @@ namespace :db do
 
 	desc 'Make DB dump'
 	task :dump do
+		update_pgpass
 		timestamp = Time.now.strftime('%Y-%m-%d_%H-%M')
 		directory = File.expand_path File.join(__dir__, 'db', 'dumps')
 		filename = File.join directory, "#{db_config[:database]}_#{timestamp}.sql"
@@ -441,6 +455,7 @@ end
 
 desc 'Start psql'
 task :psql do
+	update_pgpass
 	sh "psql #{db_access} #{db_config[:database]}"
 end
 

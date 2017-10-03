@@ -45,6 +45,15 @@ describe Flame::Render do
 			render.instance_variable_get(:@layout).should.be.equal 'some'
 		end
 
+		it 'should take tilt options from locals' do
+			render = @init.call(:view, tilt: { outvar: 'baz' }, foo: :bar)
+			render.instance_variable_get(:@tilt_options)
+				.should.equal(outvar: 'baz')
+			## https://github.com/rtomayko/tilt/blob/752a852/lib/tilt/erb.rb#L20
+			render.send(:compile_file).instance_variable_get(:@outvar)
+				.should.equal 'baz'
+		end
+
 		it 'should not have layout for partials' do
 			render = @init.call('_partial')
 			render.instance_variable_get(:@layout).should.be.equal nil

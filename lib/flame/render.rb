@@ -16,11 +16,12 @@ module Flame
 		def initialize(controller, path, options = {})
 			## Take options for rendering
 			@controller = controller
-			@scope = options.delete(:scope) || @controller
-			@layout = options.delete(:layout)
-			@layout = 'layout.*' if @layout.nil?
+			@scope = options.delete(:scope) { @controller }
+			@layout = options.delete(:layout) { 'layout.*' }
+			## Options for Tilt Template
+			@tilt_options = options.delete(:tilt)
 			## And get the rest variables to locals
-			@locals = options.merge(options.delete(:locals) || {})
+			@locals = options.merge(options.delete(:locals) { {} })
 			## Find filename
 			@filename = find_file(path)
 			unless @filename
@@ -51,7 +52,7 @@ module Flame
 		def compile_file(filename = @filename)
 			cached = @controller.cached_tilts[filename]
 			return cached if @cache && cached
-			compiled = Tilt.new(filename)
+			compiled = Tilt.new(filename, nil, @tilt_options)
 			@controller.cached_tilts[filename] ||= compiled if @cache
 			compiled
 		end

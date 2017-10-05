@@ -32,13 +32,13 @@ module Flame
 
 		## Render template
 		## @param cache [Boolean] cache compiles or not
-		def render(cache: true)
+		def render(cache: true, &block)
 			@cache = cache
 			## Compile Tilt to instance hash
 			return unless @filename
 			tilt = compile_file
 			## Render Tilt from instance hash with new options
-			layout_render tilt.render(@scope, @locals)
+			layout_render tilt.render(@scope, @locals, &block)
 		end
 
 		private

@@ -401,6 +401,11 @@ describe Flame::Controller do
 				)
 		end
 
+		should 'render partial with block' do
+			@controller.render(:_partial_with_block) { 'world' }
+				.should.equal "<h1>Hello, world!</h1>\n"
+		end
+
 		describe 'cache' do
 			before do
 				ControllerApplication.cached_tilts.clear

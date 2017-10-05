@@ -123,6 +123,13 @@ describe Flame::Render do
 				)
 		end
 
+		should 'receive block for template' do
+			render = @init.call(:_partial_with_block)
+			render.render { 'world' }.should.equal(
+				"<h1>Hello, world!</h1>\n"
+			)
+		end
+
 		describe 'cache' do
 			before do
 				@controller.cached_tilts.clear

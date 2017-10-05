@@ -95,7 +95,7 @@ module Flame
 		## @param path [Symbol, nil] path to the template file
 		## @param options [Hash] options for the `Flame::Render` rendering
 		## @return [String] rendered template
-		def view(path = nil, options = {})
+		def view(path = nil, options = {}, &block)
 			cache = options.delete(:cache)
 			cache = config[:environment] == 'production' if cache.nil?
 			template = Flame::Render.new(
@@ -103,7 +103,7 @@ module Flame
 				(path || caller_locations(1, 1)[0].label.to_sym),
 				options
 			)
-			template.render(cache: cache)
+			template.render(cache: cache, &block)
 		end
 		alias render view
 

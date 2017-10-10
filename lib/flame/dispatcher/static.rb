@@ -29,19 +29,19 @@ module Flame
 			class StaticFile
 				def initialize(filename, dir)
 					@filename = filename.to_s
-					@path = File.join dir, URI.decode_www_form_component(@filename)
+					@file_path = File.join dir, URI.decode_www_form_component(@filename)
 				end
 
 				def exist?
-					File.exist?(@path) && File.file?(@path)
+					File.exist?(@file_path) && File.file?(@file_path)
 				end
 
 				def mtime
-					File.mtime(@path)
+					File.mtime(@file_path)
 				end
 
 				def extname
-					File.extname(@path)
+					File.extname(@file_path)
 				end
 
 				def newer?(http_since)
@@ -49,7 +49,7 @@ module Flame
 				end
 
 				def content
-					File.read(@path)
+					File.read(@file_path)
 				end
 
 				def path(with_version: false)

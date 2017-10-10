@@ -47,6 +47,18 @@ describe Flame::Path do
 		it 'should receive many path parts' do
 			@init.call('/foo', '/bar', 'baz').to_s.should.equal '/foo/bar/baz'
 		end
+
+		describe 'with path as Flame::Path' do
+			should 'works' do
+				path = @init.call('/foo/bar')
+				@init.call(path).to_s.should.equal path
+			end
+
+			should 'not return the same object' do
+				path = @init.call('/foo/bar')
+				@init.call(path).to_s.should.not.be.same_as path
+			end
+		end
 	end
 
 	describe '#parts' do

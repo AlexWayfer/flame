@@ -215,7 +215,7 @@ describe Flame::Controller do
 	end
 
 	describe '#path_to_back' do
-		should 'return referer URL if exist' do
+		it 'should return referer URL if exist' do
 			referer = 'http://example.com/'
 			env = @env.merge(
 				'HTTP_REFERER' => referer
@@ -225,7 +225,7 @@ describe Flame::Controller do
 			controller.back.should.equal referer
 		end
 
-		should 'not return referer with the same URL' do
+		it 'should not return referer with the same URL' do
 			referer = 'http://localhost:3000/another/bar'
 			env = @env.merge(
 				Rack::PATH_INFO => '/another/bar',
@@ -236,11 +236,11 @@ describe Flame::Controller do
 			controller.back.should.not.equal referer
 		end
 
-		should 'return path to index action of controller without referer' do
+		it 'should return path to index action of controller without referer' do
 			@another_controller.back.should.equal '/another'
 		end
 
-		should 'return root path without referer and index action' do
+		it 'should return root path without referer and index action' do
 			env = @env.merge(
 				Rack::PATH_INFO => '/nested/nested/back'
 			)
@@ -401,7 +401,7 @@ describe Flame::Controller do
 				)
 		end
 
-		should 'render partial with block' do
+		it 'should render partial with block' do
 			@controller.render(:_partial_with_block) { 'world' }
 				.should.equal "<h1>Hello, world!</h1>\n"
 		end

@@ -100,7 +100,7 @@ describe 'FlameCLI::New::App' do
 		)
 	end
 
-	should 'generate working app' do
+	it 'should generate working app' do
 		execute_command.call
 		Dir.chdir app_name
 		## HACK for new unreleased features

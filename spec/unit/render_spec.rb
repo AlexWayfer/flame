@@ -34,9 +34,10 @@ describe Flame::Render do
 		end
 
 		it 'should take scope from locals' do
-			render = @init.call(:view, scope: self, foo: :bar)
+			scope = Object.new
+			render = @init.call(:view, scope: scope, foo: :bar)
 			render.instance_variable_get(:@locals).should.be.equal foo: :bar
-			render.instance_variable_get(:@scope).should.be.same_as self
+			render.instance_variable_get(:@scope).should.be.same_as scope
 		end
 
 		it 'should take layout from locals' do
@@ -49,6 +50,8 @@ describe Flame::Render do
 			render = @init.call(:view, tilt: { outvar: 'baz' }, foo: :bar)
 			render.instance_variable_get(:@tilt_options)
 				.should.equal(outvar: 'baz')
+			## warning: instance variable @cache not initialized
+			render.instance_variable_set(:@cache, false)
 			## https://github.com/rtomayko/tilt/blob/752a852/lib/tilt/erb.rb#L20
 			render.send(:compile_file).instance_variable_get(:@outvar)
 				.should.equal 'baz'

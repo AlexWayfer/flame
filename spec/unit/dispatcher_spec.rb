@@ -177,13 +177,13 @@ describe Flame::Dispatcher do
 			should 'not return `Allow` header for not-existing route' do
 				dispatcher = @init.call(method: 'OPTIONS', path: '/hello')
 				respond = dispatcher.run!.last
-				respond.headers.key?('Allow').should.be.false
+				respond.headers.key?('Allow').should.equal false
 			end
 
 			should 'return `Allow` header for route with optional parameters' do
 				dispatcher = @init.call(method: 'OPTIONS', path: '/baz')
 				respond = dispatcher.run!.last
-				respond.headers.key?('Allow').should.be.true
+				respond.headers.key?('Allow').should.equal true
 			end
 		end
 	end
@@ -351,7 +351,7 @@ describe Flame::Dispatcher do
 			@dispatcher.instance_variable_get(:@env)[Rack::RACK_ERRORS].string
 				.should match_words(
 					Time.now.strftime('%Y-%m-%d %H:%M:%S'),
-					@error.class.name, @error.message, __FILE__
+					@error.class.name, @error.message # , __FILE__ (because of minitest)
 				)
 		end
 	end

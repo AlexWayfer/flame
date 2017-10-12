@@ -172,7 +172,7 @@ describe Flame::Application do
 			Dir[File.join(__dir__, 'require_dirs', '**', '*')]
 				.reject { |file| File.executable?(file) }
 				.each do |file|
-					require(file).should.be.false
+					require(file).should.equal false
 				end
 		end
 
@@ -181,7 +181,7 @@ describe Flame::Application do
 			Dir[File.join(__dir__, 'require_dirs', '**', '*')]
 				.select { |file| File.file?(file) && File.executable?(file) }
 				.each do |file|
-					require(file).should.be.true
+					require(file).should.equal true
 				end
 		end
 	end

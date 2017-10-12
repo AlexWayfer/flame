@@ -13,8 +13,10 @@ end
 
 require_relative File.join('..', 'lib', 'flame')
 
-require 'bacon'
-require 'bacon/colored_output'
+require 'minitest/bacon'
+require 'minitest/reporters'
+Minitest::Reporters.use! [Minitest::Reporters::DefaultReporter.new]
+
 require 'pry-byebug'
 
 def match_words(*words)

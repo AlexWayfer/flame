@@ -1,1 +1,1 @@
-<h1>Hello, <%= @name || 'world' %>!</h1>
+<h1>Hello, <%= defined?(@name) ? @name : 'world' %>!</h1>

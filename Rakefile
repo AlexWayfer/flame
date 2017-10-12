@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
-task :spec do
-	sh 'bundle exec bacon -a -s'
+require 'rake/testtask'
+Rake::TestTask.new(:spec) do |t|
+	t.pattern = %w[spec/**/spec_helper.rb spec/**/*_spec.rb]
 end
 
 task default: :spec

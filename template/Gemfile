@@ -15,7 +15,7 @@ gem 'puma'
 gem 'rack-utf8_sanitizer'
 
 group :development do
-	gem 'filewatcher', git: 'https://github.com/thomasfl/filewatcher.git'
+	gem 'filewatcher'
 	gem 'pry-byebug'
 end
 

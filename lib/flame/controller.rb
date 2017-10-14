@@ -4,7 +4,6 @@ require 'forwardable'
 require 'gorilla-patch/namespace'
 
 require_relative 'controller/path_to'
-require_relative 'controller/with_actions'
 require_relative 'render'
 
 module Flame
@@ -13,12 +12,32 @@ module Flame
 	class Controller
 		extend Forwardable
 
-		FORBIDDEN_ACTIONS = [].freeze
-
 		## Shortcut for not-inherited public methods: actions
 		## @return [Array<Symbol>] array of actions (public instance methods)
 		def self.actions
 			public_instance_methods(false)
+		end
+
+		## Re-define public instance methods (actions) from parent
+		## @param actions [Array<Symbol>] Actions for inheritance
+		## @param exclude [Array<Symbol>] Actions for excluding from inheritance
+		## @example Inherit all parent actions
+		##   class MyController < BaseController
+		##     inherit_actions
+		##   end
+		## @example Inherit certain parent actions
+		##   class MyController < BaseController
+		##     inherit_actions :index, :show
+		##   end
+		## @example Inherit all parent actions exclude certain
+		##   class MyController < BaseController
+		##     inherit_actions exclude: %i[edit update]
+		##   end
+		def self.inherit_actions(actions = superclass.actions, exclude: [])
+			(actions - exclude).each do |public_method|
+				um = superclass.public_instance_method(public_method)
+				define_method public_method, um
+			end
 		end
 
 		def_delegators(

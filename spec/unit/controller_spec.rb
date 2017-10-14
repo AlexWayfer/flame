@@ -451,45 +451,27 @@ describe Flame::Controller do
 		end
 	end
 
-	describe 'ParentActions' do
+	describe '.inherit_actions' do
 		it 'should define actions from parent' do
-			inherited_controller = Class.new(ControllerController)
-			inherited_controller.extend Flame::Controller::ParentActions
+			inherited_controller = Class.new(ControllerController) do
+				inherit_actions
+			end
 			inherited_controller.actions.should.equal ControllerController.actions
 		end
 
-		it 'should define actions from parent without forbidden actions' do
-			inherited_controller = Class.new(ControllerController)
-			inherited_controller::FORBIDDEN_ACTIONS = %i[
-				current_reroute hash_reroute index_reroute execute_reroute hooks_reroute
-			].freeze
-			inherited_controller.extend Flame::Controller::ParentActions
+		it 'should define specific actions from parent' do
+			inherited_controller = Class.new(ControllerController) do
+				inherit_actions %i[foo bar baz]
+			end
+			inherited_controller.actions.should.equal %i[foo bar baz]
+		end
+
+		it 'should define actions from parent without excluded actions' do
+			inherited_controller = Class.new(ControllerController) do
+				inherit_actions exclude: %i[foo bar]
+			end
 			inherited_controller.actions
-				.should.equal %i[foo bar baz object_hash respond_for_reroute]
-		end
-	end
-
-	describe '.with_actions' do
-		it 'should define actions from parent' do
-			inherited_controller = Class.new(ControllerController.with_actions)
-			inherited_controller.actions.should.equal ControllerController.actions
-		end
-
-		describe 'include' do
-			before do
-				@controller_with_included_actions = Class.new(Flame::Controller) do
-					include with_actions SomeActions
-
-					def controller_action; end
-				end
-			end
-
-			it 'should include actions from included module' do
-				@controller_with_included_actions.actions
-					.should.equal %i[
-						included_action another_included_action controller_action
-					]
-			end
+				.should.equal ControllerController.actions - %i[foo bar]
 		end
 	end
 end

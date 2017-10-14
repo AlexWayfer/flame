@@ -261,42 +261,6 @@ describe Flame::Dispatcher do
 		end
 	end
 
-	describe '#path_to' do
-		it 'should return path by controller and action' do
-			@dispatcher.path_to(DispatcherController, :foo)
-				.should.equal '/foo'
-		end
-
-		it 'should return path by controller with default index action' do
-			@dispatcher.path_to(DispatcherController)
-				.should.equal '/'
-		end
-
-		it 'should return path by controller and action with arguments' do
-			@dispatcher.path_to(DispatcherController, :hello, name: 'world')
-				.should.equal '/hello/world'
-		end
-
-		it 'should raise error if route not found' do
-			-> { @dispatcher.path_to(DispatcherController, :bar) }
-				.should.raise(Flame::Errors::RouteNotFoundError)
-				.message.should match_words('DispatcherController', 'bar')
-		end
-
-		it 'should return path with (nested) params' do
-			@dispatcher.path_to(
-				DispatcherController,
-				:foo,
-				params: {
-					name: 'world',
-					nested: { some: 'here', another: %w[there maybe] }
-				}
-			)
-				.should.equal '/foo?name=world' \
-					'&nested[some]=here&nested[another][]=there&nested[another][]=maybe'
-		end
-	end
-
 	describe '#halt' do
 		it 'should just throw without changes if no arguments' do
 			-> { @dispatcher.halt }.should.throw(:halt)

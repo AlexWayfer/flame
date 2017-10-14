@@ -16,6 +16,9 @@ module Flame
 	class Dispatcher
 		GEM_STATIC_FILES = File.join __dir__, '..', '..', 'public'
 
+		extend Forwardable
+		def_delegators :@app_class, :path_to
+
 		attr_reader :request, :response
 
 		include Flame::Dispatcher::Static
@@ -91,27 +94,6 @@ module Flame
 			return @available_endpoint if defined? @available_endpoint
 			@available_endpoint =
 				@app_class.router.routes.navigate(*request.path.parts)
-		end
-
-		## Build a path to the given controller and action, with any expected params
-		##
-		## @param ctrl [Flame::Controller] class of controller
-		## @param action [Symbol] method of controller
-		## @param args [Hash] parameters for method of controller
-		## @return [String] path for requested method, controller and parameters
-		## @example Path for `show(id)` method of `ArticlesController` with `id: 2`
-		##   path_to ArticlesController, :show, id: 2 # => "/articles/show/2"
-		## @example Path for `new` method of `ArticlesController` with params
-		##   path_to ArticlesController, :new, params: { author_id: 1 }
-		##   # => "/articles/new?author_id=1"
-		def path_to(ctrl, action = :index, args = {})
-			path = @app_class.router.path_of(ctrl, action)
-			raise Errors::RouteNotFoundError.new(ctrl, action) unless path
-			query = Rack::Utils.build_nested_query args.delete(:params)
-			query = nil if query&.empty?
-			path = path.assign_arguments(args)
-			path = '/' if path.empty?
-			Addressable::URI.new(path: path, query: query).to_s
 		end
 
 		## Interrupt the execution of route, and set new optional data

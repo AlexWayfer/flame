@@ -11,6 +11,10 @@ class ApplicationController < Flame::Controller
 		'Hello from bar!'
 	end
 
+	def hello(name)
+		"Hello, #{name}!"
+	end
+
 	def baz(first, second, third = nil, fourth = nil); end
 
 	def view
@@ -217,6 +221,48 @@ describe Flame::Application do
 		end
 	end
 
+	describe '.path_to' do
+		before do
+			@app_class.class_exec do
+				mount ApplicationController, '/'
+			end
+		end
+
+		it 'should return path by controller and action' do
+			@app_class.path_to(ApplicationController, :foo)
+				.should.equal '/foo'
+		end
+
+		it 'should return path by controller with default index action' do
+			@app_class.path_to(ApplicationController)
+				.should.equal '/'
+		end
+
+		it 'should return path by controller and action with arguments' do
+			@app_class.path_to(ApplicationController, :hello, name: 'world')
+				.should.equal '/hello/world'
+		end
+
+		it 'should raise error if route not found' do
+			-> { @app_class.path_to(ApplicationController, :not_exist) }
+				.should.raise(Flame::Errors::RouteNotFoundError)
+				.message.should match_words('ApplicationController', 'not_exist')
+		end
+
+		it 'should return path with (nested) params' do
+			@app_class.path_to(
+				ApplicationController,
+				:foo,
+				params: {
+					name: 'world',
+					nested: { some: 'here', another: %w[there maybe] }
+				}
+			)
+				.should.equal '/foo?name=world' \
+					'&nested[some]=here&nested[another][]=there&nested[another][]=maybe'
+		end
+	end
+
 	describe '#initialize' do
 		it 'should take app parameter' do
 			another_app = @init.call.new
@@ -268,7 +314,7 @@ describe Flame::Application do
 			end
 
 			@app_class.router.routes.should.equal initialize_path_hashes(
-				ApplicationController, :index, :foo, :bar, :baz, :view
+				ApplicationController, :index, :foo, :bar, :hello, :baz, :view
 			)
 		end
 
@@ -278,7 +324,7 @@ describe Flame::Application do
 			end
 
 			@app_class.router.routes.should.equal initialize_path_hashes(
-				ApplicationController, :index, :foo, :bar, :baz, :view
+				ApplicationController, :index, :foo, :bar, :hello, :baz, :view
 			)
 		end
 
@@ -292,6 +338,7 @@ describe Flame::Application do
 				index: { ctrl_path: '/another' },
 				foo:   { ctrl_path: '/another' },
 				bar:   { ctrl_path: '/another' },
+				hello: { ctrl_path: '/another' },
 				baz:   { ctrl_path: '/another' },
 				view:  { ctrl_path: '/another' }
 			)
@@ -315,7 +362,7 @@ describe Flame::Application do
 
 			@app_class.router.routes.should.equal initialize_path_hashes(
 				ApplicationController,
-				:index, :foo, :bar, :view, baz: { http_method: :POST }
+				:index, :foo, :bar, :hello, :view, baz: { http_method: :POST }
 			)
 		end
 
@@ -328,7 +375,7 @@ describe Flame::Application do
 
 			@app_class.router.routes.should.equal initialize_path_hashes(
 				ApplicationController,
-				:index, :foo, :bar, :view, baz: { action_path: '/bat' }
+				:index, :foo, :bar, :hello, :view, baz: { action_path: '/bat' }
 			)
 		end
 
@@ -341,7 +388,7 @@ describe Flame::Application do
 
 			@app_class.router.routes.should.equal initialize_path_hashes(
 				ApplicationController,
-				:index, :foo, :bar, :view,
+				:index, :foo, :bar, :hello, :view,
 				baz: { action_path: '/baz/:second/:first/:?third/:?fourth' }
 			)
 		end
@@ -355,7 +402,7 @@ describe Flame::Application do
 
 			@app_class.router.routes.should.equal initialize_path_hashes(
 				ApplicationController,
-				:index, :foo, :bar, :view,
+				:index, :foo, :bar, :hello, :view,
 				baz: {
 					action_path: '/bat/:second/:first/:?third/:?fourth',
 					http_method: :POST
@@ -372,7 +419,7 @@ describe Flame::Application do
 
 			@app_class.router.routes.should.equal initialize_path_hashes(
 				ApplicationController,
-				:index, :foo, :bar, :view,
+				:index, :foo, :bar, :hello, :view,
 				baz: {
 					action_path: '/bat/:first/:second/:?third/:?fourth',
 					http_method: :POST
@@ -389,7 +436,7 @@ describe Flame::Application do
 
 			@app_class.router.routes.should.equal initialize_path_hashes(
 				ApplicationController,
-				:index, :foo, :bar, :view,
+				:index, :foo, :bar, :hello, :view,
 				baz: {
 					action_path: '/bat/:second/:first/:?third/:?fourth',
 					http_method: :POST
@@ -406,7 +453,7 @@ describe Flame::Application do
 
 			@app_class.router.routes.should.equal initialize_path_hashes(
 				ApplicationController,
-				:index, :foo, :bar, :view,
+				:index, :foo, :bar, :hello, :view,
 				baz: {
 					action_path: '/bat/:second/:first/:?third/:?fourth',
 					http_method: :POST
@@ -498,7 +545,7 @@ describe Flame::Application do
 
 			@app_class.router.routes.should.equal initialize_path_hashes(
 				ApplicationController,
-				:index, :foo, :bar, :view, baz: { http_method: :POST }
+				:index, :foo, :bar, :hello, :view, baz: { http_method: :POST }
 			)
 		end
 
@@ -514,7 +561,7 @@ describe Flame::Application do
 			@app_class.router.routes.should.equal(
 				rest_routes('/application/rest').deep_merge!(
 					initialize_path_hashes(
-						ApplicationController, :index, :foo, :bar, :view, :baz
+						ApplicationController, :index, :foo, :bar, :hello, :view, :baz
 					)
 				)
 			)
@@ -522,10 +569,11 @@ describe Flame::Application do
 			@app_class.router.reverse_routes.should.equal(
 				'ApplicationController' => {
 					index: '/application/',
-					foo: '/application/foo',
-					bar: '/application/bar',
-					view: '/application/view',
-					baz: '/application/baz/:first/:second/:?third/:?fourth'
+					foo:   '/application/foo',
+					bar:   '/application/bar',
+					hello: '/application/hello/:name',
+					view:  '/application/view',
+					baz:   '/application/baz/:first/:second/:?third/:?fourth'
 				},
 				'ApplicationRESTController' => {
 					index: '/application/rest/',
@@ -549,7 +597,7 @@ describe Flame::Application do
 			@app_class.router.routes.should.equal(
 				rest_routes('/application/rest').deep_merge!(
 					initialize_path_hashes(
-						ApplicationController, :index, :foo, :bar, :view,
+						ApplicationController, :index, :foo, :bar, :hello, :view,
 						baz: { action_path: '/:first/:second/:?third/:?fourth' }
 					)
 				)
@@ -558,10 +606,11 @@ describe Flame::Application do
 			@app_class.router.reverse_routes.should.equal(
 				'ApplicationController' => {
 					index: '/application/',
-					foo: '/application/foo',
-					bar: '/application/bar',
-					view: '/application/view',
-					baz: '/application/:first/:second/:?third/:?fourth'
+					foo:   '/application/foo',
+					bar:   '/application/bar',
+					hello: '/application/hello/:name',
+					view:  '/application/view',
+					baz:   '/application/:first/:second/:?third/:?fourth'
 				},
 				'ApplicationRESTController' => {
 					index: '/application/rest/',

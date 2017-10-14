@@ -53,6 +53,27 @@ module Flame
 				@app.call env
 			end
 
+			## Build a path to the given controller and action
+			##
+			## @param ctrl [Flame::Controller] class of controller
+			## @param action [Symbol] method of controller
+			## @param args [Hash] parameters for method of controller
+			## @return [String] path for requested method, controller and parameters
+			## @example Path for `show(id)` method of `ArticlesController`
+			##   path_to ArticlesController, :show, id: 2 # => "/articles/show/2"
+			## @example Path for `new` method of `ArticlesController` with params
+			##   path_to ArticlesController, :new, params: { author_id: 1 }
+			##   # => "/articles/new?author_id=1"
+			def path_to(ctrl, action = :index, args = {})
+				path = router.path_of(ctrl, action)
+				raise Errors::RouteNotFoundError.new(ctrl, action) unless path
+				query = Rack::Utils.build_nested_query args.delete(:params)
+				query = nil if query&.empty?
+				path = path.assign_arguments(args)
+				path = '/' if path.empty?
+				Addressable::URI.new(path: path, query: query).to_s
+			end
+
 			private
 
 			## Get filename from caller of method

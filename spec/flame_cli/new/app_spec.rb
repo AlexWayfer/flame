@@ -31,6 +31,7 @@ describe 'FlameCLI::New::App' do
 				'- controllers/_controller.rb',
 				'- controllers/site/_controller.rb',
 				'- controllers/site/index_controller.rb',
+				'Grant permissions to files...',
 				'Done!'
 			)
 	end
@@ -140,6 +141,16 @@ describe 'FlameCLI::New::App' do
 		ensure
 			`./server stop`
 			Process.wait pid
+			Dir.chdir '..'
+		end
+	end
+
+	it 'should grant `./server` file execution permissions' do
+		execute_command.call
+		begin
+			Dir.chdir app_name
+			File.stat('server').mode.to_s(8)[3..5].should.equal '744'
+		ensure
 			Dir.chdir '..'
 		end
 	end

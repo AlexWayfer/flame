@@ -14,6 +14,7 @@ module FlameCLI
 
 				make_dir do
 					copy_template
+					grant_permissions
 				end
 
 				puts 'Done!'
@@ -50,6 +51,11 @@ module FlameCLI
 					File.write(basename_pathname, content)
 					FileUtils.rm file
 				end
+			end
+
+			def grant_permissions
+				puts 'Grant permissions to files...'
+				File.chmod 0o744, 'server'
 			end
 		end
 	end

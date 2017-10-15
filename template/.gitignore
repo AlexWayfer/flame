@@ -13,9 +13,11 @@ config/**/*
 # temp
 log/
 tmp/
-#public/files
 *.bak
 *~
+
+# uploaded files
+#public/files
 
 # dumps
 *.sql

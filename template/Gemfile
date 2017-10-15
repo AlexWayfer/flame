@@ -2,13 +2,15 @@
 
 source 'https://rubygems.org'
 
+## https://github.com/bundler/bundler/issues/4978
+git_source(:github) { |name| "https://github.com/#{name}.git" }
+
 ## system
 # gem 'gorilla-patch'
 
 ## server
-gem 'flame'
-# gem 'flame-flash'
-# gem 'flame-r18n'
+gem 'flame', github: 'AlexWayfer/flame'
+# gem 'flame-flash', github: 'AlexWayfer/flame-flash'
 gem 'puma'
 # gem 'rack-slashenforce'
 gem 'rack-utf8_sanitizer'
@@ -26,6 +28,9 @@ end
 # gem 'pg'
 # gem 'sequel'
 # gem 'sequel_pg', require: 'sequel'
+
+## translations
+# gem 'flame-r18n', github: 'AlexWayfer/flame-r18n'
 
 ## others
 # gem 'faker'

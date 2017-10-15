@@ -14,6 +14,7 @@ gem 'flame', github: 'AlexWayfer/flame'
 gem 'puma'
 # gem 'rack-slashenforce'
 gem 'rack-utf8_sanitizer'
+# gem 'rack_csrf', require: 'rack/csrf'
 
 group :development do
 	gem 'filewatcher'
@@ -31,6 +32,11 @@ end
 
 ## translations
 # gem 'flame-r18n', github: 'AlexWayfer/flame-r18n'
+## for named_variables filter
+# gem 'r18n-rails-api'
+
+## views
+gem 'erubi', require: 'tilt/erubi'
 
 ## others
 # gem 'faker'

@@ -35,7 +35,7 @@ def bash_spawn(command)
 end
 
 def server(command)
-	exit if %i[start restart].include?(command) && !bundle_check
+	exit if %i[start restart].include?(command) && !(bundle_check && assets_build)
 	web_server(command)
 end
 
@@ -49,22 +49,47 @@ def web_server(command)
 end
 
 def development_restart(pumactl_command)
-	filewatcher_pid = bash_spawn filewatcher_command(pumactl_command)
-	web_server :stop
+	filewatchers_pids = development_filewatchers(pumactl_command)
+		.map { |command| bash_spawn command }
+	web_server :stop if File.exist? puma_pid_file
 	web_server :start
 rescue SystemExit, Interrupt
-	bash "kill #{filewatcher_pid}"
+	filewatchers_pids.each do |filewatcher_pid|
+		bash "kill #{filewatcher_pid}"
+	end
 end
 
-def filewatcher_command(execute)
+def filewatcher_command(pattern, execute, exclude: nil)
 	<<-CMD.split.join(' ')
 		bundle exec "
 			filewatcher -r
-				'**/{Gemfile,*.{rb,ru,yml}}'
-				--exclude '**/{spec/**/*,config/**/*.example*}'
+				'#{pattern}'
+				#{"--exclude '#{exclude}'" unless exclude.nil?}
 				'#{execute}'
 		"
 	CMD
+end
+
+def development_filewatchers(pumactl_command)
+	[
+		server_filewatcher(pumactl_command),
+		assets_filewatcher
+	].compact
+end
+
+def server_filewatcher(pumactl_command)
+	filewatcher_command(
+		'**/{Gemfile,*.{rb,ru,yml},_colors.scss}',
+		pumactl_command,
+		exclude: '**/{spec/**/*,config/**/*.example*}'
+	)
+end
+
+ASSETS_DIR = 'assets'
+
+def assets_filewatcher
+	return unless Dir.exist?(ASSETS_DIR)
+	filewatcher_command("#{ASSETS_DIR}/**/*", 'rake assets:build')
 end
 
 def server_config
@@ -75,8 +100,14 @@ def puma_config_file
 	@puma_config_file ||= File.join(__dir__, 'config', 'puma.rb')
 end
 
+def puma_pid_file
+	File.join(
+		__dir__, *server_config[environment].values_at(:pids_dir, :pid_file)
+	)
+end
+
 def environment
-	server_config[:environment]
+	ENV['RACK_ENV'] || server_config[:environment]
 end
 
 def log_files
@@ -96,6 +127,11 @@ end
 
 def bundle_check
 	bash 'bundle check || bundle install'
+end
+
+def assets_build
+	return true unless Dir.exist?(ASSETS_DIR)
+	bash 'rake assets:build'
 end
 
 ## Runtime

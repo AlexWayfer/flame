@@ -11,6 +11,7 @@ config/**/*
 !config/nginx/sites/*.example*
 
 # temp
+.sass-cache/
 log/
 tmp/
 *.bak

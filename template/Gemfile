@@ -38,6 +38,9 @@ end
 ## views
 gem 'erubi', require: 'tilt/erubi'
 
+## assets
+# gem 'sass'
+
 ## others
 # gem 'faker'
 # gem 'google_currency'

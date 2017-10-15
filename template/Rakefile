@@ -499,6 +499,24 @@ task :deploy, :without_restart do |_t, args|
 	end
 end
 
+namespace :assets do
+	styles_input_dir = File.join 'assets', 'styles'
+	styles_input_file = File.join styles_input_dir, 'main.scss'
+	styles_output_dir = File.join 'public', 'styles'
+	styles_output_file = File.join styles_output_dir, 'main.css'
+
+	desc 'Build assets'
+	task :build do
+		FileUtils.mkdir_p styles_output_dir
+		sh "sass #{styles_input_file} #{styles_output_file} -t compact"
+	end
+
+	desc 'Watch for assets'
+	task :watch do
+		sh "sass --watch #{styles_input_dir}:#{styles_output_dir} -t compact"
+	end
+end
+
 def env_true?(key)
 	%(true yes 1 y).include?(ENV[key.to_s].to_s.downcase)
 end

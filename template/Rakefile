@@ -312,9 +312,9 @@ namespace :db do
 	end
 end
 
-namespace :check do
+namespace :locales do
 	desc 'Check locales'
-	task :locales do
+	task :check do
 		require 'yaml'
 		require 'json'
 
@@ -408,9 +408,11 @@ namespace :check do
 			end
 		end
 	end
+end
 
+namespace :static do
 	desc 'Check static files'
-	task :static do
+	task :check do
 		Dir[File.join(__dir__, 'public', '**', '*')].each do |file|
 			basename = File.basename(file)
 			grep_options = '--exclude-dir={\.git,log} --color=always'

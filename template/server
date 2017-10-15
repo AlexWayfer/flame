@@ -7,14 +7,16 @@ require 'yaml'
 
 ## Functons
 def show_usage
-	puts 'Usage: ./server COMMAND'
-	puts 'COMMAND is one of:'
-	puts '    start - Start server'
-	puts '     stop - Stop server'
-	puts '     kill - Kill server (and filewatcher)'
-	puts '  restart - Restart server'
-	puts '  monitor - Show log'
-	puts '    devel - Restart and monitor server'
+	puts <<~USAGE
+		Usage: ./server COMMAND
+		COMMAND is one of:
+		    start - Start server
+		     stop - Stop server
+		     kill - Kill server (and filewatcher)
+		  restart - Restart server
+		  monitor - Show log
+		    devel - Restart and monitor server
+	USAGE
 end
 
 def bash(command)

@@ -4,7 +4,6 @@ source 'https://rubygems.org'
 
 ## system
 # gem 'gorilla-patch'
-# gem 'json'
 
 ## server
 gem 'flame'

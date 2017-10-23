@@ -73,4 +73,4 @@ More at [Wiki](https://github.com/AlexWayfer/flame/wiki) and in `example/` direc
 
 ## Benchmark
 
-The last benchmark can be viewed [here](https://github.com/AlexWayfer/bench-micro).
+The last benchmark can be viewed [here](https://github.com/luislavena/bench-micro).

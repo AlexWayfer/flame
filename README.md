@@ -17,6 +17,10 @@ Flame is ready to use in production, but if you find flaws - please let me know.
 [![Code Climate](https://codeclimate.com/github/AlexWayfer/flame/badges/gpa.svg)](https://codeclimate.com/github/AlexWayfer/flame)
 [![Dependency Status](https://gemnasium.com/badges/github.com/AlexWayfer/flame.svg)](https://gemnasium.com/github.com/AlexWayfer/flame)
 
+## Why?
+
+I don't like class methods, especially for controller's hooks — OOP is prettier without it. And I found a way to implement controller's hooks without using class methods, but with the inheritance (including the including of modules). Moreover, with class methods an insufficiently obvious order of hooks (especially with inheritance) and complicated implementation of conditions are obtained. In this framework everything is Ruby-native.
+
 ## Installation
 
 Using the built-in `gem`:

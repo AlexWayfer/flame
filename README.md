@@ -38,6 +38,8 @@ gem 'flame'
 
 ## Usage
 
+The simplest example:
+
 ```ruby
 # index_controller.rb
 

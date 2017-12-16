@@ -11,11 +11,11 @@ or maybe even [Rails](https://github.com/rails/rails).
 
 Flame is ready to use in production, but if you find flaws - please let me know.
 
-[![Gem Version](https://badge.fury.io/rb/flame.svg)](https://badge.fury.io/rb/flame)
-[![Build Status](https://travis-ci.org/AlexWayfer/flame.svg?branch=master)](https://travis-ci.org/AlexWayfer/flame)
-[![codecov](https://codecov.io/gh/AlexWayfer/flame/branch/master/graph/badge.svg)](https://codecov.io/gh/AlexWayfer/flame)
-[![Code Climate](https://codeclimate.com/github/AlexWayfer/flame/badges/gpa.svg)](https://codeclimate.com/github/AlexWayfer/flame)
-[![Dependency Status](https://gemnasium.com/badges/github.com/AlexWayfer/flame.svg)](https://gemnasium.com/github.com/AlexWayfer/flame)
+[![Gem](https://img.shields.io/gem/v/flame.svg?style=flat-square)](https://rubygems.org/gems/flame)
+[![Travis](https://img.shields.io/travis/AlexWayfer/flame.svg?style=flat-square)](https://travis-ci.org/AlexWayfer/flame)
+[![Codecov](https://img.shields.io/codecov/c/github/AlexWayfer/flame.svg?style=flat-square)](https://codecov.io/gh/AlexWayfer/flame)
+[![Code Climate](https://img.shields.io/codeclimate/maintainability/AlexWayfer/flame.svg?style=flat-square)](https://codeclimate.com/github/AlexWayfer/flame)
+[![Gemnasium](https://img.shields.io/gemnasium/AlexWayfer/flame.svg?style=flat-square)](https://gemnasium.com/github.com/AlexWayfer/flame)
 
 ## Why?
 

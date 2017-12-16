@@ -1,4 +1,16 @@
-# Flame
+<h1 align="center">
+	<img src="https://raw.githubusercontent.com/AlexWayfer/flame/master/public/favicon.ico" height="150" alt="Flame Logo" title="Logo from open-source Elusive-Iconfont (https://github.com/reduxframework/elusive-iconfont)" />
+	<br>
+	Flame
+</h1>
+
+<p align="center">
+	<a href="https://rubygems.org/gems/flame"><img src="https://img.shields.io/gem/v/flame.svg?style=flat-square" alt="Gem" /></a>
+	<a href="https://travis-ci.org/AlexWayfer/flame"><img src="https://img.shields.io/travis/AlexWayfer/flame.svg?style=flat-square" alt="Travis" /></a>
+	<a href="https://codecov.io/gh/AlexWayfer/flame"><img src="https://img.shields.io/codecov/c/github/AlexWayfer/flame.svg?style=flat-square" alt="Codecov" /></a>
+	<a href="https://codeclimate.com/github/AlexWayfer/flame"><img src="https://img.shields.io/codeclimate/maintainability/AlexWayfer/flame.svg?style=flat-square" alt="Code Climate" /></a>
+	<a href="https://gemnasium.com/github.com/AlexWayfer/flame"><img src="https://img.shields.io/gemnasium/AlexWayfer/flame.svg?style=flat-square" alt="Gemnasium" /></a>
+</p>
 
 Flame is a small Ruby web framework,
 built on [Rack](https://github.com/rack/rack),
@@ -6,16 +18,6 @@ inspired by [Gin](https://github.com/jcasts/gin)
 (which follows class-controllers style),
 designed as a replacement [Sinatra](https://github.com/sinatra/sinatra),
 or maybe even [Rails](https://github.com/rails/rails).
-
-## Status
-
-Flame is ready to use in production, but if you find flaws - please let me know.
-
-[![Gem](https://img.shields.io/gem/v/flame.svg?style=flat-square)](https://rubygems.org/gems/flame)
-[![Travis](https://img.shields.io/travis/AlexWayfer/flame.svg?style=flat-square)](https://travis-ci.org/AlexWayfer/flame)
-[![Codecov](https://img.shields.io/codecov/c/github/AlexWayfer/flame.svg?style=flat-square)](https://codecov.io/gh/AlexWayfer/flame)
-[![Code Climate](https://img.shields.io/codeclimate/maintainability/AlexWayfer/flame.svg?style=flat-square)](https://codeclimate.com/github/AlexWayfer/flame)
-[![Gemnasium](https://img.shields.io/gemnasium/AlexWayfer/flame.svg?style=flat-square)](https://gemnasium.com/github.com/AlexWayfer/flame)
 
 ## Why?
 

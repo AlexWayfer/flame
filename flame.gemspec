@@ -16,22 +16,22 @@ Gem::Specification.new do |s|
 	s.license     = 'MIT'
 
 	s.add_runtime_dependency 'addressable', '~> 2.5'
-	s.add_runtime_dependency 'rack', '~> 2'
-	s.add_runtime_dependency 'tilt', '>= 2.0', '< 3'
 	s.add_runtime_dependency 'gorilla-patch', '~> 2.5'
+	s.add_runtime_dependency 'rack', '~> 2'
 	s.add_runtime_dependency 'thor', '~> 0'
+	s.add_runtime_dependency 'tilt', '>= 2.0', '< 3'
 
-	s.add_development_dependency 'rubocop', '~> 0.50'
-	s.add_development_dependency 'rake', '~> 12'
+	s.add_development_dependency 'codecov', '~> 0'
 	s.add_development_dependency 'minitest-bacon', '~> 1'
 	s.add_development_dependency 'minitest-reporters', '~> 1'
-	s.add_development_dependency 'rack-test', '~> 0'
-	s.add_development_dependency 'simplecov', '~> 0'
-	s.add_development_dependency 'codecov', '~> 0'
 	s.add_development_dependency 'pry', '~> 0'
 	s.add_development_dependency 'pry-byebug', '~> 3.5'
 	s.add_development_dependency 'puma', '~> 3.9'
+	s.add_development_dependency 'rack-test', '~> 0'
 	s.add_development_dependency 'rack-utf8_sanitizer', '~> 1.3'
+	s.add_development_dependency 'rake', '~> 12'
+	s.add_development_dependency 'rubocop', '0.51'
+	s.add_development_dependency 'simplecov', '~> 0'
 
 	s.files = Dir[File.join('{lib,public,template}', '**', '{*,.*}')]
 	s.executables = ['flame']

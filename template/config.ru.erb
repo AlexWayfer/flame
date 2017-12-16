@@ -13,11 +13,11 @@ Bundler.require :default, environment
 
 ## Require dirs
 Flame::Application.require_dirs(
-	%w[config models helpers lib exports mailers services controllers]
+	%w[config lib models helpers exports mailers services controllers]
 )
 
 ## Require application
-require './app'
+require './application'
 
 ## Use session middleware
 if <%= @short_module_name %>::Application.config[:session]
@@ -26,7 +26,10 @@ end
 
 ## Logger
 require 'logger'
-logs_dir = File.join __dir__, <%= @short_module_name %>::Application.config[:server][:logs_dir]
+logs_dir = File.join(
+	__dir__,
+	<%= @short_module_name %>::Application.config[:server][environment.to_s][:logs_dir]
+)
 
 <%= @short_module_name %>::Application.config[:logger] = Logger.new(
 	is_development ? $stdout : File.join(logs_dir, 'stdout'),
@@ -61,6 +64,9 @@ use Rack::UTF8Sanitizer
 
 ## Remove trailing slashes from request path (and redirect)
 # use Rack::RemoveTrailingSlashes
+
+## CSRF
+# use Rack::Csrf, raise: is_development
 
 ## Run application
 run <%= @short_module_name %>::Application

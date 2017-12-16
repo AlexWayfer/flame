@@ -25,7 +25,7 @@ describe 'FlameCLI::New::App' do
 				'Clean directories...',
 				'Replace module names in template...',
 				'- config.ru',
-				'- app.rb',
+				'- application.rb',
 				'- config/config.rb',
 				'- config/sequel.rb',
 				'- controllers/_controller.rb',
@@ -65,14 +65,14 @@ describe 'FlameCLI::New::App' do
 		execute_command.call
 		read_file.call('config.ru').should match_words(
 			'use Rack::Session::Cookie, FB::Application.config[:session][:cookie]',
-			'File.join __dir__, FB::Application.config[:server][:logs_dir]',
+			'FB::Application.config[:server][environment.to_s][:logs_dir]',
 			'FB::Application.config[:logger] = Logger.new',
 			'FB::DB.loggers <<',
 			'FB.logger',
 			'FB::DB.freeze',
 			'run FB::Application'
 		)
-		read_file.call('app.rb').should match_words(
+		read_file.call('application.rb').should match_words(
 			'module FooBar',
 			'include FB::Config'
 		)

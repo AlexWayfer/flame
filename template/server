@@ -9,18 +9,20 @@ require 'yaml'
 def show_usage
 	puts <<~USAGE
 		Usage: ./server COMMAND
-		COMMAND is one of:
-		    start - Start server
-		     stop - Stop server
-		     kill - Kill server (and filewatcher)
-		  restart - Restart server
-		  monitor - Show log
-		    devel - Restart and monitor server
+
+		  COMMAND is one of:
+		      start - Start server
+		       stop - Stop server
+		       kill - Kill server (and filewatcher)
+		    restart - Restart server
+		    monitor - Show log
+		      devel - Restart and monitor server
+		         ps - Show processes of server
 	USAGE
 end
 
-def bash(command)
-	puts command
+def bash(command, print: true)
+	puts command if print
 	system bash_command(command)
 end
 
@@ -31,11 +33,18 @@ end
 
 def bash_spawn(command)
 	puts "spawn #{command}"
-	spawn bash_command(command)
+	spawn bash_command command
 end
 
 def server(command)
-	exit if %i[start restart].include?(command) && !(bundle_check && assets_build)
+	if %i[start restart].include?(command) &&
+	   !(dependencies_check && assets_build)
+		exit
+	end
+	if %i[stop restart].include?(command)
+		kill_each read_filewatcher_pids
+		delete_filewatcher_pids_file
+	end
 	web_server(command)
 end
 
@@ -49,20 +58,27 @@ def web_server(command)
 end
 
 def development_restart(pumactl_command)
-	filewatchers_pids = development_filewatchers(pumactl_command)
-		.map { |command| bash_spawn command }
-	web_server :stop if File.exist? puma_pid_file
-	web_server :start
+	filewatcher_pids =
+		development_filewatchers.map { |command| bash_spawn command }
+	dump_filewatcher_pids filewatcher_pids
+	# web_server :stop if File.exist? puma_pid_file
+	# web_server :start
+	File.exist?(puma_pid_file) ? bash(pumactl_command) : web_server(:start)
 rescue SystemExit, Interrupt
-	filewatchers_pids.each do |filewatcher_pid|
-		bash "kill #{filewatcher_pid}"
+	kill_each filewatcher_pids
+	delete_filewatcher_pids_file
+end
+
+def kill_each(pids)
+	Array(pids).each do |pid|
+		bash "kill #{pid}"
 	end
 end
 
 def filewatcher_command(pattern, execute, exclude: nil)
 	<<-CMD.split.join(' ')
 		bundle exec "
-			filewatcher -r
+			filewatcher
 				'#{pattern}'
 				#{"--exclude '#{exclude}'" unless exclude.nil?}
 				'#{execute}'
@@ -70,26 +86,28 @@ def filewatcher_command(pattern, execute, exclude: nil)
 	CMD
 end
 
-def development_filewatchers(pumactl_command)
-	[
-		server_filewatcher(pumactl_command),
-		assets_filewatcher
-	].compact
+def development_filewatchers
+	YAML.load_file(File.join(__dir__, 'filewatchers.yml')).map do |args|
+		filewatcher_command args[:pattern], args[:command], exclude: args[:exclude]
+	end
 end
 
-def server_filewatcher(pumactl_command)
-	filewatcher_command(
-		'**/{Gemfile,*.{rb,ru,yml},_colors.scss}',
-		pumactl_command,
-		exclude: '**/{spec/**/*,config/**/*.example*}'
+def dump_filewatcher_pids(filewatcher_pids)
+	FileUtils.mkdir_p server_config_pids_dir
+	File.write(
+		filewatcher_pids_file,
+		filewatcher_pids.join($RS)
 	)
 end
 
-ASSETS_DIR = 'assets'
+def read_filewatcher_pids
+	return unless File.exist?(filewatcher_pids_file)
+	File.read(filewatcher_pids_file).split($RS)
+end
 
-def assets_filewatcher
-	return unless Dir.exist?(ASSETS_DIR)
-	filewatcher_command("#{ASSETS_DIR}/**/*", 'rake assets:build')
+def delete_filewatcher_pids_file
+	return unless File.exist?(filewatcher_pids_file)
+	File.delete filewatcher_pids_file
 end
 
 def server_config
@@ -104,6 +122,14 @@ def puma_pid_file
 	File.join(
 		__dir__, *server_config[environment].values_at(:pids_dir, :pid_file)
 	)
+end
+
+def server_config_pids_dir
+	server_config[environment][:pids_dir]
+end
+
+def filewatcher_pids_file
+	File.join server_config_pids_dir, 'filewatcher.pids'
 end
 
 def environment
@@ -125,13 +151,16 @@ def monitor_server
 	bash "tail -f #{log_files}"
 end
 
-def bundle_check
-	bash 'bundle check || bundle install'
+def dependencies_check
+	bash('bundle check || bundle install') # && bash('yarn install')
 end
 
 def assets_build
-	return true unless Dir.exist?(ASSETS_DIR)
-	bash 'rake assets:build'
+	bash 'rake assets:build', print: false
+end
+
+def ps_with_grep(pattern)
+	bash "ps aux | grep #{pattern} --color", print: false
 end
 
 ## Runtime
@@ -155,7 +184,17 @@ when 'devel'
 		sleep 1.5
 		monitor_server
 	end
+when 'ps'
+	puts
+	puts 'Filewatcher:'
+	puts
+	ps_with_grep '[f]ilewatcher'
+	puts
+	puts 'Puma:'
+	puts
+	ps_with_grep '[p]uma[\ :]'
 else
 	puts "Unknown command #{ARGV[0]}"
+	puts
 	show_usage
 end

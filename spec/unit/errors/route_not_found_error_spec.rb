@@ -9,7 +9,7 @@ describe 'Flame::Errors' do
 		describe '#message' do
 			it 'should be correct' do
 				@error.message.should.equal(
-					"Route with controller 'ErrorsController' and method 'bar'" \
+					"Route with controller 'ErrorsController' and action 'bar'" \
 						' not found in application routes'
 				)
 			end

@@ -13,6 +13,17 @@ require_relative 'errors/template_not_found_error'
 module Flame
 	## Helper for render functionality
 	class Render
+		## Create a new instance from controller, by path and with options
+		## @param controller [Flame::Controller]
+		##   controller for default scope, views directory and cache
+		## @param path [Symbol, String] path (full or the last part) for view search
+		## @param options [Hash] options for template
+		## @option options [Object] :scope (controller)
+		##   scope of visibility in rendering
+		## @option options [Symbol, String, false] :layout ('layout.*')
+		##   name of the layout file
+		## @option options [Hash] :tilt options for Tilt
+		## @option options [Hash] :locals ({}) local variables for rendering
 		def initialize(controller, path, options = {})
 			## Take options for rendering
 			@controller = controller
@@ -30,8 +41,9 @@ module Flame
 			@layout = nil if File.basename(@filename)[0] == '_'
 		end
 
-		## Render template
+		## Render template with layout
 		## @param cache [Boolean] cache compiles or not
+		## @return [String] compiled template
 		def render(cache: true, &block)
 			@cache = cache
 			## Compile Tilt to instance hash

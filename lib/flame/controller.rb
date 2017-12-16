@@ -135,6 +135,8 @@ module Flame
 		end
 
 		## Default method for Internal Server Error, can be inherited
+		## @param _exception [Exception] exception from code executing
+		## @return [String] content of exception page
 		def server_error(_exception)
 			body default_body
 		end

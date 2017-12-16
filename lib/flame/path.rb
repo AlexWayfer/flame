@@ -14,6 +14,9 @@ module Flame
 			parts.join('/').gsub(%r|/{2,}|, '/')
 		end
 
+		## Create a new instance
+		## @param paths [String, Flame::Path, Array<String, Flame::Path>]
+		##   paths as parts for new path
 		def initialize(*paths)
 			@path = self.class.merge(*paths)
 			freeze
@@ -34,6 +37,9 @@ module Flame
 			super
 		end
 
+		## Create new instance from self and other by concatinating
+		## @param other [Flame::Path, String] other path which will be concatinated
+		## @return [Flame::Path] result of concatinating
 		def +(other)
 			self.class.new(self, other)
 		end
@@ -140,30 +146,43 @@ module Flame
 			ARG_CHAR = ':'
 			ARG_CHAR_OPT = '?'
 
+			## Create new instance from String
+			## @param part [String] path part as String
+			## @param arg [Boolean] is this part an argument
 			def initialize(part, arg: false)
 				@part = "#{ARG_CHAR if arg}#{ARG_CHAR_OPT if arg == :opt}#{part}"
 				freeze
 			end
 
+			## Freeze object
 			def freeze
 				@part.freeze
 				super
 			end
 
+			## Compare with another
+			## @param other [Flame::Path::Part] other path part
+			## @return [true, false] equal or not
 			def ==(other)
 				to_s == other.to_s
 			end
 
 			alias eql? ==
 
+			## Convert path part to String
+			## @return [String] path part as String
 			def to_s
 				@part
 			end
 
+			## Is the path part an argument
+			## @return [true, false] an argument or not
 			def arg?
 				@part.start_with? ARG_CHAR
 			end
 
+			## Is the path part an optional argument
+			## @return [true, false] an optional argument or not
 			def opt_arg?
 				arg? && @part[1] == ARG_CHAR_OPT
 			end
@@ -172,6 +191,8 @@ module Flame
 			# 	arg? && !opt_arg?
 			# end
 
+			## Path part as a String without arguments characters
+			## @return [String] clean String
 			def clean
 				@part.delete ARG_CHAR + ARG_CHAR_OPT
 			end

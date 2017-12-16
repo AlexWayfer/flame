@@ -4,11 +4,17 @@ module Flame
 	class Application
 		## Class for Flame::Application.config
 		class Config < Hash
+			## Create an instance of application config
+			## @param app [Flame::Application] application
+			## @param hash [Hash] config content
 			def initialize(app, hash = {})
 				@app = app
 				replace(hash)
 			end
 
+			## Get config value by key
+			## @param key [Symbol] config key
+			## @return [Object] config value
 			def [](key)
 				result = super(key)
 				if result.class <= Proc && result.parameters.empty?

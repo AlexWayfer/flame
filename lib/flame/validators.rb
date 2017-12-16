@@ -7,12 +7,18 @@ module Flame
 	module Validators
 		## Compare arguments from path and from controller's action
 		class RouteArgumentsValidator
+			## Create a new instance of validator
+			## @param ctrl [Flame::Controller] controller of route
+			## @param path [Flame::Path, String] path of route
+			## @param action [Symbol, String] action of route
 			def initialize(ctrl, path, action)
 				@ctrl = ctrl
 				@path = Flame::Path.new(path)
 				@action = action
 			end
 
+			## Validate
+			## @return [true, false] valid or not
 			def valid?
 				extra_valid? && order_valid?
 			end

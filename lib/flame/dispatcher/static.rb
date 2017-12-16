@@ -4,6 +4,11 @@ module Flame
 	class Dispatcher
 		## Module for working with static files
 		module Static
+			## Find static file by path
+			## @param filename [String] relative path to the static file
+			## @param dir [String]
+			##   absolute local path of the directory with static files
+			## @return [Flame::Dispatcher::Static::StaticFile] instance of static file
 			def find_static(filename = request.path_info, dir: config[:public_dir])
 				StaticFile.new(filename, dir)
 			end

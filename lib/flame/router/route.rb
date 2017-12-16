@@ -9,6 +9,7 @@ module Flame
 		class Route
 			attr_reader :controller, :action
 
+			## Create a new instance
 			## @param controller [Flame::Controller] controller
 			## @param action [Symbol] action
 			def initialize(controller, action)

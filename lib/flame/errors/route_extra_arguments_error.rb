@@ -4,6 +4,14 @@ module Flame
 	module Errors
 		## Error for Route initialization
 		class RouteExtraArgumentsError < StandardError
+			## Create a new instance of error
+			## @param ctrl [Flame::Controller] controller
+			## @param action [Symbol] action
+			## @param path [Flame::Path, String] path
+			## @param extra [Hash] extra arguments
+			## @option extra [Symbol] :type required or optional
+			## @option extra [Symbol] :place extra arguments in controller or path
+			## @option extra [Array<Symbol>] :args extra arguments
 			def initialize(ctrl, action, path, extra)
 				@ctrl = ctrl
 				@action = action
@@ -15,6 +23,8 @@ module Flame
 				}[@extra[:type]]
 			end
 
+			## Calculated message of the error
+			## @return [String] message of the error
 			def message
 				case @extra[:place]
 				when :ctrl

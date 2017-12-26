@@ -463,7 +463,7 @@ describe Flame::Controller do
 			inherited_controller = Class.new(ControllerController) do
 				inherit_actions %i[foo bar baz]
 			end
-			inherited_controller.actions.should.equal %i[foo bar baz]
+			inherited_controller.actions.sort.should.equal %i[foo bar baz].sort
 		end
 
 		it 'should define actions from parent without excluded actions' do

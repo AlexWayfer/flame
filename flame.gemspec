@@ -27,6 +27,7 @@ Gem::Specification.new do |s|
 	s.add_development_dependency 'pry', '~> 0'
 	s.add_development_dependency 'pry-byebug', '~> 3.5'
 	s.add_development_dependency 'puma', '~> 3.9'
+	s.add_development_dependency 'rack-console', '~> 1'
 	s.add_development_dependency 'rack-test', '~> 0'
 	s.add_development_dependency 'rack-utf8_sanitizer', '~> 1.3'
 	s.add_development_dependency 'rake', '~> 12'

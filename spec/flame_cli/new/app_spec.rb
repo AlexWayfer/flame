@@ -102,12 +102,15 @@ describe 'FlameCLI::New::App' do
 	end
 
 	it 'should generate working app' do
+		ENV['RACK_ENV'] = 'development'
 		execute_command.call
 		Dir.chdir app_name
 		## HACK for new unreleased features
 		File.write(
 			'Gemfile',
-			File.read('Gemfile').sub("gem 'flame'\n", "gem 'flame', path: '..'\n")
+			File.read('Gemfile').sub(
+				"gem 'flame', github: 'AlexWayfer/flame'\n", "gem 'flame', path: '..'\n"
+			)
 		)
 		%w[server].each do |config|
 			FileUtils.cp "config/#{config}.example.yml", "config/#{config}.yml"

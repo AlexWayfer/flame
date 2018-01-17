@@ -7,6 +7,8 @@ rvm:
 before_install:
   - gem update --system
 
+cache: bundler
+
 notifications:
   email:
     on_success: change

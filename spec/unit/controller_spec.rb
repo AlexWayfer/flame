@@ -456,7 +456,9 @@ describe Flame::Controller do
 			inherited_controller = Class.new(ControllerController) do
 				inherit_actions
 			end
-			inherited_controller.actions.should.equal ControllerController.actions
+			inherited_controller.actions.sort.should.equal(
+				ControllerController.actions.sort
+			)
 		end
 
 		it 'should define specific actions from parent' do

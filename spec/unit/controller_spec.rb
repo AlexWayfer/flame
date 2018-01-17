@@ -472,8 +472,9 @@ describe Flame::Controller do
 			inherited_controller = Class.new(ControllerController) do
 				inherit_actions exclude: %i[foo bar]
 			end
-			inherited_controller.actions
-				.should.equal ControllerController.actions - %i[foo bar]
+			inherited_controller.actions.sort.should.equal(
+				(ControllerController.actions - %i[foo bar]).sort
+			)
 		end
 	end
 end

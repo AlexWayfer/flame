@@ -54,24 +54,41 @@ describe Flame::Router::Routes do
 	end
 
 	describe '#navigate' do
-		it 'should works with Path Part for Path Parts which are not arguments' do
-			path = Flame::Path.new('/foo/bar')
-			@routes.navigate(*path.parts).should.equal('baz' => {})
+		describe 'for path without arguments' do
+			should 'works with Path Part argument' do
+				path = Flame::Path.new('/foo/bar')
+				@routes.navigate(*path.parts).should.equal('baz' => {})
+			end
+
+			should 'works with String argument' do
+				@routes.navigate('foo', 'bar').should.equal('baz' => {})
+			end
 		end
 
-		it 'should works with String for Path Parts which are not arguments' do
-			@routes.navigate('foo', 'bar').should.equal('baz' => {})
+		describe 'for path with arguments' do
+			let(:routes) { @init.call('/:first/:second') }
+
+			should 'works with Path Part argument' do
+				path = Flame::Path.new('/foo')
+				routes.navigate(*path.parts).should.equal(':second' => {})
+			end
+
+			should 'works with String argument' do
+				routes.navigate('foo').should.equal(':second' => {})
+			end
 		end
 
-		it 'should works with Path Part for Path Parts which are arguments' do
-			path = Flame::Path.new('/foo')
-			routes = @init.call('/:first/:second')
-			routes.navigate(*path.parts).should.equal(':second' => {})
-		end
+		describe 'for path with optional argument at beginning' do
+			let(:routes) { @init.call('/:?first/second/third') }
 
-		it 'should works with String for Path Parts which are arguments' do
-			routes = @init.call('/:first/:second')
-			routes.navigate('foo').should.equal(':second' => {})
+			should 'works with Path Part argument' do
+				path = Flame::Path.new('/second')
+				routes.navigate(*path.parts).should.equal('third' => {})
+			end
+
+			should 'works with String argument' do
+				routes.navigate('second').should.equal('third' => {})
+			end
 		end
 
 		should 'works for root path' do

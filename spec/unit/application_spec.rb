@@ -102,6 +102,7 @@ describe Flame::Application do
 		@app = @app_class.new
 		@env_init = proc do |path: '/foo'|
 			{
+				Rack::RACK_ERRORS => StringIO.new,
 				Rack::RACK_INPUT => StringIO.new,
 				Rack::REQUEST_METHOD => 'GET',
 				Rack::PATH_INFO => path,
@@ -145,7 +146,7 @@ describe Flame::Application do
 			env = @env_init.call(path: '/view')
 			app_class = @init.call
 			app_class.class_exec { mount :application, '/' }
-			view_names = %w[view layout].map do |filename|
+			view_names = %w[application/view layout].map do |filename|
 				File.join(__dir__, 'views', "#{filename}.html.erb")
 			end
 			app_class.call(env).first.should.equal 200

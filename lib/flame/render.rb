@@ -76,7 +76,6 @@ module Flame
 		def find_files(path, dirs)
 			paths = [path]
 			paths.push(dirs.last) if path.to_sym == :index
-			dirs.push(nil)
 			files = Dir[
 				File.join(views_dir, "{#{dirs.join(',')}}", "{#{paths.join(',')}}.*")
 			]
@@ -94,7 +93,7 @@ module Flame
 
 		## Find layout-files by path
 		def find_layouts(path)
-			find_files(path, layout_dirs)
+			find_files(path, layout_dirs.push(nil))
 				.select { |file| Tilt[file] }
 				.sort! { |a, b| b.split('/').size <=> a.split('/').size }
 		end
@@ -104,26 +103,25 @@ module Flame
 		## Find possible directories for the controller
 		def controller_dirs
 			parts = @controller.class.underscore.split('/').map do |part|
-				%w[_controller _ctrl]
-					.find { |suffix| part.chomp! suffix }
+				%w[_controller _ctrl].find { |suffix| part.chomp! suffix }
 				part
 				## Alternative, but slower by ~50%:
 				# part.sub(/_(controller|ctrl)$/, '')
 			end
+			parts = parts[0..-2] if parts.last == 'index'
 			combine_parts(parts).map! { |path| path.join('/') }
 		end
 
 		## Make combinations in order with different sizes
-		## @example Make parts for ['project', 'namespace', 'controller']
+		## @example Make parts for ['project', 'namespace', 'entity']
 		##   # => [
-		##          ['project', 'namespace', 'controller'],
-		##          ['project', 'namespace'],
-		##          ['namespace', 'controller'],
-		##          ['namespace']
+		##          ['project', 'namespace', 'entity'],
+		##          ['namespace', 'entity'],
+		##          ['entity']
 		##        ]
 		def combine_parts(parts)
 			parts.size.downto(1).with_object([]) do |i, arr|
-				arr.push(*parts.combination(i).to_a)
+				arr.push(parts[-i..-1])
 			end
 			# variants.uniq!.reject!(&:empty?)
 		end

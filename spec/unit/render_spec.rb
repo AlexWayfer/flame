@@ -3,12 +3,17 @@
 class RenderController < Flame::Controller
 end
 
-class AnotherRenderController < Flame::Controller
+module NestedRender
+	class Controller < Flame::Controller
+	end
+
+	class IndexController < Flame::Controller
+	end
 end
 
 class RenderApp < Flame::Application
 	mount RenderController
-	mount AnotherRenderController
+	mount NestedRender::Controller
 end
 
 describe Flame::Render do
@@ -64,7 +69,7 @@ describe Flame::Render do
 
 		it 'should find file' do
 			render = @init.call(:view)
-			expected_file = File.join(__dir__, 'views', 'view.html.erb')
+			expected_file = File.join(__dir__, 'views', 'render', 'view.html.erb')
 			founded_file = File.realpath render.instance_variable_get(:@filename)
 			founded_file.should.be.equal expected_file
 		end
@@ -72,12 +77,10 @@ describe Flame::Render do
 
 	describe '#render' do
 		it 'should find file priority by controller name' do
-			controller = @controller_init.call AnotherRenderController
-			render = Flame::Render.new(controller, :view)
-			render.render
+			@init.call(:view).render
 				.should.be.equal <<~CONTENT
 					<body>
-						<h1>I am from controller name!</h1>\n
+						<h1>I am for RenderController!</h1>\n
 					</body>
 				CONTENT
 		end
@@ -87,7 +90,7 @@ describe Flame::Render do
 			render.render
 				.should.be.equal <<~CONTENT
 					<body>
-						<h1>Hello, world!</h1>\n
+						<h1>I am for RenderController!</h1>\n
 					</body>
 				CONTENT
 		end
@@ -95,7 +98,7 @@ describe Flame::Render do
 		it 'should render view without layout by false option' do
 			render = @init.call(:view, layout: false)
 			render.render.should.be.equal(
-				"<h1>Hello, world!</h1>\n"
+				"<h1>I am for RenderController!</h1>\n"
 			)
 		end
 
@@ -124,6 +127,35 @@ describe Flame::Render do
 				.message.should.equal(
 					"Template 'nonexistent' not found for 'RenderController'"
 				)
+		end
+
+		it 'should raise error if file with controller name part not found' do
+			lambda do
+				@init.call(:index)
+			end
+				.should.raise(Flame::Errors::TemplateNotFoundError)
+				.message.should.equal(
+					"Template 'index' not found for 'RenderController'"
+				)
+
+			lambda do
+				controller = @controller_init.call NestedRender::Controller
+				Flame::Render.new(controller, :index)
+			end
+				.should.raise(Flame::Errors::TemplateNotFoundError)
+				.message.should.equal(
+					"Template 'index' not found for 'NestedRender::Controller'"
+				)
+		end
+
+		it 'should find file for nested IndexController ' do
+			controller = @controller_init.call NestedRender::IndexController
+			Flame::Render.new(controller, :index).render
+				.should.equal <<~CONTENT
+					<body>
+						Nested index.\n
+					</body>
+				CONTENT
 		end
 
 		should 'receive block for template' do

@@ -115,10 +115,16 @@ describe 'FlameCLI::New::App' do
 		%w[server].each do |config|
 			FileUtils.cp "config/#{config}.example.yml", "config/#{config}.yml"
 		end
+		## HACK for testing while some server is running
+		port = 3456
+		File.write(
+			'config/server.yml',
+			File.read('config/server.yml').sub('port: 3000', "port: #{port}")
+		)
 		system 'bundle install --gemfile=Gemfile'
 		begin
 			pid = spawn './server start'
-			uri = URI('http://localhost:3000/')
+			uri = URI("http://localhost:#{port}/")
 			number_of_attempts = 0
 			begin
 				number_of_attempts += 1

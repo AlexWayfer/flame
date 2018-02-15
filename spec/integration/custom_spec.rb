@@ -4,6 +4,10 @@ require_relative 'app'
 
 ## Example of custom controller
 class CustomController < Flame::Controller
+	def index
+		'This is index for nearest routes'
+	end
+
 	def foo
 		'This is foo'
 	end
@@ -22,7 +26,8 @@ class CustomController < Flame::Controller
 
 	private
 
-	def execute(method)
+	def execute(action)
+		@action = action
 		super
 	rescue StandardError => exception
 		@rescued = true
@@ -32,6 +37,7 @@ class CustomController < Flame::Controller
 
 	def not_found
 		response.header['Custom-Header'] = 'Hello from not_found'
+		halt redirect :foo if request.path.to_s.include? 'redirecting'
 		super
 	end
 
@@ -73,7 +79,7 @@ describe CustomController do
 	end
 
 	it 'should execute custom code for `not_found`' do
-		get '/custom/foo/404'
+		get '/custom/404'
 		last_response.should.be.not_found
 		last_response.headers['Custom-Header'].should.equal 'Hello from not_found'
 	end
@@ -88,5 +94,11 @@ describe CustomController do
 		head '/custom/foo'
 		last_response.should.be.ok
 		last_response.body.should.be.empty
+	end
+
+	should 'return redirect with halt to foo from `not_found`' do
+		get '/custom/redirecting'
+		last_response.should.be.redirect
+		last_response.body.should.equal 'Some page about 302 code'
 	end
 end

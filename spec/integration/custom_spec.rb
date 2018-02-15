@@ -30,6 +30,11 @@ class CustomController < Flame::Controller
 		raise exception
 	end
 
+	def not_found
+		response.header['Custom-Header'] = 'Hello from not_found'
+		super
+	end
+
 	def default_body
 		result = "Some page about #{status} code"
 		result += "; rescued is #{@rescued}" if status == 500
@@ -65,6 +70,12 @@ describe CustomController do
 		get '/custom/foo/404'
 		last_response.should.be.not_found
 		last_response.body.should.equal 'Some page about 404 code'
+	end
+
+	it 'should execute custom code for `not_found`' do
+		get '/custom/foo/404'
+		last_response.should.be.not_found
+		last_response.headers['Custom-Header'].should.equal 'Hello from not_found'
 	end
 
 	it 'should return custom 500' do

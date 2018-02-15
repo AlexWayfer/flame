@@ -134,6 +134,10 @@ module Flame
 			body send(method, *extract_params_for(method))
 		end
 
+		def not_found
+			body default_body
+		end
+
 		## Default method for Internal Server Error, can be inherited
 		## @param _exception [Exception] exception from code executing
 		## @return [String] content of exception page

@@ -15,6 +15,15 @@ Gem::Specification.new do |s|
 	s.homepage    = 'https://github.com/AlexWayfer/flame'
 	s.license     = 'MIT'
 
+	s.metadata = {
+		'bug_tracker_uri'   => 'https://github.com/AlexWayfer/flame/issues',
+		'documentation_uri' =>
+			"http://www.rubydoc.info/gems/flame/#{Flame::VERSION}",
+		'homepage_uri'      => 'https://github.com/AlexWayfer/flame',
+		'source_code_uri'   => 'https://github.com/AlexWayfer/flame',
+		'wiki_uri'          => 'https://github.com/AlexWayfer/flame/wiki'
+	}
+
 	s.add_runtime_dependency 'addressable', '~> 2.5'
 	s.add_runtime_dependency 'gorilla-patch', '~> 2.7'
 	s.add_runtime_dependency 'rack', '~> 2'

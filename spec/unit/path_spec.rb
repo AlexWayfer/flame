@@ -217,6 +217,18 @@ describe Flame::Path do
 				@init.call('/foo/another+bar/baz')
 			).should.equal Hash[first: 'another bar', second: 'baz']
 		end
+
+		should 'extract missing optional argument before static part as nil' do
+			@init.call('/foo/:?bar/baz').extract_arguments(
+				@init.call('/foo/baz')
+			).should.equal Hash[bar: nil]
+		end
+
+		should 'not return optional argument for path with slash at the end' do
+			@path.extract_arguments(
+				@init.call('/foo/bar/baz//')
+			).should.equal Hash[first: 'bar', second: 'baz']
+		end
 	end
 
 	describe '#assign_arguments' do

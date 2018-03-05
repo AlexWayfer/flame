@@ -86,14 +86,14 @@ module Flame
 		## @param other_path [Flame::Path] other path with values at arguments
 		## @return [Hash{Symbol => String}] hash of arguments from two paths
 		def extract_arguments(other_path)
-			parts.each_with_index.with_object({}) do |(part, i), args|
-				other_part = other_path.parts[i].to_s
-				next args unless part.arg?
-				break args if part.opt_arg? && other_part.empty?
-				args[
-					part[(part.opt_arg? ? 2 : 1)..-1].to_sym
-				] = URI.decode_www_form_component(other_part)
-			end
+			parts.zip(other_path.parts)
+				.each_with_index.with_object({}) do |((part, other_part), index), args|
+					next args unless part.arg?
+
+					break args if part.opt_arg? && other_part.nil?
+
+					args[part.clean.to_sym] = extract_argument(parts, other_part, index)
+				end
 		end
 
 		## Assign arguments to path for `Controller#path_to`
@@ -122,6 +122,11 @@ module Flame
 
 		private
 
+		def extract_argument(parts, other_part, index)
+			return nil if parts[index.next] == other_part
+			URI.decode_www_form_component(other_part)
+		end
+
 		## Helpers for `assign_arguments`
 		def assign_argument(part, args = {})
 			## Not argument
@@ -141,7 +146,7 @@ module Flame
 		class Part
 			extend Forwardable
 
-			def_delegators :@part, :[], :hash
+			def_delegators :@part, :[], :hash, :empty?, :b
 
 			ARG_CHAR = ':'
 			ARG_CHAR_OPT = '?'
@@ -174,6 +179,7 @@ module Flame
 			def to_s
 				@part
 			end
+			alias to_str to_s
 
 			## Is the path part an argument
 			## @return [true, false] an argument or not

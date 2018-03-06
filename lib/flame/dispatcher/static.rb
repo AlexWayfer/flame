@@ -34,7 +34,7 @@ module Flame
 			class StaticFile
 				def initialize(filename, dir)
 					@filename = filename.to_s
-					@file_path = File.join dir, URI.decode_www_form_component(@filename)
+					@file_path = File.join dir, CGI.unescape(@filename)
 				end
 
 				def exist?

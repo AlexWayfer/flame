@@ -78,4 +78,10 @@ describe Flame::Dispatcher::Static do
 		dispatcher = Flame::Dispatcher.new(@app, @env)
 		dispatcher.send(:try_static).should.equal nil
 	end
+
+	it 'should not raise error about invalid encoding' do
+		@env[Rack::PATH_INFO] = '/%EF%BF%BD%8%EF%BF%BD'
+		dispatcher = Flame::Dispatcher.new(@app, @env)
+		-> { dispatcher.send(:try_static) }.should.not.raise(ArgumentError)
+	end
 end

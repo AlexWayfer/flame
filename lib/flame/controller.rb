@@ -40,6 +40,28 @@ module Flame
 			end
 		end
 
+		## Re-define public instance method from module
+		## @example Define actions from module in controller
+		##   class MyController < BaseController
+		##     include with_actions Module1
+		##     include with_actions Module2
+		##     ....
+		##   end
+		def self.with_actions(mod, exclude: [])
+			Module.new do
+				@mod = mod
+				@exclude = exclude
+
+				def self.included(ctrl)
+					ctrl.include @mod
+
+					(@mod.public_instance_methods - @exclude).each do |meth|
+						ctrl.send :define_method, meth, @mod.public_instance_method(meth)
+					end
+				end
+			end
+		end
+
 		def_delegators(
 			:@dispatcher,
 			:config, :request, :params, :halt, :session, :response, :status, :body,

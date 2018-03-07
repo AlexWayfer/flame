@@ -477,4 +477,36 @@ describe Flame::Controller do
 			)
 		end
 	end
+
+	describe '.with_actions' do
+		it 'should define actions from specified module' do
+			inherited_controller = Class.new(ControllerController) do
+				include with_actions SomeActions
+			end
+			inherited_controller.actions.sort.should.equal(
+				SomeActions.public_instance_methods.sort
+			)
+		end
+
+		it 'should define actions from specified module without excluded actions' do
+			inherited_controller = Class.new(ControllerController) do
+				include with_actions(SomeActions, exclude: %i[included_action])
+			end
+			inherited_controller.actions.sort.should.equal(
+				(SomeActions.public_instance_methods - %i[included_action]).sort
+			)
+		end
+
+		it 'should define actions from specified module and controller' do
+			inherited_controller = Class.new(ControllerController) do
+				inherit_actions
+				include with_actions SomeActions
+			end
+			inherited_controller.actions.sort.should.equal(
+				(
+					ControllerController.actions + SomeActions.public_instance_methods
+				).sort
+			)
+		end
+	end
 end

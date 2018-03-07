@@ -224,6 +224,18 @@ describe Flame::Path do
 			).should.equal Hash[bar: nil]
 		end
 
+		should 'extract arguments after optional argument at start correctly' do
+			@init.call('/:?foo/bar/:?baz/qux/:id').extract_arguments(
+				@init.call('/bar/baz/qux/2')
+			).should.equal Hash[foo: nil, baz: 'baz', id: '2']
+		end
+
+		should 'extract optional argument after missing optional argument' do
+			@init.call('/:?foo/bar/:?baz').extract_arguments(
+				@init.call('/bar/baz')
+			).should.equal Hash[foo: nil, baz: 'baz']
+		end
+
 		should 'not return optional argument for path with slash at the end' do
 			@path.extract_arguments(
 				@init.call('/foo/bar/baz//')

@@ -42,7 +42,7 @@ Gem::Specification.new do |s|
 	s.add_development_dependency 'rack-test', '~> 0'
 	s.add_development_dependency 'rack-utf8_sanitizer', '~> 1.3'
 	s.add_development_dependency 'rake', '~> 12'
-	s.add_development_dependency 'rubocop', '0.51'
+	s.add_development_dependency 'rubocop', '0.52.1'
 	s.add_development_dependency 'simplecov', '~> 0'
 
 	s.files = Dir[File.join('{lib,public,template}', '**', '{*,.*}')]

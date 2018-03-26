@@ -15,6 +15,8 @@ class IntegrationApp
 end
 
 describe IndexController do
+	include Rack::Test::Methods
+
 	it 'should return index' do
 		get '/'
 		last_response.should.be.ok

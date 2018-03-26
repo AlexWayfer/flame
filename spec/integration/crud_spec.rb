@@ -31,6 +31,8 @@ class IntegrationApp
 end
 
 describe 'CRUD Controller' do
+	include Rack::Test::Methods
+
 	it 'should return list of items' do
 		get '/crud'
 		last_response.should.be.ok

@@ -54,6 +54,8 @@ class IntegrationApp
 end
 
 describe CustomController do
+	include Rack::Test::Methods
+
 	it 'should return foo' do
 		get '/custom/foo'
 		last_response.should.be.ok

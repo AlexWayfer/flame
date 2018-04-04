@@ -23,7 +23,7 @@ module Flame
 			## @param route [Flame::Route] route that must be executed
 			def execute_route(route, action = route.action)
 				params.merge!(
-					@app_class.router.path_of(route).extract_arguments(request.path)
+					router.path_of(route).extract_arguments(request.path)
 				)
 				# route.execute(self)
 				controller = route.controller.new(self)
@@ -42,7 +42,7 @@ module Flame
 				## Return nil if must be no body for current HTTP status
 				return if Rack::Utils::STATUS_WITH_NO_ENTITY_BODY.include?(status)
 				## Find the nearest route by the parts of requested path
-				route = @app_class.router.find_nearest_route(request.path)
+				route = router.find_nearest_route(request.path)
 				## Return standard `default_body` if the route not found
 				return default_body unless route
 				controller = route.controller.new(self)

@@ -11,6 +11,9 @@ require_relative 'router/route'
 module Flame
 	## Router class for routing
 	class Router
+		extend Forwardable
+		def_delegators :routes, :navigate
+
 		attr_reader :app, :routes, :reverse_routes
 
 		## @param app [Flame::Application] host application
@@ -18,6 +21,15 @@ module Flame
 			@app = app
 			@routes = Flame::Router::Routes.new
 			@reverse_routes = {}
+		end
+
+		using GorillaPatch::DeepMerge
+
+		## Add RoutesRefine to Router
+		## @param routes_refine [Flame::Router::RoutesRefine] refined routes
+		def add(routes_refine)
+			routes.deep_merge! routes_refine.routes
+			reverse_routes.merge! routes_refine.reverse_routes
 		end
 
 		## Find the nearest route by path

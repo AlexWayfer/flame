@@ -82,8 +82,6 @@ module Flame
 				caller(2..2).first.split(':')[0]
 			end
 
-			using GorillaPatch::DeepMerge
-
 			## Mount controller in application class
 			## @param controller [Symbol] the snake-cased name of mounted controller
 			##   (without `Controller` or `::IndexController` for namespaces)
@@ -105,13 +103,9 @@ module Flame
 			##   end
 			def mount(controller_name, path = nil, &block)
 				## Add routes from controller to glob array
-
-				routes_refine = Router::RoutesRefine.new(
+				router.add Router::RoutesRefine.new(
 					router, namespace, controller_name, path, &block
 				)
-
-				router.routes.deep_merge! routes_refine.routes
-				router.reverse_routes.merge! routes_refine.reverse_routes
 			end
 
 			using GorillaPatch::Namespace

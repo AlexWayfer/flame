@@ -17,7 +17,7 @@ module Flame
 		GEM_STATIC_FILES = File.join __dir__, '..', '..', 'public'
 
 		extend Forwardable
-		def_delegators :@app_class, :path_to
+		def_delegators :@app_class, :router, :path_to
 
 		attr_reader :request, :response
 
@@ -92,8 +92,7 @@ module Flame
 		## Available routes endpoint
 		def available_endpoint
 			return @available_endpoint if defined? @available_endpoint
-			@available_endpoint =
-				@app_class.router.routes.navigate(*request.path.parts)
+			@available_endpoint = router.navigate(*request.path.parts)
 		end
 
 		## Interrupt the execution of route, and set new optional data

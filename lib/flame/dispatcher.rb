@@ -37,13 +37,15 @@ module Flame
 		## Start of execution the request
 		def run!
 			catch :halt do
+				validate_request
+
 				try_options ||
 					try_static ||
 					try_static(dir: GEM_STATIC_FILES) ||
 					try_route ||
 					halt(404)
 			end
-			response.write body unless request.http_method == :HEAD
+			response.write body unless request.head?
 			response.finish
 		end
 
@@ -71,7 +73,13 @@ module Flame
 
 		## Parameters of the request
 		def params
-			@params ||= request.params.symbolize_keys(deep: true)
+			@params ||=
+				begin
+					request.params.symbolize_keys(deep: true)
+				rescue ArgumentError => e
+					raise unless e.message.include?('invalid %-encoding')
+					{}
+				end
 		end
 
 		## Session object as Hash
@@ -139,6 +147,14 @@ module Flame
 		end
 
 		private
+
+		def validate_request
+			## https://github.com/rack/rack/issues/337#issuecomment-48555831
+			request.params
+		rescue ArgumentError => e
+			raise unless e.message.include?('invalid %-encoding')
+			halt 400
+		end
 
 		## Return response if HTTP-method is OPTIONS
 		def try_options

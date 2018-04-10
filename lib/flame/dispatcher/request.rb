@@ -11,6 +11,8 @@ module Flame
 
 			## Override HTTP-method of the request if the param '_method' found
 			def http_method
+				return @http_method if defined?(@http_method)
+
 				method_from_method =
 					begin
 						params['_method']
@@ -18,7 +20,8 @@ module Flame
 						## https://github.com/rack/rack/issues/337#issuecomment-48555831
 						raise unless e.message.include?('invalid %-encoding')
 					end
-				@http_method ||= (method_from_method || request_method).upcase.to_sym
+
+				@http_method = (method_from_method || request_method).upcase.to_sym
 			end
 		end
 	end

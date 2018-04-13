@@ -89,7 +89,17 @@ module Flame
 
 		## Find template-file by path
 		def find_file(path)
-			find_files(path, controller_dirs).find { |file| Tilt[file] }
+			caller_path = caller_locations(4..4).first.path
+
+			caller_dir =
+				begin
+					File.dirname(caller_path).sub(views_dir, '') if Tilt[caller_path]
+				rescue LoadError
+					nil
+				end
+
+			find_files(path, controller_dirs | Array(caller_dir))
+				.find { |file| Tilt[file] }
 		end
 
 		## Find layout-files by path

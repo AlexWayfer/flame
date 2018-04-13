@@ -133,6 +133,15 @@ describe Flame::Render do
 			)
 		end
 
+		should 'render by relative name' do
+			render = @init.call('namespace/_will_render_nested')
+			render.render.should.be.equal <<~CONTENT
+				Hello!
+				There is nested:
+				Deeply nested file.
+			CONTENT
+		end
+
 		describe 'cache' do
 			before do
 				@controller.cached_tilts.clear

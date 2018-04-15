@@ -237,12 +237,10 @@ describe Flame::Dispatcher do
 			dispatcher.params.should.be.same_as dispatcher.params
 		end
 
-		should 'not fail for invalid %-encoding in requests' do
+		it 'should not break with invalid %-encoding query' do
 			lambda do
 				dispatcher = @init.call(path: '/foo', query: 'bar=%%')
-				dispatcher.run!
-				dispatcher.status.should.equal 400
-				dispatcher.body.should.equal '<h1>Bad Request</h1>'
+				dispatcher.params
 			end
 				.should.not.raise(ArgumentError)
 		end
@@ -347,5 +345,15 @@ describe Flame::Dispatcher do
 			dispatcher.run!
 			dispatcher.request.env[:execute_before_called].should.equal 1
 		end
+	end
+
+	it 'should not break for invalid %-encoding in requests' do
+		lambda do
+			dispatcher = @init.call(path: '/foo', query: 'bar=%%')
+			dispatcher.run!
+			dispatcher.status.should.equal 400
+			dispatcher.body.should.equal '<h1>Bad Request</h1>'
+		end
+			.should.not.raise(ArgumentError)
 	end
 end

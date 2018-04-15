@@ -2,10 +2,11 @@
 
 describe Flame::Dispatcher::Request do
 	before do
-		@env_init = proc do |method: :PATCH|
+		@env_init = proc do |method: :PATCH, query: ''|
 			{
 				Rack::REQUEST_METHOD => 'POST',
 				Rack::PATH_INFO => '/hello/great/world',
+				Rack::QUERY_STRING => query,
 				Rack::RACK_INPUT => StringIO.new("_method=#{method}"),
 				Rack::RACK_REQUEST_FORM_HASH => { '_method' => method.to_s }
 			}
@@ -56,6 +57,11 @@ describe Flame::Dispatcher::Request do
 			request = custom_request_class.new(@env)
 			3.times { request.http_method }
 			request.params_execs.should.equal 1
+		end
+
+		it 'should not break with invalid %-encoding query' do
+			env = @env_init.call(query: 'bar=%%')
+			-> { @request_init.call(env).http_method }.should.not.raise(ArgumentError)
 		end
 	end
 end

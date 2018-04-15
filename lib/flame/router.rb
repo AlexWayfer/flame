@@ -11,6 +11,8 @@ require_relative 'router/route'
 module Flame
 	## Router class for routing
 	class Router
+		HTTP_METHODS = %i[GET POST PUT PATCH DELETE].freeze
+
 		extend Forwardable
 		def_delegators :routes, :navigate
 
@@ -100,7 +102,7 @@ module Flame
 				end
 			end
 
-			%i[GET POST PUT PATCH DELETE].each do |http_method|
+			HTTP_METHODS.each do |http_method|
 				## Define refine methods for all HTTP methods
 				## @overload post(path, action)
 				##   Execute action on requested path and HTTP method
@@ -180,6 +182,10 @@ module Flame
 
 			## Execute block of refinings end sorting routes
 			def execute(&block)
+				@controller.refined_http_methods
+					.each do |http_method, action_path, action|
+						send(http_method, action_path, action)
+					end
 				instance_exec(&block) if block
 				defaults
 			end

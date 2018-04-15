@@ -22,6 +22,21 @@ class ApplicationController < Flame::Controller
 	end
 end
 
+class ApplicationRefinedController < Flame::Controller
+	def foo; end
+
+	get def bar; end
+
+	post def baz; end
+
+	put def qux; end
+
+	delete '/refined_quux/:id', def quux(id); end
+
+	def quuz; end
+	patch '/refined_quuz', :quuz
+end
+
 ## Test controller with REST methods for Application
 class ApplicationRESTController < Flame::Controller
 	def index; end
@@ -353,7 +368,7 @@ describe Flame::Application do
 			@app_class.router.routes.should.be.any
 		end
 
-		it 'should mount controller with overwrited HTTP-methods' do
+		it 'should mount controller and refine HTTP-methods' do
 			@app_class.class_exec do
 				mount :application do
 					post :baz
@@ -632,6 +647,28 @@ describe Flame::Application do
 			end
 
 			block.should.not.raise(NameError)
+		end
+
+		it 'should mount controller with refined HTTP-methods inside' do
+			@app_class.class_exec do
+				mount :application_refined
+			end
+
+			@app_class.router.routes.should.equal initialize_path_hashes(
+				ApplicationRefinedController,
+				foo: { http_method: :GET },
+				bar: { http_method: :GET },
+				baz: { http_method: :POST },
+				qux: { http_method: :PUT },
+				quux: {
+					http_method: :DELETE,
+					action_path: '/refined_quux/:id'
+				},
+				quuz: {
+					http_method: :PATCH,
+					action_path: '/refined_quuz'
+				}
+			)
 		end
 	end
 end

@@ -65,7 +65,7 @@ describe Flame::Router do
 				mount :router
 			end
 
-			path = Flame::Path.new('/router/bar')
+			path = Flame::Path.new('/router/not_exist')
 			@router.find_nearest_route(path)
 				.should.equal Flame::Router::Route.new(
 					RouterController, :index

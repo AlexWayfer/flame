@@ -1,9 +1,7 @@
 language: ruby
 rvm:
   - 2.3
-  ## https://travis-ci.org/AlexWayfer/flame/jobs/349907949
-  ## https://bugs.ruby-lang.org/issues/13539
-  - 2.4.3
+  - 2.4
   - 2.5
 
 before_install:

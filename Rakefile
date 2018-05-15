@@ -13,7 +13,7 @@ task :release, %i[version] do |_t, args|
 	raise ArgumentError, 'No version provided' unless version
 
 	## Write new version to version file
-	version_file = File.join(__dir__, 'lib', 'flame', 'version.rb')
+	version_file = File.join(__dir__, 'lib/flame/version.rb')
 	File.write version_file, File.read(version_file).sub(/'.+'/, "'#{version}'")
 
 	## Commit version update

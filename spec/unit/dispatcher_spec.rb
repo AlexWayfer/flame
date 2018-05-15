@@ -115,7 +115,7 @@ describe Flame::Dispatcher do
 		it 'should return content of existing static file in gem' do
 			respond = @init.call(path: 'favicon.ico').run!.last
 			respond.status.should.equal 200
-			favicon_file = File.join __dir__, '..', '..', 'public', 'favicon.ico'
+			favicon_file = File.join __dir__, '../../public/favicon.ico'
 			respond.body.should.equal [File.read(favicon_file)]
 		end
 

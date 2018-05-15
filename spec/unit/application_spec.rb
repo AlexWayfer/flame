@@ -188,7 +188,7 @@ describe Flame::Application do
 
 		it 'should require all wanted files' do
 			@requiring.call
-			Dir[File.join(__dir__, 'require_dirs', '**', '*')]
+			Dir[File.join(__dir__, 'require_dirs/**/*')]
 				.reject { |file| File.executable?(file) }
 				.each do |file|
 					require(file).should.equal false
@@ -197,7 +197,7 @@ describe Flame::Application do
 
 		it 'should not require executable files' do
 			@requiring.call
-			Dir[File.join(__dir__, 'require_dirs', '**', '*')]
+			Dir[File.join(__dir__, 'require_dirs/**/*')]
 				.select { |file| File.file?(file) && File.executable?(file) }
 				.each do |file|
 					require(file).should.equal true

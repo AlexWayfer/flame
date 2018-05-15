@@ -47,7 +47,7 @@ worker_timeout env_config[:daemonize] ? 15 : 1_000_000
 threads 0, env_config[:threads_count] || 4
 daemonize env_config[:daemonize]
 
-# bind 'unix://' + File.join(%w[tmp sockets puma.sock])
+# bind 'unix://tmp/sockets/puma.sock'
 env_config[:binds].each do |type, value|
 	value = "#{value[:host]}:#{value[:port]}" if type == :tcp
 	FileUtils.mkdir_p File.join(root_dir, File.dirname(value)) if type == :unix

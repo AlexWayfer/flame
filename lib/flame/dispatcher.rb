@@ -14,7 +14,7 @@ require_relative 'errors/route_not_found_error'
 module Flame
 	## Helpers for dispatch Flame::Application#call
 	class Dispatcher
-		GEM_STATIC_FILES = File.join __dir__, '..', '..', 'public'
+		GEM_STATIC_FILES = File.join(__dir__, '../../public').freeze
 
 		extend Forwardable
 		def_delegators :@app_class, :router, :path_to

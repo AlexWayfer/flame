@@ -45,6 +45,6 @@ Gem::Specification.new do |s|
 	s.add_development_dependency 'rubocop', '~> 0.54'
 	s.add_development_dependency 'simplecov', '~> 0'
 
-	s.files = Dir[File.join('{lib,public,template}', '**', '{*,.*}')]
+	s.files = Dir['{lib,public,template}/**/{*,.*}']
 	s.executables = ['flame']
 end

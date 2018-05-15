@@ -111,11 +111,11 @@ def delete_filewatcher_pids_file
 end
 
 def server_config
-	@server_config ||= YAML.load_file(File.join(__dir__, 'config', 'server.yml'))
+	@server_config ||= YAML.load_file(File.join(__dir__, 'config/server.yml'))
 end
 
 def puma_config_file
-	@puma_config_file ||= File.join(__dir__, 'config', 'puma.rb')
+	@puma_config_file ||= File.join(__dir__, 'config/puma.rb')
 end
 
 def puma_pid_file
@@ -137,11 +137,11 @@ def environment
 end
 
 def log_files
-	File.join(__dir__, %w[log {stdout,stderr}])
+	File.join(__dir__, 'log/{stdout,stderr}')
 end
 
 def waiting_mailing_lock
-	while Dir[File.join(__dir__, 'tmp', 'mailing_*')].any?
+	while Dir[File.join(__dir__, 'tmp/mailing_*')].any?
 		puts "\e[31m\e[1mMails sending in progress!\e[22m\e[0m\nWaiting..."
 		sleep 1
 	end

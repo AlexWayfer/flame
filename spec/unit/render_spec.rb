@@ -64,7 +64,7 @@ describe Flame::Render do
 
 		it 'should find file' do
 			render = @init.call(:view)
-			expected_file = File.join(__dir__, 'views', 'view.html.erb')
+			expected_file = File.join(__dir__, 'views/view.html.erb')
 			founded_file = File.realpath render.instance_variable_get(:@filename)
 			founded_file.should.be.equal expected_file
 		end

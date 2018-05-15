@@ -31,19 +31,19 @@ module FlameCLI
 
 			def copy_template
 				puts 'Copy template directories and files...'
-				FileUtils.cp_r File.join(__dir__, '..', '..', 'template', '.'), '.'
+				FileUtils.cp_r File.join(__dir__, '../../template/.'), '.'
 				clean_dirs
 				render_templates
 			end
 
 			def clean_dirs
 				puts 'Clean directories...'
-				FileUtils.rm Dir[File.join('**', '*', '.keep')]
+				FileUtils.rm Dir['**/*/.keep']
 			end
 
 			def render_templates
 				puts 'Replace module names in template...'
-				Dir[File.join('**', '*.erb')].each do |file|
+				Dir['**/*.erb'].each do |file|
 					file_pathname = Pathname.new(file)
 					basename_pathname = file_pathname.sub_ext('')
 					puts "- #{basename_pathname}"

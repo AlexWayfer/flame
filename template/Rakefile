@@ -70,7 +70,7 @@ class Question
 	end
 end
 
-DB_CONFIG_FILE = File.join(__dir__, 'config', 'database.yml')
+DB_CONFIG_FILE = File.join(__dir__, 'config/database.yml').freeze
 
 if File.exist? DB_CONFIG_FILE
 	namespace :db do
@@ -97,7 +97,7 @@ if File.exist? DB_CONFIG_FILE
 
 		DB_EXTENSIONS = %w[citext pgcrypto].freeze
 
-		PGPASS_FILE = File.expand_path File.join('~', '.pgpass')
+		PGPASS_FILE = File.expand_path('~/.pgpass').freeze
 
 		PGPASS_LINE =
 			DB_CONFIG
@@ -556,7 +556,7 @@ if File.exist? DB_CONFIG_FILE
 end
 
 namespace :locales do
-	CROWDIN_CONFIG_FILE = File.join('config', 'crowdin.yml')
+	CROWDIN_CONFIG_FILE = 'config/crowdin.yml'
 
 	desc 'Upload files for translation'
 	task :upload do
@@ -668,7 +668,7 @@ end
 namespace :static do
 	desc 'Check static files'
 	task :check do
-		Dir[File.join(__dir__, 'public', '**', '*')].each do |file|
+		Dir[File.join(__dir__, 'public/**/*')].each do |file|
 			basename = File.basename(file)
 			grep_options = '--exclude-dir={\.git,log} --color=always'
 			found = `grep -ir '#{basename}' ./ #{grep_options}`
@@ -689,7 +689,7 @@ namespace :config do
 	task :check do
 		example_suffix = '.example'
 		Dir[
-			File.join(__dir__, 'config', '**', "*#{example_suffix}*")
+			File.join(__dir__, "config/**/*#{example_suffix}*")
 		].each do |example_filename|
 			regular_filename = example_filename.sub(example_suffix, '')
 			if File.exist? regular_filename
@@ -770,7 +770,7 @@ end
 ##  Update from git without migrations and restart (for static files update)
 desc 'Deploy to production server'
 task :deploy, :without_restart do |_t, args|
-	servers = YAML.load_file File.join(__dir__, 'config', 'deploy.yml')
+	servers = YAML.load_file File.join(__dir__, 'config/deploy.yml')
 	rake_command = "rake update[master#{',true' if args.without_restart}]"
 	servers.each do |server|
 		update_command = "cd #{server[:path]} && #{rake_command}"

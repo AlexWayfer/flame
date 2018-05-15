@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative File.join '..', '..', 'spec_helper'
+require_relative '../../spec_helper'
 
 ## Test controller for Errors
 class ErrorsController < Flame::Controller

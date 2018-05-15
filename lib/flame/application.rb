@@ -28,7 +28,7 @@ module Flame
 			def require_dirs(dirs)
 				caller_dir = File.dirname caller_file
 				dirs.each do |dir|
-					Dir[File.join(caller_dir, dir, '**', '*.rb')]
+					Dir[File.join(caller_dir, dir, '**/*.rb')]
 						.reject { |file| File.executable?(file) }
 						.sort_by { |s| [File.basename(s)[0], s] }
 						.each { |file| require File.expand_path(file) }

@@ -11,7 +11,7 @@ if ENV['CODECOV']
 	SimpleCov.formatter = SimpleCov::Formatter::Codecov
 end
 
-require_relative File.join('..', 'lib', 'flame')
+require_relative '../lib/flame'
 
 require 'minitest/bacon'
 require 'minitest/reporters'

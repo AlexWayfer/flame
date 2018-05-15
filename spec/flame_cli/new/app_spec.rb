@@ -9,12 +9,12 @@ describe 'FlameCLI::New::App' do
 		`#{FLAME_CLI} new app #{app_name}`
 	end
 
-	template_dir = File.join(__dir__, '..', '..', '..', 'template')
+	template_dir = File.join(__dir__, '../../../template')
 	template_dir_pathname = Pathname.new(template_dir)
 	template_ext = '.erb'
 
 	after do
-		FileUtils.rm_r File.join(__dir__, '..', '..', '..', app_name)
+		FileUtils.rm_r File.join(__dir__, '../../..', app_name)
 	end
 
 	it 'should print correct output' do
@@ -43,7 +43,7 @@ describe 'FlameCLI::New::App' do
 
 	it 'should copy template directories and files into app root directory' do
 		execute_command.call
-		Dir[File.join(template_dir, '**', '*')].each do |filename|
+		Dir[File.join(template_dir, '**/*')].each do |filename|
 			filename_pathname = Pathname.new(filename)
 				.relative_path_from(template_dir_pathname)
 			next if File.dirname(filename).split(File::SEPARATOR).include? 'views'
@@ -57,7 +57,7 @@ describe 'FlameCLI::New::App' do
 
 	it 'should clean directories' do
 		execute_command.call
-		Dir[File.join(app_name, '**', '.keep')].should.be.empty
+		Dir[File.join(app_name, '**/.keep')].should.be.empty
 	end
 
 	it 'should render app name in files' do

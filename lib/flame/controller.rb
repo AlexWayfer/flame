@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'forwardable'
-require 'gorilla-patch/namespace'
+require 'gorilla_patch/namespace'
 
 require_relative 'controller/path_to'
 require_relative 'render'

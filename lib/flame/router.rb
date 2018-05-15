@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-require 'gorilla-patch/deep_merge'
-require 'gorilla-patch/inflections'
-require 'gorilla-patch/namespace'
-require 'gorilla-patch/transform'
+require 'gorilla_patch/deep_merge'
+require 'gorilla_patch/inflections'
+require 'gorilla_patch/namespace'
+require 'gorilla_patch/transform'
 
 require_relative 'router/routes'
 require_relative 'router/route'

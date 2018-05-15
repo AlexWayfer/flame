@@ -6,7 +6,7 @@ source 'https://rubygems.org'
 git_source(:github) { |name| "https://github.com/#{name}.git" }
 
 ## system
-# gem 'gorilla-patch'
+# gem 'gorilla_patch'
 
 ## server
 gem 'flame', github: 'AlexWayfer/flame'

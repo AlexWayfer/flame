@@ -2,7 +2,7 @@
 
 require 'fileutils'
 require 'pathname'
-require 'gorilla-patch/inflections'
+require 'gorilla_patch/inflections'
 require 'erb'
 
 require_relative 'new/app'

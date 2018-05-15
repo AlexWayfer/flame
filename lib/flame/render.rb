@@ -6,7 +6,7 @@ require 'tilt'
 require 'tilt/plain'
 require 'tilt/erb'
 
-require 'gorilla-patch/inflections'
+require 'gorilla_patch/inflections'
 
 require_relative 'errors/template_not_found_error'
 

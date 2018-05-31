@@ -189,11 +189,14 @@ describe Flame::Application do
 
 		it 'should require all wanted files' do
 			@requiring.call
-			Dir[File.join(__dir__, 'require_dirs/**/*')]
-				.reject { |file| File.executable?(file) || file.include?('spec') }
-				.each do |file|
-					require(file).should.equal false
-				end
+			files =
+				Dir[File.join(__dir__, 'require_dirs/**/*')]
+					.reject do |file|
+						File.executable?(file) || file.match?(%r{lib/\w+/spec/})
+					end
+			files.each do |file|
+				require(file).should.equal false
+			end
 		end
 
 		it 'should not require executable files' do

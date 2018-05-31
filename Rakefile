@@ -2,7 +2,9 @@
 
 require 'rake/testtask'
 Rake::TestTask.new(:spec) do |t|
-	t.pattern = %w[spec/**/spec_helper.rb spec/**/*_spec.rb]
+	t.pattern =
+		FileList['spec/**/spec_helper.rb', 'spec/**/*_spec.rb']
+		.exclude(/require_dirs/)
 end
 
 task default: :spec

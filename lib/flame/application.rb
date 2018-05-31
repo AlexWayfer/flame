@@ -25,13 +25,10 @@ module Flame
 			##   Flame::Application.require_dirs(
 			##     %w[config lib models helpers mailers services controllers]
 			##	 )
-			def require_dirs(dirs)
+			def require_dirs(dirs, ignore: [])
 				caller_dir = File.dirname caller_file
 				dirs.each do |dir|
-					Dir[File.join(caller_dir, dir, '**/*.rb')]
-						.reject { |file| File.executable?(file) }
-						.sort_by { |s| [File.basename(s)[0], s] }
-						.each { |file| require File.expand_path(file) }
+					require_dir File.join(caller_dir, dir), ignore: ignore
 				end
 			end
 
@@ -80,6 +77,18 @@ module Flame
 			## @return [String] filename of caller
 			def caller_file
 				caller(2..2).first.split(':')[0]
+			end
+
+			def require_dir(dir, ignore: [])
+				files =
+					Dir[File.join(dir, '**/*.rb')]
+						.reject do |file|
+							File.executable?(file) ||
+								ignore.any? { |regexp| regexp.match?(file) }
+						end
+				files
+					.sort_by { |s| [File.basename(s)[0], s] }
+					.each { |file| require File.expand_path(file) }
 			end
 
 			## Mount controller in application class

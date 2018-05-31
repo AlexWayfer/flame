@@ -177,7 +177,8 @@ describe Flame::Application do
 			@requiring = lambda do
 				@app_class.require_dirs(
 					%w[config lib models helpers mailers services controllers]
-						.map! { |dir| File.join 'require_dirs', dir }
+						.map! { |dir| File.join 'require_dirs', dir },
+					ignore: [%r{lib/\w+/spec}]
 				)
 			end
 		end
@@ -189,7 +190,7 @@ describe Flame::Application do
 		it 'should require all wanted files' do
 			@requiring.call
 			Dir[File.join(__dir__, 'require_dirs/**/*')]
-				.reject { |file| File.executable?(file) }
+				.reject { |file| File.executable?(file) || file.include?('spec') }
 				.each do |file|
 					require(file).should.equal false
 				end
@@ -199,6 +200,15 @@ describe Flame::Application do
 			@requiring.call
 			Dir[File.join(__dir__, 'require_dirs/**/*')]
 				.select { |file| File.file?(file) && File.executable?(file) }
+				.each do |file|
+					require(file).should.equal true
+				end
+		end
+
+		it 'should not require ignored files' do
+			@requiring.call
+			Dir[File.join(__dir__, 'require_dirs/**/*')]
+				.select { |file| File.file?(file) && file.match?(%r{lib/\w+/spec/}) }
 				.each do |file|
 					require(file).should.equal true
 				end

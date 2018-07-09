@@ -1,23 +1,27 @@
 # frozen_string_literal: true
 
 describe Flame::Dispatcher::Response do
-	before do
-		@response = Flame::Dispatcher::Response.new
-	end
+	subject(:response) { Flame::Dispatcher::Response.new }
 
-	it 'should be Rack::Response child' do
-		@response.should.be.kind_of Rack::Response
-	end
+	it { is_expected.to be_kind_of Rack::Response }
 
 	describe '#content_type=' do
-		it 'should set Content-Type header with given value' do
-			@response.content_type = 'text/html'
-			@response.content_type.should.equal 'text/html'
+		before do
+			response.content_type = content_type
 		end
 
-		it 'should set Content-Type header by extension' do
-			@response.content_type = '.css'
-			@response.content_type.should.equal 'text/css'
+		subject { response.content_type }
+
+		context 'MIME-type' do
+			let(:content_type) { 'text/html' }
+
+			it { is_expected.to eq 'text/html' }
+		end
+
+		context 'file extension' do
+			let(:content_type) { '.css' }
+
+			it { is_expected.to eq 'text/css' }
 		end
 	end
 end

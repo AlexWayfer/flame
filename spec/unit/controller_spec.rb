@@ -110,403 +110,589 @@ class ControllerApplication < Flame::Application
 end
 
 describe Flame::Controller do
-	before do
-		@env = {
+	let(:env) do
+		{
 			Rack::RACK_URL_SCHEME => 'http',
 			Rack::SERVER_NAME => 'localhost',
 			Rack::SERVER_PORT => 3000,
 			Rack::RACK_INPUT => StringIO.new
 		}
-		@dispatcher = Flame::Dispatcher.new(ControllerApplication, @env)
-		@controller = ControllerController.new(@dispatcher)
-		@another_controller = AnotherControllerController.new(@dispatcher)
 	end
 
+	let(:dispatcher) { Flame::Dispatcher.new(ControllerApplication, env) }
+
+	let(:controller_class) { ControllerController }
+
+	let(:controller) { controller_class.new(dispatcher) }
+
 	describe '.actions' do
-		it 'should return all public not-inherited methods of Controller' do
-			ControllerController.actions
-				.should.equal ControllerController.public_instance_methods(false)
-		end
+		subject { controller_class.actions }
+
+		it { is_expected.to eq ControllerController.public_instance_methods(false) }
 	end
 
 	describe '.default_path' do
-		it 'should return downcased path based on controller name' do
-			ControllerController.default_path
-				.should.equal '/controller'
-			AnotherControllerController.default_path
-				.should.equal '/another_controller'
+		subject { controller_class.default_path }
+
+		context 'one-word named controller' do
+			let(:controller_class) { ControllerController }
+
+			it { is_expected.to eq '/controller' }
 		end
 
-		it 'should return downcased module name for index controller' do
-			Nested::IndexController.default_path
-				.should.equal '/nested'
+		context 'two-word named controller' do
+			let(:controller_class) { AnotherControllerController }
+
+			it { is_expected.to eq '/another_controller' }
+		end
+
+		context 'nested in module index controller' do
+			let(:controller_class) { Nested::IndexController }
+
+			it { is_expected.to eq '/nested' }
 		end
 	end
 
 	describe 'delegators' do
-		it 'should delegate all needed methods' do
-			needed_methods = %i[
-				config request params halt session response status body
-				default_body
-			]
-			(needed_methods - @controller.methods).should.be.empty
+		subject { controller.methods }
+
+		it do
+			is_expected.to include(
+				:config, :request, :params, :halt, :session, :response,
+				:status, :body, :default_body
+			)
 		end
 	end
 
 	describe '#initialize' do
-		it 'should take dispatcher' do
-			ControllerController.new(@dispatcher)
-				.instance_variable_get(:@dispatcher)
-				.should.equal @dispatcher
+		subject { controller_class.new(dispatcher) }
+
+		describe '@dispatcher' do
+			subject { super().instance_variable_get(:@dispatcher) }
+
+			it { is_expected.to eq dispatcher }
 		end
 	end
 
 	describe '#path_to' do
-		it 'should return path to another controller' do
-			@controller.path_to(AnotherControllerController, :baz)
-				.should.equal '/another/baz'
+		subject { controller.path_to(*args) }
+
+		context 'another controller and action' do
+			let(:args) { [AnotherControllerController, :baz] }
+
+			it { is_expected.to eq '/another/baz' }
 		end
 
-		it 'should return path to index action of another controller by default' do
-			@controller.path_to(AnotherControllerController)
-				.should.equal '/another'
+		context 'another controller without action' do
+			let(:args) { [AnotherControllerController] }
+
+			it { is_expected.to eq '/another' }
 		end
 
-		it 'should return path to self without controller argument' do
-			@controller.path_to(:bar)
-				.should.equal '/bar'
+		context 'action without controller' do
+			let(:args) { [:bar] }
+
+			it { is_expected.to eq '/bar' }
 		end
 
-		it 'should return path to self with arguments assigments' do
-			@controller.path_to(:foo, first: 'Alex')
-				.should.equal '/foo/Alex'
+		context 'action with arguments' do
+			let(:args) { [:foo, first: 'Alex'] }
+
+			it { is_expected.to eq '/foo/Alex' }
 		end
 	end
 
 	describe '#url_to' do
-		it 'should return URL by String path' do
-			path = '/some/path?with=args'
-			@controller.url_to(path)
-				.should.equal "http://localhost:3000#{path}"
+		subject { controller.url_to(*args) }
+
+		context 'String path' do
+			let(:args) { ['/some/path?with=args'] }
+
+			it { is_expected.to eq 'http://localhost:3000/some/path?with=args' }
 		end
 
-		it 'should return URL by controller and action' do
-			@controller.url_to(AnotherControllerController, :baz)
-				.should.equal 'http://localhost:3000/another/baz'
+		context 'controller and action' do
+			let(:args) { [AnotherControllerController, :baz] }
+
+			it { is_expected.to eq 'http://localhost:3000/another/baz' }
 		end
 
-		it 'should return URL by action from self' do
-			@controller.url_to(:foo, first: 'Alex')
-				.should.equal 'http://localhost:3000/foo/Alex'
+		context 'action and argument' do
+			let(:args) { [:foo, first: 'Alex'] }
+
+			it { is_expected.to eq 'http://localhost:3000/foo/Alex' }
 		end
 
-		it 'should return URL by Flame::Path object' do
-			path = Flame::Path.new '/some/path?with=args'
-			@controller.url_to(path)
-				.should.equal "http://localhost:3000#{path}"
+		context 'Flame::Path object' do
+			let(:args) { [Flame::Path.new('/some/path?with=args')] }
+
+			it { is_expected.to eq 'http://localhost:3000/some/path?with=args' }
 		end
 
-		it 'should return URL with mtime of static file in argmunet' do
-			file = 'test.txt'
-			mtime = File.mtime File.join(__dir__, 'public', file)
-			@controller.url_to("/#{file}", version: true)
-				.should.equal "http://localhost:3000/#{file}?v=#{mtime.to_i}"
+		context 'static file with version' do
+			let(:file) { 'test.txt' }
+			let(:mtime) { File.mtime File.join(__dir__, 'public', file) }
+			let(:args) { ["/#{file}", version: true] }
+
+			it { is_expected.to eq "http://localhost:3000/#{file}?v=#{mtime.to_i}" }
 		end
 	end
 
 	describe '#path_to_back' do
-		it 'should return referer URL if exist' do
-			referer = 'http://example.com/'
-			env = @env.merge(
-				'HTTP_REFERER' => referer
-			)
-			dispatcher = Flame::Dispatcher.new(ControllerApplication, env)
-			controller = AnotherControllerController.new(dispatcher)
-			controller.back.should.equal referer
+		let(:controller_class) { AnotherControllerController }
+		subject { controller.back } ## it's action with `path_to_back`
+
+		context 'referer URL exists' do
+			let(:referer) { 'http://example.com/' }
+			let(:env) { super().merge('HTTP_REFERER' => referer) }
+
+			it { is_expected.to eq referer }
 		end
 
-		it 'should not return referer with the same URL' do
-			referer = 'http://localhost:3000/another/bar'
-			env = @env.merge(
-				Rack::PATH_INFO => '/another/bar',
-				'HTTP_REFERER' => referer
-			)
-			dispatcher = Flame::Dispatcher.new(ControllerApplication, env)
-			controller = AnotherControllerController.new(dispatcher)
-			controller.back.should.not.equal referer
+		context 'referer with the same URL' do
+			let(:referer) { 'http://localhost:3000/another/bar' }
+			let(:env) do
+				super().merge(
+					Rack::PATH_INFO => '/another/bar',
+					'HTTP_REFERER' => referer
+				)
+			end
+
+			it { is_expected.not_to eq referer }
 		end
 
-		it 'should return path to index action of controller without referer' do
-			@another_controller.back.should.equal '/another'
+		context 'without referer' do
+			it { is_expected.to eq '/another' }
 		end
 
-		it 'should return root path without referer and index action' do
-			env = @env.merge(
-				Rack::PATH_INFO => '/nested/nested/back'
-			)
-			dispatcher = Flame::Dispatcher.new(ControllerApplication, env)
-			controller = Nested::NestedController.new(dispatcher)
-			controller.back.should.equal '/'
+		context 'without referer and index action' do
+			let(:env) { super().merge(Rack::PATH_INFO => '/nested/nested/back') }
+			let(:controller_class) { Nested::NestedController }
+
+			it { is_expected.to eq '/' }
 		end
 	end
 
 	describe '#redirect' do
-		describe 'by String' do
-			before do
-				@url = 'http://example.com/'
+		before do
+			controller.redirect(*args)
+		end
+
+		context 'by String' do
+			let(:url) { 'http://example.com/' }
+
+			context 'without status' do
+				let(:args) { [url] }
+
+				describe 'status' do
+					subject { controller.status }
+
+					it { is_expected.to eq 302 }
+				end
+
+				describe 'location in response' do
+					subject { controller.response.location }
+
+					it { is_expected.to eq url }
+				end
+
+				describe 'no mutation of of args as array' do
+					subject { args }
+
+					it { is_expected.to eq [url] }
+				end
 			end
 
-			it 'should write rediect to response' do
-				@controller.redirect(@url)
-				@controller.status.should.equal 302
-				@controller.response.location.should.equal @url
-			end
+			context 'with status as the last arument' do
+				let(:args) { [url, 301] }
 
-			it 'should receive status as last arument' do
-				@controller.redirect(@url, 301)
-				@controller.status.should.equal 301
-				@controller.response.location.should.equal @url
-			end
+				describe 'status' do
+					subject { controller.status }
 
-			it 'should not mutate args as array' do
-				args = [@url, 302]
-				@controller.redirect(*args)
-				@controller.status.should.equal 302
-				@controller.response.location.should.equal @url
-				args.should.equal [@url, 302]
+					it { is_expected.to eq 301 }
+				end
+
+				describe 'location in response' do
+					subject { controller.response.location }
+
+					it { is_expected.to eq url }
+				end
+
+				describe 'no mutation of of args as array' do
+					subject { args }
+
+					it { is_expected.to eq [url, 301] }
+				end
 			end
 		end
 
 		describe 'by controller and action' do
-			it 'should write rediect to response' do
-				@controller.redirect(AnotherControllerController, :hello, name: 'Alex')
-				@controller.status.should.equal 302
-				@controller.response.location.should.equal '/another/hello/Alex'
+			let(:controller_class) { AnotherControllerController }
+
+			context 'without status' do
+				let(:args) { [controller_class, :hello, name: 'Alex'] }
+
+				describe 'status' do
+					subject { controller.status }
+
+					it { is_expected.to eq 302 }
+				end
+
+				describe 'location in response' do
+					subject { controller.response.location }
+
+					it { is_expected.to eq '/another/hello/Alex' }
+				end
+
+				describe 'no mutation of of args as array' do
+					subject { args }
+
+					it { is_expected.to eq [controller_class, :hello, name: 'Alex'] }
+				end
 			end
 
-			it 'should receive status as last arument' do
-				@controller.redirect(
-					AnotherControllerController, :hello, { name: 'Alex' }, 301
-				)
-				@controller.status.should.equal 301
-				@controller.response.location.should.equal '/another/hello/Alex'
-			end
+			context 'with status as the last arument' do
+				let(:args) { [controller_class, :hello, { name: 'Alex' }, 301] }
 
-			it 'should not mutate args as array' do
-				args = [AnotherControllerController, :hello, { name: 'Alex' }, 301]
-				@controller.redirect(*args)
-				@controller.status.should.equal 301
-				@controller.response.location.should.equal '/another/hello/Alex'
-				args.should.equal(
-					[AnotherControllerController, :hello, { name: 'Alex' }, 301]
-				)
+				describe 'status' do
+					subject { controller.status }
+
+					it { is_expected.to eq 301 }
+				end
+
+				describe 'location in response' do
+					subject { controller.response.location }
+
+					it { is_expected.to eq '/another/hello/Alex' }
+				end
+
+				describe 'no mutation of of args as array' do
+					subject { args }
+
+					it do
+						is_expected.to eq [controller_class, :hello, { name: 'Alex' }, 301]
+					end
+				end
 			end
 		end
 
 		describe 'by URI object' do
-			it 'should write redirect to response' do
-				@controller.redirect URI::HTTP.build(host: 'example.com')
-				@controller.status.should.equal 302
-				@controller.response.location.should.equal 'http://example.com'
+			let(:uri) { URI::HTTP.build(host: 'example.com') }
+
+			context 'without status' do
+				let(:args) { [uri] }
+
+				describe 'status' do
+					subject { controller.status }
+
+					it { is_expected.to eq 302 }
+				end
+
+				describe 'location in response' do
+					subject { controller.response.location }
+
+					it { is_expected.to eq 'http://example.com' }
+				end
+
+				describe 'no mutation of of args as array' do
+					subject { args }
+
+					it { is_expected.to eq [uri] }
+				end
 			end
 
-			it 'should receive status as last arument' do
-				@controller.redirect URI::HTTP.build(host: 'example.com'), 301
-				@controller.status.should.equal 301
-				@controller.response.location.should.equal 'http://example.com'
+			context 'with status as the last arument' do
+				let(:args) { [uri, 301] }
+
+				describe 'status' do
+					subject { controller.status }
+
+					it { is_expected.to eq 301 }
+				end
+
+				describe 'location in response' do
+					subject { controller.response.location }
+
+					it { is_expected.to eq 'http://example.com' }
+				end
+
+				describe 'no mutation of of args as array' do
+					subject { args }
+
+					it { is_expected.to eq [uri, 301] }
+				end
 			end
 		end
 
-		it 'should return default status' do
-			@controller.redirect('http://example.com/').should.equal 302
+		describe 'default status' do
+			let(:args) { ['http://example.com'] }
+
+			subject { controller.status }
+
+			it { is_expected.to eq 302 }
 		end
 
-		it 'should return specified status' do
-			@controller.redirect('http://example.com/', 301).should.equal 301
+		describe 'specified status' do
+			let(:args) { ['http://example.com', 301] }
+
+			subject { controller.status }
+
+			it { is_expected.to eq 301 }
 		end
 	end
 
 	describe '#reroute' do
-		it 'should call specified action of specified controller' do
-			@controller.baz.should.equal 'Another baz'
+		subject { controller.public_send(action) }
+
+		context 'specified action of specified controller' do
+			let(:action) { :baz }
+
+			it { is_expected.to eq 'Another baz' }
 		end
 
-		it 'should call specified action of current controller' do
-			@controller.current_reroute.should.equal 'Hello from reroute'
+		context 'specified action of current controller' do
+			let(:action) { :current_reroute }
+
+			it { is_expected.to eq 'Hello from reroute' }
 		end
 
-		it 'should not recreate current controller' do
-			@controller.hash_reroute.should.equal @controller.object_hash
+		describe 'no recreation of current controller' do
+			let(:action) { :hash_reroute }
+
+			it { is_expected.to eq controller.object_hash }
 		end
 
-		it 'should call index action by default' do
-			@controller.index_reroute.should.equal 'Another index'
+		describe 'index action by default' do
+			let(:action) { :index_reroute }
+
+			it { is_expected.to eq 'Another index' }
 		end
 
-		it 'should call `execute` method of called controller' do
-			@controller.execute_reroute.should.equal 'Another execute'
+		describe 'calling `execute` method of called controller' do
+			let(:action) { :execute_reroute }
+
+			it { is_expected.to eq 'Another execute' }
 		end
 
-		it 'should save result of action as body regardless of after-hooks' do
-			@controller.hooks_reroute.should.equal 'Another hooked'
+		describe 'saving result of action as body regardless of after-hooks' do
+			let(:action) { :hooks_reroute }
+
+			it { is_expected.to eq 'Another hooked' }
 		end
 	end
 
 	describe '#attachment' do
-		it 'should set default Content-Disposition header' do
-			@controller.attachment
-			@controller.response['Content-Disposition']
-				.should.equal 'attachment'
+		before do
+			controller.attachment(*args)
 		end
 
-		it 'should set Content-Disposition header with filename' do
-			@controller.attachment 'style.css'
-			@controller.response['Content-Disposition']
-				.should.equal 'attachment; filename="style.css"'
+		subject { controller.response }
+
+		describe 'Content-Disposition header' do
+			subject { super()['Content-Disposition'] }
+
+			describe 'default' do
+				let(:args) { [] }
+
+				it { is_expected.to eq 'attachment' }
+			end
+
+			describe 'from filename' do
+				let(:args) { ['style.css'] }
+
+				it { is_expected.to eq 'attachment; filename="style.css"' }
+			end
 		end
 
-		it 'should set Content-Type header by filename' do
-			@controller.attachment 'style.css'
-			@controller.response['Content-Type']
-				.should.equal 'text/css'
+		describe 'Content-Type header by filename' do
+			subject { super()['Content-Type'] }
+
+			describe 'from filename' do
+				let(:args) { ['style.css'] }
+
+				it { is_expected.to eq 'text/css' }
+			end
 		end
 	end
 
 	describe '#view' do
-		it 'should render partial' do
-			@controller.view(:_partial)
-				.should.equal "<p>This is partial</p>\n"
+		subject(:view_subject) { controller.view(*args, &block) }
+
+		let(:block) { nil }
+
+		context 'partial' do
+			let(:args) { [:_partial] }
+
+			it { is_expected.to eq "<p>This is partial</p>\n" }
 		end
 
-		it 'should render view with layout and instance variables' do
-			@controller.instance_variable_set(:@name, 'user')
-			@controller.view(:view)
-				.should.equal <<~CONTENT
+		context 'view with layout and instance variables' do
+			let(:args) { [:view] }
+
+			before do
+				controller.instance_variable_set(:@name, 'user')
+			end
+
+			it do
+				is_expected.to eq <<~CONTENT
 					<body>
 						<h1>Hello, user!</h1>\n
 					</body>
 				CONTENT
+			end
 		end
 
-		it 'should receive options for Flame::Render' do
-			@controller.view(:view, layout: false)
-				.should.equal "<h1>Hello, world!</h1>\n"
+		context 'view without layout' do
+			let(:args) { [:view, layout: false] }
+
+			it { is_expected.to eq "<h1>Hello, world!</h1>\n" }
 		end
 
-		it 'should raise error if template file not found' do
-			-> { @controller.view(:nonexistent) }
-				.should.raise(Flame::Errors::TemplateNotFoundError)
-				.message.should.equal(
+		context 'template file not found' do
+			let(:args) { [:nonexistent] }
+
+			it do
+				expect { subject }.to raise_error(
+					Flame::Errors::TemplateNotFoundError,
 					"Template 'nonexistent' not found for 'ControllerController'"
 				)
+			end
 		end
 
-		it 'should render partial with block' do
-			@controller.render(:_partial_with_block) { 'world' }
-				.should.equal "<h1>Hello, world!</h1>\n"
+		context 'partial with block' do
+			let(:args) { [:_partial_with_block] }
+			let(:block) { proc { 'world' } }
+
+			it { is_expected.to eq "<h1>Hello, world!</h1>\n" }
 		end
 
 		describe 'cache' do
+			subject(:cached_tilts) { ControllerApplication.cached_tilts }
+
 			before do
-				ControllerApplication.cached_tilts.clear
+				cached_tilts.clear
+				controller.config[:environment] = environment
+				view_subject
 			end
 
-			it 'should not work for development environment' do
-				@controller.config[:environment] = 'development'
-				@controller.view(:view)
-				ControllerApplication.cached_tilts.should.be.empty
+			subject { cached_tilts.size }
+
+			context 'development environment' do
+				let(:environment) { 'development' }
+				let(:args) { [:view] }
+
+				it { is_expected.to be_zero }
 			end
 
-			it 'should work for production environment' do
-				@controller.config[:environment] = 'production'
-				@controller.view(:view, layout: false)
-				ControllerApplication.cached_tilts.size.should.equal 1
+			context 'production environment' do
+				let(:environment) { 'production' }
+				let(:args) { [:view, layout: false] }
+
+				it { is_expected.to eq 1 }
 			end
 
-			it 'should not work with false value of cache option' do
-				@controller.config[:environment] = 'production'
-				@controller.view(:view, cache: false)
-				ControllerApplication.cached_tilts.should.be.empty
+			context 'production environment and false value of cache option' do
+				let(:environment) { 'production' }
+				let(:args) { [:view, cache: false] }
+
+				it { is_expected.to be_zero }
 			end
 
-			it 'should work with true value of cache option' do
-				@controller.config[:environment] = 'development'
-				@controller.view(:view, layout: false, cache: true)
-				ControllerApplication.cached_tilts.size.should.equal 1
+			context 'development environment and true value of cache option' do
+				let(:environment) { 'development' }
+				let(:args) { [:view, layout: false, cache: true] }
+
+				it { is_expected.to eq 1 }
 			end
 		end
 
-		it 'should take controller name as default path' do
-			@controller.bar
-				.should.equal <<~CONTENT
+		describe 'taking controller name as default path' do
+			subject { controller.bar }
+
+			it do
+				is_expected.to eq <<~CONTENT
 					<body>
 						This is view for bar method of ControllerController\n
 					</body>
 				CONTENT
+			end
 		end
 
-		it 'should have `render` alias' do
-			@controller.view(:view)
-				.should.equal @controller.render(:view)
+		describe '`render` alias' do
+			let(:args) { [:view] }
+
+			it { is_expected.to eq controller.render(*args) }
 		end
 	end
 
-	describe '.inherit_actions' do
-		it 'should define actions from parent' do
-			inherited_controller = Class.new(ControllerController) do
-				inherit_actions
+	describe 'actions inheritance' do
+		subject { inherited_controller.actions.sort }
+
+		describe '.inherit_actions' do
+			let(:inherited_controller) do
+				arguments = args
+				Class.new(controller_class) { inherit_actions(*arguments) }
 			end
-			inherited_controller.actions.sort.should.equal(
-				ControllerController.actions.sort
-			)
+
+			context 'without arguments' do
+				let(:args) { [] }
+
+				it { is_expected.to eq controller_class.actions.sort }
+			end
+
+			context 'specific actions' do
+				let(:args) { [%i[foo bar baz]] }
+
+				it { is_expected.to eq %i[foo bar baz].sort }
+			end
+
+			context 'excluded actions' do
+				let(:args) { [{ exclude: %i[foo bar] }] }
+
+				it { is_expected.to eq((controller_class.actions - %i[foo bar]).sort) }
+			end
 		end
 
-		it 'should define specific actions from parent' do
-			inherited_controller = Class.new(ControllerController) do
-				inherit_actions %i[foo bar baz]
+		describe '.with_actions' do
+			let(:inherited_controller) do
+				arguments = args
+				Class.new(controller_class) do
+					include with_actions SomeActions, *arguments
+				end
 			end
-			inherited_controller.actions.sort.should.equal %i[foo bar baz].sort
-		end
 
-		it 'should define actions from parent without excluded actions' do
-			inherited_controller = Class.new(ControllerController) do
-				inherit_actions exclude: %i[foo bar]
-			end
-			inherited_controller.actions.sort.should.equal(
-				(ControllerController.actions - %i[foo bar]).sort
-			)
-		end
-	end
+			context 'without arguments' do
+				let(:args) { [] }
 
-	describe '.with_actions' do
-		it 'should define actions from specified module' do
-			inherited_controller = Class.new(ControllerController) do
-				include with_actions SomeActions
+				it { is_expected.to eq SomeActions.public_instance_methods.sort }
 			end
-			inherited_controller.actions.sort.should.equal(
-				SomeActions.public_instance_methods.sort
-			)
-		end
 
-		it 'should define actions from specified module without excluded actions' do
-			inherited_controller = Class.new(ControllerController) do
-				include with_actions(SomeActions, exclude: %i[included_action])
-			end
-			inherited_controller.actions.sort.should.equal(
-				(SomeActions.public_instance_methods - %i[included_action]).sort
-			)
-		end
+			context 'excluded actions' do
+				let(:args) { [{ exclude: %i[included_action] }] }
 
-		it 'should define actions from specified module and controller' do
-			inherited_controller = Class.new(ControllerController) do
-				inherit_actions
-				include with_actions SomeActions
+				it do
+					is_expected.to eq(
+						(SomeActions.public_instance_methods - %i[included_action]).sort
+					)
+				end
 			end
-			inherited_controller.actions.sort.should.equal(
-				(
-					ControllerController.actions + SomeActions.public_instance_methods
-				).sort
-			)
+
+			context '+ .inherit_actions' do
+				let(:inherited_controller) do
+					Class.new(controller_class) do
+						inherit_actions
+						include with_actions SomeActions
+					end
+				end
+
+				it do
+					is_expected.to eq(
+						(
+							ControllerController.actions + SomeActions.public_instance_methods
+						).sort
+					)
+				end
+			end
 		end
 	end
 end

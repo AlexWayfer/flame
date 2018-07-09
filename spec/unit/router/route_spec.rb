@@ -20,35 +20,45 @@ class AnotherRouteController < Flame::Controller
 end
 
 describe Flame::Router::Route do
-	before do
-		@init = proc do |*args|
-			args = [RouteController, :foo] if args.empty?
-			Flame::Router::Route.new(*args)
-		end
+	def route_intialize(*args)
+		Flame::Router::Route.new(*args)
 	end
 
+	subject(:route) { route_intialize(*args) }
+
+	let(:args) { [RouteController, :foo] }
+
 	describe '#initialize' do
-		it 'should receive controller and action' do
-			-> { @init.call(RouteController, :foo) }
-				.should.not.raise(ArgumentError)
+		it 'receives controller and action' do
+			expect { subject }.not_to raise_error
 		end
 	end
 
 	describe '#==' do
-		it 'should return true for another object with the same attributes' do
-			@init.call.should == @init.call
+		subject { left == right }
+
+		let(:left)  { route_intialize(*left_args) }
+		let(:right) { route_intialize(*right_args) }
+
+		context 'another object with the same attributes' do
+			let(:left_args)  { args }
+			let(:right_args) { left_args }
+
+			it { is_expected.to be true }
 		end
 
-		it 'should return false for another object with another controller' do
-			route = @init.call(RouteController, :foo)
-			other = @init.call(AnotherRouteController, :foo)
-			route.should.not == other
+		context 'another object with another controller' do
+			let(:left_args)  { [RouteController, :foo] }
+			let(:right_args) { [AnotherRouteController, :foo] }
+
+			it { is_expected.to be false }
 		end
 
-		it 'should return false for another object with another action' do
-			route = @init.call(RouteController, :foo)
-			other = @init.call(RouteController, :bar)
-			route.should.not == other
+		context 'another object with another action' do
+			let(:left_args)  { [RouteController, :foo] }
+			let(:right_args) { [RouteController, :bar] }
+
+			it { is_expected.to be false }
 		end
 	end
 end

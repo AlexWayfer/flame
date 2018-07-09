@@ -7,65 +7,74 @@ end
 
 describe 'Flame::Validators' do
 	describe Flame::Validators::RouteArgumentsValidator do
-		before do
-			@init = proc do |path:|
-				Flame::Validators::RouteArgumentsValidator.new(
-					ValidatorsController, path, :foo
-				)
-			end
+		subject do
+			described_class.new(ValidatorsController, path, :foo)
 		end
 
 		describe '#valid?' do
-			it 'should return true for no extra arguments' do
-				@init.call(path: '/foo/:first/:second/:?third/:?fourth')
-					.valid?.should.equal true
+			subject { super().valid? }
+
+			context 'no extra arguments' do
+				let(:path) { '/foo/:first/:second/:?third/:?fourth' }
+
+				it { is_expected.to be true }
 			end
 
-			it 'should raise error for extra action required arguments' do
-				path = '/foo/:first/:?third/:?fourth'
-				-> { @init.call(path: path).valid? }
-					.should.raise(Flame::Errors::RouteExtraArgumentsError)
-					.message.should.equal(
+			context 'extra action required arguments' do
+				let(:path) { '/foo/:first/:?third/:?fourth' }
+
+				it do
+					expect { subject }.to raise_error(
+						Flame::Errors::RouteExtraArgumentsError,
 						"Path '#{path}' has no required arguments [:second]"
 					)
+				end
 			end
 
-			it 'should raise error for extra action optional arguments' do
-				path = '/foo/:first/:second'
-				-> { @init.call(path: path).valid? }
-					.should.raise(Flame::Errors::RouteExtraArgumentsError)
-					.message.should.equal(
+			context 'extra action optional arguments' do
+				let(:path) { '/foo/:first/:second' }
+
+				it do
+					expect { subject }.to raise_error(
+						Flame::Errors::RouteExtraArgumentsError,
 						"Path '#{path}' has no optional arguments [:third, :fourth]"
 					)
+				end
 			end
 
-			it 'should raise error for extra path required arguments' do
-				path = '/foo/:first/:second/:fourth/:?third/:?fourth'
-				-> { @init.call(path: path).valid? }
-					.should.raise(Flame::Errors::RouteExtraArgumentsError)
-					.message.should.equal(
+			context 'extra path required arguments' do
+				let(:path) { '/foo/:first/:second/:fourth/:?third/:?fourth' }
+
+				it do
+					expect { subject }.to raise_error(
+						Flame::Errors::RouteExtraArgumentsError,
 						"Action 'ValidatorsController#foo'" \
 							' has no required arguments [:fourth]'
 					)
+				end
 			end
 
-			it 'should raise error for extra path optional arguments' do
-				path = '/foo/:first/:second/:?third/:?fourth/:?fifth'
-				-> { @init.call(path: path).valid? }
-					.should.raise(Flame::Errors::RouteExtraArgumentsError)
-					.message.should.equal(
+			context 'extra path optional arguments' do
+				let(:path) { '/foo/:first/:second/:?third/:?fourth/:?fifth' }
+
+				it do
+					expect { subject }.to raise_error(
+						Flame::Errors::RouteExtraArgumentsError,
 						"Action 'ValidatorsController#foo'" \
 							' has no optional arguments [:fifth]'
 					)
+				end
 			end
 
-			it 'should raise error for wrong order of optional arguments' do
-				path = '/foo/:first/:second/:?fourth/:?third'
-				-> { @init.call(path: path).valid? }
-					.should.raise(Flame::Errors::RouteArgumentsOrderError)
-					.message.should.equal(
+			context 'wrong order of optional arguments' do
+				let(:path) { '/foo/:first/:second/:?fourth/:?third' }
+
+				it do
+					expect { subject }.to raise_error(
+						Flame::Errors::RouteArgumentsOrderError,
 						"Path '#{path}' should have ':?third' argument before ':?fourth'"
 					)
+				end
 			end
 		end
 	end

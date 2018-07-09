@@ -2,16 +2,17 @@
 
 describe 'Flame::Errors' do
 	describe Flame::Errors::ArgumentNotAssignedError do
-		before do
-			@error = Flame::Errors::ArgumentNotAssignedError.new(
+		subject(:error) do
+			described_class.new(
 				'/foo/:first/:second',
 				':second'
 			)
-
-			@correct_message =
-				"Argument ':second' for path '/foo/:first/:second' is not assigned"
 		end
 
-		behaves_like 'error with correct output'
+		let(:correct_message) do
+			"Argument ':second' for path '/foo/:first/:second' is not assigned"
+		end
+
+		it_behaves_like 'error with correct output'
 	end
 end

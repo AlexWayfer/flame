@@ -2,16 +2,16 @@
 
 describe 'Flame::Errors' do
 	describe Flame::Errors::RouteArgumentsOrderError do
-		before do
-			path = '/foo/:first/:second/:?fourth/:?third'
+		let(:path) { '/foo/:first/:second/:?fourth/:?third' }
 
-			@error =
-				Flame::Errors::RouteArgumentsOrderError.new(path, %w[:?third :?fourth])
-
-			@correct_message =
-				"Path '#{path}' should have ':?third' argument before ':?fourth'"
+		subject(:error) do
+			described_class.new(path, %w[:?third :?fourth])
 		end
 
-		behaves_like 'error with correct output'
+		let(:correct_message) do
+			"Path '#{path}' should have ':?third' argument before ':?fourth'"
+		end
+
+		it_behaves_like 'error with correct output'
 	end
 end

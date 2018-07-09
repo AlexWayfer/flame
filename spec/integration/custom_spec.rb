@@ -56,51 +56,131 @@ end
 describe CustomController do
 	include Rack::Test::Methods
 
-	it 'should return foo' do
-		get '/custom/foo'
-		last_response.should.be.ok
-		last_response.body.should.equal 'This is foo'
+	describe 'foo' do
+		before { get '/custom/foo' }
+
+		describe 'last_response' do
+			subject { last_response }
+
+			it { is_expected.to be_ok }
+
+			describe 'body' do
+				subject { super().body }
+
+				it { is_expected.to eq 'This is foo' }
+			end
+		end
 	end
 
-	it 'should return hello with world' do
-		get '/custom/hello'
-		last_response.should.be.ok
-		last_response.body.should.equal 'Hello, world!'
+	describe 'hello with world' do
+		before { get '/custom/hello' }
+
+		describe 'last_response' do
+			subject { last_response }
+
+			it { is_expected.to be_ok }
+
+			describe 'body' do
+				subject { super().body }
+
+				it { is_expected.to eq 'Hello, world!' }
+			end
+		end
 	end
 
-	it 'should return hello with name' do
-		get '/custom/hello/Alex'
-		last_response.should.be.ok
-		last_response.body.should.equal 'Hello, Alex!'
+	describe 'hello with name' do
+		before { get '/custom/hello/Alex' }
+
+		describe 'last_response' do
+			subject { last_response }
+
+			it { is_expected.to be_ok }
+
+			describe 'body' do
+				subject { super().body }
+
+				it { is_expected.to eq 'Hello, Alex!' }
+			end
+		end
 	end
 
-	it 'should return custom 404' do
-		get '/custom/foo/404'
-		last_response.should.be.not_found
-		last_response.body.should.equal 'Some page about 404 code'
+	describe 'custom 404' do
+		before { get '/custom/foo/404' }
+
+		describe 'last_response' do
+			subject { last_response }
+
+			it { is_expected.to be_not_found }
+
+			describe 'body' do
+				subject { super().body }
+
+				it { is_expected.to eq 'Some page about 404 code' }
+			end
+		end
 	end
 
-	it 'should execute custom code for `not_found`' do
-		get '/custom/404'
-		last_response.should.be.not_found
-		last_response.headers['Custom-Header'].should.equal 'Hello from not_found'
+	describe 'execute custom code for `not_found`' do
+		before { get '/custom/404' }
+
+		describe 'last_response' do
+			subject { last_response }
+
+			it { is_expected.to be_not_found }
+
+			describe 'Custom-Header' do
+				subject { super().headers['Custom-Header'] }
+
+				it { is_expected.to eq 'Hello from not_found' }
+			end
+		end
 	end
 
-	it 'should return custom 500' do
-		get '/custom/error'
-		last_response.should.be.server_error
-		last_response.body.should.equal 'Some page about 500 code; rescued is true'
+	describe 'custom 500' do
+		before { get '/custom/error' }
+
+		describe 'last_response' do
+			subject { last_response }
+
+			it { is_expected.to be_server_error }
+
+			describe 'body' do
+				subject { super().body }
+
+				it { is_expected.to eq 'Some page about 500 code; rescued is true' }
+			end
+		end
 	end
 
-	it 'should return status and headers for HEAD request' do
-		head '/custom/foo'
-		last_response.should.be.ok
-		last_response.body.should.be.empty
+	describe 'status and headers for HEAD request' do
+		before { head '/custom/foo' }
+
+		describe 'last_response' do
+			subject { last_response }
+
+			it { is_expected.to be_ok }
+
+			describe 'body' do
+				subject { super().body }
+
+				it { is_expected.to be_empty }
+			end
+		end
 	end
 
-	should 'return redirect with halt to foo from `not_found`' do
-		get '/custom/redirecting'
-		last_response.should.be.redirect
-		last_response.body.should.equal 'Some page about 302 code'
+	describe 'redirect with halt to `foo` from `not_found`' do
+		before { get '/custom/redirecting' }
+
+		describe 'last_response' do
+			subject { last_response }
+
+			it { is_expected.to be_redirect }
+
+			describe 'body' do
+				subject { super().body }
+
+				it { is_expected.to eq 'Some page about 302 code' }
+			end
+		end
 	end
 end

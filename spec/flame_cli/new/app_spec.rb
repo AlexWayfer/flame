@@ -1,25 +1,26 @@
 # frozen_string_literal: true
 
+require 'pathname'
 require 'net/http'
 
 describe 'FlameCLI::New::App' do
-	app_name = 'foo_bar'
+	let(:app_name) { 'foo_bar' }
 
-	execute_command = proc do
+	subject(:execute_command) do
 		`#{FLAME_CLI} new app #{app_name}`
 	end
 
-	template_dir = File.join(__dir__, '../../../template')
-	template_dir_pathname = Pathname.new(template_dir)
-	template_ext = '.erb'
+	let(:template_dir)          { File.join(__dir__, '../../../template') }
+	let(:template_dir_pathname) { Pathname.new(template_dir) }
+	let(:template_ext)          { '.erb' }
 
 	after do
 		FileUtils.rm_r File.join(__dir__, '../../..', app_name)
 	end
 
-	it 'should print correct output' do
-		execute_command.call
-			.should match_words(
+	describe 'output' do
+		it do
+			is_expected.to match_words(
 				"Creating '#{app_name}' directory...",
 				'Copy template directories and files...',
 				'Clean directories...',
@@ -34,107 +35,196 @@ describe 'FlameCLI::New::App' do
 				'Grant permissions to files...',
 				'Done!'
 			)
+		end
 	end
 
-	it 'should create root directory with received app name' do
-		execute_command.call
-		Dir.exist?(app_name).should.be.true
+	describe 'creates root directory with received app name' do
+		subject { Dir.exist?(app_name) }
+
+		before { execute_command }
+
+		it { is_expected.to be true }
 	end
 
-	it 'should copy template directories and files into app root directory' do
-		execute_command.call
-		Dir[File.join(template_dir, '**/*')].each do |filename|
-			filename_pathname = Pathname.new(filename)
-				.relative_path_from(template_dir_pathname)
-			next if File.dirname(filename).split(File::SEPARATOR).include? 'views'
-			if filename_pathname.extname == template_ext
-				filename_pathname = filename_pathname.sub_ext('')
+	describe 'copies template directories and files into app root directory' do
+		before { execute_command }
+
+		let(:files) do
+			Dir[File.join(template_dir, '**/*')]
+				.map do |filename|
+					filename_pathname = Pathname.new(filename)
+						.relative_path_from(template_dir_pathname)
+					next if File.dirname(filename).split(File::SEPARATOR).include? 'views'
+					if filename_pathname.extname == template_ext
+						filename_pathname = filename_pathname.sub_ext('')
+					end
+					File.join app_name, filename_pathname
+				end
+				.compact
+		end
+
+		subject { File }
+
+		it { files.each { |file| is_expected.to exist file } }
+	end
+
+	describe 'cleans directories' do
+		before { execute_command }
+
+		subject { Dir[File.join(app_name, '**/.keep')] }
+
+		it { is_expected.to be_empty }
+	end
+
+	describe 'renders app name in files' do
+		before { execute_command }
+
+		subject { File.read File.join(app_name, *path_parts) }
+
+		describe 'config.ru' do
+			let(:path_parts) { 'config.ru' }
+
+			it do
+				is_expected.to match_words(
+					'use Rack::Session::Cookie, FB::Application.config[:session][:cookie]',
+					'FB::Application.config[:server][environment.to_s][:logs_dir]',
+					'FB::Application.config[:logger] = Logger.new',
+					'FB::DB.loggers <<',
+					'FB.logger',
+					'FB::DB.freeze',
+					'run FB::Application'
+				)
 			end
-			app_filename = File.join(app_name, filename_pathname)
-			File.exist?(app_filename).should.be.true
+		end
+
+		describe 'application.rb' do
+			let(:path_parts) { 'application.rb' }
+
+			it do
+				is_expected.to match_words(
+					'module FooBar',
+					'include FB::Config'
+				)
+			end
+		end
+
+		describe 'controllers/_controller.rb' do
+			let(:path_parts) { ['controllers', '_controller.rb'] }
+
+			it do
+				is_expected.to match_words(
+					'module FooBar',
+					'FB.logger'
+				)
+			end
+		end
+
+		describe 'controllers/site/_controller.rb' do
+			let(:path_parts) { ['controllers', 'site', '_controller.rb'] }
+
+			it do
+				is_expected.to match_words(
+					'module FooBar',
+					'class Controller < FB::Controller'
+				)
+			end
+		end
+
+		describe 'controllers/site/index_controller.rb' do
+			let(:path_parts) { ['controllers', 'site', 'index_controller.rb'] }
+
+			it do
+				is_expected.to match_words(
+					'module FooBar',
+					'class IndexController < FB::Site::Controller'
+				)
+			end
+		end
+
+		describe 'config/config.rb' do
+			let(:path_parts) { ['config', 'config.rb'] }
+
+			it do
+				is_expected.to match_words(
+					'module FooBar',
+					"SITE_NAME = 'FooBar'",
+					"ORGANIZATION_NAME = 'FooBar LLC'",
+					'::FB = ::FooBar',
+					'FB::Application.config[:logger]'
+				)
+			end
+		end
+
+		describe 'config/sequel.rb' do
+			let(:path_parts) { ['config', 'sequel.rb'] }
+
+			it do
+				is_expected.to match_words(
+					'module FooBar'
+				)
+			end
 		end
 	end
 
-	it 'should clean directories' do
-		execute_command.call
-		Dir[File.join(app_name, '**/.keep')].should.be.empty
-	end
+	describe 'generates working app' do
+		before do
+			ENV['RACK_ENV'] = 'development'
 
-	it 'should render app name in files' do
-		read_file = ->(*path_parts) { File.read File.join(app_name, *path_parts) }
-		execute_command.call
-		read_file.call('config.ru').should match_words(
-			'use Rack::Session::Cookie, FB::Application.config[:session][:cookie]',
-			'FB::Application.config[:server][environment.to_s][:logs_dir]',
-			'FB::Application.config[:logger] = Logger.new',
-			'FB::DB.loggers <<',
-			'FB.logger',
-			'FB::DB.freeze',
-			'run FB::Application'
-		)
-		read_file.call('application.rb').should match_words(
-			'module FooBar',
-			'include FB::Config'
-		)
-		read_file.call('controllers', '_controller.rb').should match_words(
-			'module FooBar',
-			'FB.logger'
-		)
-		read_file.call('controllers', 'site', '_controller.rb').should match_words(
-			'module FooBar',
-			'class Controller < FB::Controller'
-		)
-		read_file.call('controllers', 'site', 'index_controller.rb')
-			.should match_words(
-				'module FooBar',
-				'class IndexController < FB::Site::Controller'
-			)
-		read_file.call('config', 'config.rb').should match_words(
-			'module FooBar',
-			"SITE_NAME = 'FooBar'",
-			"ORGANIZATION_NAME = 'FooBar LLC'",
-			'::FB = ::FooBar',
-			'FB::Application.config[:logger]'
-		)
-		read_file.call('config', 'sequel.rb').should match_words(
-			'module FooBar'
-		)
-	end
+			execute_command
 
-	it 'should generate working app' do
-		ENV['RACK_ENV'] = 'development'
-		execute_command.call
-		Dir.chdir app_name
-		## HACK for new unreleased features
-		File.write(
-			'Gemfile',
-			File.read('Gemfile').sub(
-				"gem 'flame', github: 'AlexWayfer/flame'\n", "gem 'flame', path: '..'\n"
+			Dir.chdir app_name
+
+			## HACK for new unreleased features
+			File.write(
+				'Gemfile',
+				File.read('Gemfile').sub(
+					"gem 'flame', github: 'AlexWayfer/flame'\n", "gem 'flame', path: '..'\n"
+				)
 			)
-		)
-		%w[server].each do |config|
-			FileUtils.cp "config/#{config}.example.yml", "config/#{config}.yml"
+
+			%w[server].each do |config|
+				FileUtils.cp "config/#{config}.example.yml", "config/#{config}.yml"
+			end
+
+			## HACK for testing while some server is running
+			File.write(
+				'config/server.yml',
+				File.read('config/server.yml').sub('port: 3000', "port: #{port}")
+			)
+
+			system 'bundle install --gemfile=Gemfile'
 		end
-		## HACK for testing while some server is running
-		port = 3456
-		File.write(
-			'config/server.yml',
-			File.read('config/server.yml').sub('port: 3000', "port: #{port}")
-		)
-		system 'bundle install --gemfile=Gemfile'
-		begin
-			pid = spawn './server start'
-			uri = URI("http://localhost:#{port}/")
-			number_of_attempts = 0
+
+		let(:port) { 3456 }
+
+		subject do
 			begin
-				number_of_attempts += 1
-				response = Net::HTTP.get(uri)
-			rescue Errno::ECONNREFUSED => e
-				sleep 1
-				retry if number_of_attempts < 10
-				raise e
+				pid = spawn './server start'
+
+				number_of_attempts = 0
+
+				begin
+					number_of_attempts += 1
+					response = Net::HTTP.get URI("http://localhost:#{port}/")
+				rescue Errno::ECONNREFUSED => e
+					sleep 1
+					retry if number_of_attempts < 10
+					raise e
+				end
+
+				response
+			ensure
+				`./server stop`
+				Process.wait pid
 			end
-			response.should.equal <<~RESPONSE
+		end
+
+		after do
+			Dir.chdir '..'
+		end
+
+		it do
+			is_expected.to eq <<~RESPONSE
 				<!DOCTYPE html>
 				<html>
 					<head>
@@ -147,20 +237,22 @@ describe 'FlameCLI::New::App' do
 					</body>
 				</html>
 			RESPONSE
-		ensure
-			`./server stop`
-			Process.wait pid
-			Dir.chdir '..'
 		end
 	end
 
-	it 'should grant `./server` file execution permissions' do
-		execute_command.call
-		begin
+	describe 'grants `./server` file execution permissions' do
+		before do
+			execute_command
+
 			Dir.chdir app_name
-			File.stat('server').mode.to_s(8)[3..5].should.equal '744'
-		ensure
+		end
+
+		after do
 			Dir.chdir '..'
 		end
+
+		subject { File.stat('server').mode.to_s(8)[3..5] }
+
+		it { is_expected.to eq '744' }
 	end
 end

@@ -2,14 +2,15 @@
 
 describe 'Flame::Errors' do
 	describe Flame::Errors::RouteNotFoundError do
-		before do
-			@error = Flame::Errors::RouteNotFoundError.new(ErrorsController, :bar)
-
-			@correct_message =
-				"Route with controller 'ErrorsController' and action 'bar' " \
-					'not found in application routes'
+		subject(:error) do
+			Flame::Errors::RouteNotFoundError.new(ErrorsController, :bar)
 		end
 
-		behaves_like 'error with correct output'
+		let(:correct_message) do
+			"Route with controller 'ErrorsController' and action 'bar' " \
+				'not found in application routes'
+		end
+
+		it_behaves_like 'error with correct output'
 	end
 end

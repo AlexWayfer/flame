@@ -1,11 +1,7 @@
 # frozen_string_literal: true
 
-describe 'Flame::VERSION' do
-	it 'should be String' do
-		Flame::VERSION.should.be.kind_of String
-	end
+describe Flame::VERSION do
+	it { is_expected.to be_kind_of String }
 
-	it 'should not be empty' do
-		Flame::VERSION.should.not.be.empty
-	end
+	it { is_expected.not_to be_empty }
 end

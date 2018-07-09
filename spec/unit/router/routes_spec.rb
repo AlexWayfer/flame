@@ -1,123 +1,165 @@
 # frozen_string_literal: true
 
 describe Flame::Router::Routes do
-	before do
-		@init = lambda do |path = '/foo/bar/baz'|
-			Flame::Router::Routes.new(path)
-		end
-		@routes = @init.call
-	end
+	let(:path) { '/foo/bar/baz' }
 
-	it 'should be a kind of Hash' do
-		@routes.should.be.kind_of Hash
-	end
+	subject(:routes) { Flame::Router::Routes.new(path) }
 
 	describe '#initialize' do
-		it 'should receive Flame::Path for building' do
-			path = Flame::Path.new('/foo/bar/baz')
-			@init.call(path)
-				.should.equal('foo' => { 'bar' => { 'baz' => {} } })
+		it { is_expected.to be_kind_of Hash }
+
+		context 'path as Flame::Path' do
+			let(:path) { Flame::Path.new('/foo/bar/baz') }
+
+			it { is_expected.to eq('foo' => { 'bar' => { 'baz' => {} } }) }
 		end
 
-		it 'should receive path as String for building' do
-			@init.call('/foo/bar/baz')
-				.should.equal('foo' => { 'bar' => { 'baz' => {} } })
+		context 'path as String' do
+			let(:path) { '/foo/bar/baz' }
+
+			it { is_expected.to eq('foo' => { 'bar' => { 'baz' => {} } }) }
 		end
 
-		it 'should build nested Hashes as kind of Routes' do
-			deep_check = lambda do |values|
+		describe 'nested Hashes' do
+			def deep_check(values)
 				values.all? do |value|
 					value.is_a?(Flame::Router::Routes) &&
-						(deep_check.call(value.values) || value.values.empty?)
+						(deep_check(value.values) || value.values.empty?)
 				end
 			end
 
-			deep_check.call(@routes.values).should.be.true
+			subject { deep_check(routes.values) }
+
+			it { is_expected.to be true }
 		end
 	end
 
 	describe '#[]' do
-		it 'should works with Path Part for key which is not argument' do
-			path_part = Flame::Path::Part.new('foo')
-			@routes[path_part].should.equal('bar' => { 'baz' => {} })
+		context 'Path Part for key which is not argument' do
+			subject { super()[Flame::Path::Part.new('foo')] }
+
+			it { is_expected.to eq('bar' => { 'baz' => {} }) }
 		end
 
-		it 'should works with String for key which is not argument ' do
-			@routes['foo'].should.equal('bar' => { 'baz' => {} })
+		context 'String for key which is not argument ' do
+			subject { super()['foo'] }
+
+			it { is_expected.to eq('bar' => { 'baz' => {} }) }
 		end
 
-		it 'should works for HTTP-methods as Symbol keys' do
-			routes = @init.call('/foo/bar')
-			routes['foo']['bar'][:GET] = 42
-			routes['foo']['bar'][:GET].should.equal 42
+		context 'HTTP-methods as Symbol keys' do
+			let(:path) { '/foo/bar' }
+
+			subject { super()['foo']['bar'][:GET] }
+
+			before do
+				routes['foo']['bar'][:GET] = 42
+			end
+
+			it { is_expected.to eq 42 }
 		end
 	end
 
 	describe '#navigate' do
-		describe 'for path without arguments' do
-			should 'works with Path Part argument' do
-				path = Flame::Path.new('/foo/bar')
-				@routes.navigate(*path.parts).should.equal('baz' => {})
+		subject { super().navigate(*args) }
+
+		context 'path without arguments' do
+			context 'Path Part argument' do
+				let(:args) { Flame::Path.new('/foo/bar').parts }
+
+				it { is_expected.to eq('baz' => {}) }
 			end
 
-			should 'works with String argument' do
-				@routes.navigate('foo', 'bar').should.equal('baz' => {})
-			end
-		end
+			context 'String argument' do
+				let(:args) { %w[foo bar] }
 
-		describe 'for path with arguments' do
-			let(:routes) { @init.call('/:first/:second') }
-
-			should 'works with Path Part argument' do
-				path = Flame::Path.new('/foo')
-				routes.navigate(*path.parts).should.equal(':second' => {})
-			end
-
-			should 'works with String argument' do
-				routes.navigate('foo').should.equal(':second' => {})
+				it { is_expected.to eq('baz' => {}) }
 			end
 		end
 
-		describe 'for path with optional argument at beginning' do
-			let(:routes) { @init.call('/:?first/second/third') }
+		context 'path with arguments' do
+			let(:path) { '/:first/:second' }
 
-			should 'works with Path Part argument' do
-				path = Flame::Path.new('/second')
-				routes.navigate(*path.parts).should.equal('third' => {})
+			context 'Path Part argument' do
+				let(:args) { Flame::Path.new('/foo').parts }
+
+				it { is_expected.to eq(':second' => {}) }
 			end
 
-			should 'works with String argument' do
-				routes.navigate('second').should.equal('third' => {})
+			context 'String argument' do
+				let(:args) { 'foo' }
+
+				it { is_expected.to eq(':second' => {}) }
 			end
 		end
 
-		should 'works for root path' do
-			@routes.navigate('/').should.equal('foo' => { 'bar' => { 'baz' => {} } })
+		context 'path with optional argument at beginning' do
+			let(:path) { '/:?first/second/third' }
+
+			context 'Path Part argument' do
+				let(:args) { Flame::Path.new('/second').parts }
+
+				it { is_expected.to eq('third' => {}) }
+			end
+
+			context 'String argument' do
+				let(:args) { 'second' }
+
+				it { is_expected.to eq('third' => {}) }
+			end
 		end
 
-		should 'return nested routes from path' do
-			routes = @init.call(['/foo', '/:?var', '/bar'])
-			routes.navigate('/foo').should.equal routes['foo'][':?var']
-			routes.navigate('/foo/some').should.equal routes['foo'][':?var']
-			routes.navigate('/foo/some/bar')
-				.should.equal routes['foo'][':?var']['bar']
+		context 'root path' do
+			let(:args) { '/' }
+
+			it { is_expected.to eq('foo' => { 'bar' => { 'baz' => {} } }) }
 		end
 
-		should 'return nil for not-existing path' do
-			@routes.navigate('/foo/baz').should.be.nil
+		context 'nested routes from path' do
+			let(:path) { '/foo/:?var/bar' }
+
+			describe 'level one' do
+				let(:args) { '/foo' }
+
+				it { is_expected.to eq routes['foo'][':?var'] }
+			end
+
+			describe 'level two' do
+				let(:args) { '/foo/some' }
+
+				it { is_expected.to eq routes['foo'][':?var'] }
+			end
+
+			describe 'level three' do
+				let(:args) { '/foo/some/bar' }
+
+				it { is_expected.to eq routes['foo'][':?var']['bar'] }
+			end
+		end
+
+		context 'nonexistent path' do
+			let(:args) { '/foo/baz' }
+
+			it { is_expected.to be_nil }
 		end
 	end
 
 	describe '#allow' do
-		should 'return correct String for multiple allow HTTP-methods' do
-			routes = @init.call('/foo/bar')
-			routes['foo']['bar'][:GET]  = 42
-			routes['foo']['bar'][:POST] = 84
-			routes['foo']['bar'].allow.should.equal 'GET, POST, OPTIONS'
+		subject { super()['foo']['bar'].allow }
+
+		context 'multiple allow HTTP-methods' do
+			let(:path) { '/foo/bar' }
+
+			before do
+				routes['foo']['bar'][:GET]  = 42
+				routes['foo']['bar'][:POST] = 84
+			end
+
+			it { is_expected.to eq 'GET, POST, OPTIONS' }
 		end
 
-		should 'return nil for not-existing path' do
-			@routes['foo']['bar'].allow.should.be.nil
+		context 'nonexistent path' do
+			it { is_expected.to be_nil }
 		end
 	end
 end

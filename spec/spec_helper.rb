@@ -11,20 +11,25 @@ if ENV['CODECOV']
 	SimpleCov.formatter = SimpleCov::Formatter::Codecov
 end
 
-require_relative '../lib/flame'
-
-require 'minitest/bacon'
-require 'minitest/reporters'
-Minitest::Reporters.use! [Minitest::Reporters::DefaultReporter.new]
-
 require 'pry-byebug'
 
-def match_words(*words)
-	regexp = words.map! { |word| "(?=.*#{Regexp.escape(word)})" }.join
-	->(obj) { obj.match(/#{regexp}/m) }
+require_relative '../lib/flame'
+
+Dir["#{__dir__}/**/spec_helper.rb"].each do |spec_helper|
+	next if spec_helper.match?(/require_dirs/)
+	require spec_helper
 end
 
-def equal_routes(*attrs_collection)
-	routes = attrs_collection.map! { |attrs| Flame::Router::Route.new(*attrs) }
-	->(array) { array.sort == routes.sort }
+def transform_words_into_regexp(*words)
+	words.map { |word| "(?=.*#{Regexp.escape(word)})" }.join
+end
+
+RSpec::Matchers.define :match_words do |*words|
+	regexp = transform_words_into_regexp(*words)
+
+	match do |actual|
+		actual.match(/#{regexp}/m)
+	end
+
+	diffable
 end

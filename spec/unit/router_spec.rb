@@ -16,140 +16,141 @@ class RouterApplication < Flame::Application
 end
 
 describe Flame::Router do
-	before do
-		@app_class = Class.new(RouterApplication)
-		@router = @app_class.router
+	subject(:router) { Class.new(RouterApplication).router }
+
+	describe '#app' do
+		subject { super().app }
+
+		it { is_expected.to be < Flame::Application }
 	end
 
-	describe 'attrs' do
-		it 'should have app reader' do
-			@router.app.should < Flame::Application
-		end
+	describe '#routes' do
+		subject { super().routes }
 
-		it 'should have routes reader' do
-			@router.routes.should.be.instance_of Flame::Router::Routes
-		end
+		it { is_expected.to be_instance_of Flame::Router::Routes }
+	end
 
-		it 'should have reverse_routes reader' do
-			@router.reverse_routes.should.be.instance_of Hash
-		end
+	describe '#reverse_routes' do
+		subject { super().reverse_routes }
+
+		it { is_expected.to be_instance_of Hash }
 	end
 
 	describe '#initialize' do
-		it 'should initialize empty routes' do
-			@router.routes.should.be.instance_of Flame::Router::Routes
-			@router.routes.should.be.empty
+		describe '#routes' do
+			subject { super().routes }
+
+			it { is_expected.to be_instance_of Flame::Router::Routes }
+			it { is_expected.to be_empty }
 		end
 
-		it 'should initialize empty Hash of reverse_routes' do
-			@router.reverse_routes.should.be.instance_of Hash
-			@router.reverse_routes.should.be.empty
+		describe '#reverse_routes' do
+			subject { super().reverse_routes }
+
+			it { is_expected.to be_instance_of Hash }
+			it { is_expected.to be_empty }
 		end
 	end
 
 	describe '#find_nearest_route' do
-		it 'should return route by path' do
-			@router.app.class_exec do
-				mount :router
-			end
+		subject { super().find_nearest_route(path) }
 
-			path = Flame::Path.new('/router/foo/bar/baz/qux')
-			@router.find_nearest_route(path)
-				.should.equal Flame::Router::Route.new(
-					RouterController, :foo
-				)
-		end
-
-		it 'should return root route if there is no such actions' do
-			@router.app.class_exec do
-				mount :router
-			end
-
-			path = Flame::Path.new('/router/not_exist')
-			@router.find_nearest_route(path)
-				.should.equal Flame::Router::Route.new(
-					RouterController, :index
-				)
-		end
-
-		it 'should return root route for controller with nested controller' do
-			@router.app.class_exec do
-				mount :router do
-					mount :router_another
+		context 'one mounted controller' do
+			before do
+				router.app.class_exec do
+					mount :router
 				end
 			end
 
-			path = Flame::Path.new('/router/foo')
-			@router.find_nearest_route(path)
-				.should.equal Flame::Router::Route.new(
-					RouterController, :index
-				)
-		end
+			context 'existing controller and action' do
+				let(:path) { Flame::Path.new('/router/foo/bar/baz/qux') }
 
-		it 'should return route by path parts without optional argument' do
-			@router.app.class_exec do
-				mount :router
+				it do
+					is_expected.to eq Flame::Router::Route.new(RouterController, :foo)
+				end
 			end
 
-			path = Flame::Path.new('/router/foo/bar/baz')
-			@router.find_nearest_route(path)
-				.should.equal Flame::Router::Route.new(
-					RouterController, :foo
-				)
-		end
+			context 'nonexistent action' do
+				let(:path) { Flame::Path.new('/router/not_exist') }
 
-		it 'should return nil for not existing route' do
-			@router.app.class_exec do
-				mount :router
+				it do
+					is_expected.to eq Flame::Router::Route.new(RouterController, :index)
+				end
 			end
 
-			path = Flame::Path.new('/another')
-			@router.find_nearest_route(path)
-				.should.equal nil
-		end
+			context 'path without optional argument' do
+				let(:path) { Flame::Path.new('/router/foo/bar/baz') }
 
-		it 'should not return route by path parts without required argument' do
-			@router.app.class_exec do
-				mount :router
+				it do
+					is_expected.to eq Flame::Router::Route.new(RouterController, :foo)
+				end
 			end
 
-			path = Flame::Path.new('/router/foo/bar')
-			@router.find_nearest_route(path)
-				.should.not.equal Flame::Router::Route.new(
-					RouterController, :foo
-				)
+			context 'nonexistent route' do
+				let(:path) { Flame::Path.new('/another') }
+
+				it do
+					is_expected.to be_nil
+				end
+			end
+
+			context 'path without required argument' do
+				let(:path) { Flame::Path.new('/router/foo/bar') }
+
+				it do
+					is_expected.not_to eq Flame::Router::Route.new(RouterController, :foo)
+				end
+			end
+		end
+
+		context 'controller with nested controller' do
+			let(:path) { Flame::Path.new('/router/foo') }
+
+			before do
+				router.app.class_exec do
+					mount :router do
+						mount :router_another
+					end
+				end
+			end
+
+			it do
+				is_expected.to eq Flame::Router::Route.new(RouterController, :index)
+			end
 		end
 	end
 
 	describe '#path_of' do
-		it 'should return path of existing route' do
-			@router.app.class_exec do
+		subject { super().path_of(*args) }
+
+		before do
+			router.app.class_exec do
 				mount :router
 			end
-
-			route = Flame::Router::Route.new(RouterController, :foo)
-			@router.path_of(route).should.equal(
-				'/router/foo/:first/:second/:?third/:?fourth'
-			)
 		end
 
-		it 'should return path of existing route by controller and action' do
-			@router.app.class_exec do
-				mount :router
+		context 'existing route' do
+			shared_examples 'route found' do
+				it { is_expected.to eq '/router/foo/:first/:second/:?third/:?fourth' }
 			end
 
-			@router.path_of(RouterController, :foo).should.equal(
-				'/router/foo/:first/:second/:?third/:?fourth'
-			)
+			context 'by route' do
+				let(:args) { Flame::Router::Route.new(RouterController, :foo) }
+
+				it_behaves_like 'route found'
+			end
+
+			context 'by controller and action' do
+				let(:args) { [RouterController, :foo] }
+
+				it_behaves_like 'route found'
+			end
 		end
 
-		it 'should return nil for non-existing route' do
-			@router.app.class_exec do
-				mount :router
-			end
+		context 'nonexistent route' do
+			let(:args) { Flame::Router::Route.new(RouterAnotherController, :index) }
 
-			route = Flame::Router::Route.new(RouterAnotherController, :index)
-			@router.path_of(route).should.be.nil
+			it { is_expected.to be_nil }
 		end
 	end
 end

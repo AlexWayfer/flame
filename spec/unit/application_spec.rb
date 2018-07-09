@@ -110,578 +110,721 @@ def rest_routes(prefix = nil)
 end
 
 describe Flame::Application do
-	before do
-		ENV.delete 'RACK_ENV'
-		@init = proc { Class.new(Flame::Application) }
-		@app_class = @init.call
-		@app = @app_class.new
-		@env_init = proc do |path: '/foo'|
-			{
-				Rack::RACK_INPUT => StringIO.new,
-				Rack::REQUEST_METHOD => 'GET',
-				Rack::PATH_INFO => path,
-				bar: 'baz'
-			}
-		end
-		@env = @env_init.call
+	subject(:app_class) { Class.new(described_class) }
+
+	subject(:app) { app_class.new(another_app) }
+
+	let(:another_app) { nil }
+
+	let(:env_path) { '/foo' }
+
+	let(:env) do
+		{
+			Rack::RACK_INPUT => StringIO.new,
+			Rack::REQUEST_METHOD => 'GET',
+			Rack::PATH_INFO => env_path
+		}
 	end
 
 	describe '.config' do
-		it 'should return config' do
-			@app_class.config.should.be.kind_of Flame::Application::Config
-		end
+		subject { app_class.config }
+
+		it { is_expected.to be_kind_of Flame::Application::Config }
 	end
 
 	describe '.config=' do
-		it 'should receive config' do
-			config = Flame::Application::Config.new(@app_class)
-			@app_class.config = config
-			@app_class.config.should.be.same_as config
-		end
+		before { app_class.config = config }
+
+		subject { app_class.config }
+
+		let(:config) { Flame::Application::Config.new(app_class) }
+
+		it { is_expected.to be config }
 	end
 
 	describe '.router' do
-		it 'should return self router' do
-			@app_class.router.should.be.kind_of Flame::Router
-		end
+		subject { app_class.router }
+
+		it { is_expected.to be_kind_of Flame::Router }
 	end
 
 	describe '.cached_tilts' do
-		it 'should be a Hash' do
-			@app_class.cached_tilts.should.be.kind_of Hash
-		end
+		subject { app_class.cached_tilts }
 
-		it 'should cache Hash' do
-			@app_class.cached_tilts.should.be.same_as @app_class.cached_tilts
-		end
+		it { is_expected.to be_kind_of Hash }
+		it { is_expected.to be subject }
 
-		it 'should fill out by controller renders' do
-			ENV['RACK_ENV'] = 'production'
-			env = @env_init.call(path: '/view')
-			app_class = @init.call
-			app_class.class_exec { mount :application, '/' }
-			view_names = %w[view layout].map do |filename|
-				File.join(__dir__, 'views', "#{filename}.html.erb")
+		describe 'filling' do
+			let(:env_path) { '/view' }
+
+			before do
+				allow(ENV).to receive(:[]).and_call_original
+				allow(ENV).to receive(:[]).with('RACK_ENV').and_return 'production'
+
+				app_class.class_exec do
+					mount :application, '/'
+				end
 			end
-			app_class.call(env).first.should.equal 200
-			app_class.cached_tilts.size.should.equal 2
-			app_class.cached_tilts.keys.should.equal view_names
-			app_class.cached_tilts.each_value do |value|
-				value.should.be.kind_of Tilt::Template
+
+			let(:view_names) do
+				%w[view layout].map do |filename|
+					File.join(__dir__, 'views', "#{filename}.html.erb")
+				end
+			end
+
+			it 'occurs by controller renders' do
+				expect(app_class.call(env).first).to eq 200
+
+				expect(subject.size).to eq 2
+				expect(subject.keys).to eq view_names
+
+				subject.each_value do |value|
+					expect(value).to be_kind_of Tilt::Template
+				end
 			end
 		end
 	end
 
 	describe '.require_dirs' do
-		before do
-			@requiring = lambda do
-				@app_class.require_dirs(
-					%w[config lib models helpers mailers services controllers]
-						.map! { |dir| File.join 'require_dirs', dir },
-					ignore: [%r{lib/\w+/spec}]
-				)
+		it do
+			all_files = Dir[File.join(__dir__, 'require_dirs/**/*')]
+
+			wanted_files = all_files.reject do |file|
+				File.executable?(file) || file.match?(%r{lib/\w+/spec/})
 			end
-		end
 
-		it 'should not raise any error' do
-			@requiring.should.not.raise
-		end
-
-		it 'should require all wanted files' do
-			@requiring.call
-			files =
-				Dir[File.join(__dir__, 'require_dirs/**/*')]
-					.reject do |file|
-						File.executable?(file) || file.match?(%r{lib/\w+/spec/})
-					end
-			files.each do |file|
-				require(file).should.equal false
+			executable_files = all_files.select do |file|
+				File.file?(file) && File.executable?(file)
 			end
-		end
 
-		it 'should not require executable files' do
-			@requiring.call
-			Dir[File.join(__dir__, 'require_dirs/**/*')]
-				.select { |file| File.file?(file) && File.executable?(file) }
-				.each do |file|
-					require(file).should.equal true
-				end
-		end
+			ignored_files = all_files.select do |file|
+				File.file?(file) && file.match?(%r{lib/\w+/spec/})
+			end
 
-		it 'should not require ignored files' do
-			@requiring.call
-			Dir[File.join(__dir__, 'require_dirs/**/*')]
-				.select { |file| File.file?(file) && file.match?(%r{lib/\w+/spec/}) }
-				.each do |file|
-					require(file).should.equal true
-				end
+			allow(Kernel).to receive(:require) do |file|
+				expect(wanted_files).to include file
+				expect(executable_files).to include file
+				expect(ignored_files).to include file
+			end
+
+			app_class.require_dirs(
+				%w[config lib models helpers mailers services controllers]
+					.map! { |dir| File.join 'require_dirs', dir },
+				ignore: [%r{lib/\w+/spec}]
+			)
 		end
 	end
 
 	describe '.inherited' do
-		it 'should set default config' do
-			@app_class.config.should.be.kind_of Flame::Application::Config
-			@app_class.config[:root_dir].should.equal __dir__
-			@app_class.config[:public_dir].should.equal File.join(__dir__, 'public')
-			@app_class.config[:views_dir].should.equal File.join(__dir__, 'views')
-			@app_class.config[:config_dir].should.equal File.join(__dir__, 'config')
-			@app_class.config[:tmp_dir].should.equal File.join(__dir__, 'tmp')
-			@app_class.config[:environment].should.equal 'development'
-		end
+		describe 'default config' do
+			subject { app_class.config }
 
-		it 'should take environment from ENV' do
-			ENV['RACK_ENV'] = 'production'
-			@init.call.config[:environment].should.equal 'production'
+			it { is_expected.to be_kind_of Flame::Application::Config }
+
+			describe 'values' do
+				subject { super()[key] }
+
+				{
+					root_dir:    __dir__,
+					public_dir:  File.join(__dir__, 'public'),
+					views_dir:   File.join(__dir__, 'views'),
+					config_dir:  File.join(__dir__, 'config'),
+					tmp_dir:     File.join(__dir__, 'tmp'),
+					environment: 'development'
+				}.each do |key, value|
+					describe key.to_s do
+						let(:key) { key }
+						it { is_expected.to eq value }
+					end
+				end
+
+				describe 'environment from ENV' do
+					before do
+						allow(ENV).to receive(:[]).with('RACK_ENV').and_return 'production'
+					end
+
+					let(:key) { :environment }
+
+					it { is_expected.to eq 'production' }
+				end
+			end
 		end
 	end
 
 	describe '.call' do
-		it 'should create an instance and call its #call' do
-			@app_class.call(@env).should.be.kind_of Array
-		end
+		subject { app_class.call(env) }
 
-		it 'should cache created instance' do
-			@app_class.call(@env)
-			first_app = @app.instance_variable_get(:@app)
-			@app_class.call(@env)
-			second_app = @app.instance_variable_get(:@app)
-			first_app.should.be.same_as second_app
+		it { is_expected.to be_kind_of Array }
+
+		it 'caches created instance' do
+			first_app, second_app = Array.new(2) do
+				subject
+				app.instance_variable_get(:@app)
+			end
+
+			expect(first_app).to equal second_app
 		end
 	end
 
 	describe '.path_to' do
 		before do
-			@app_class.class_exec do
+			app_class.class_exec do
 				mount ApplicationController, '/'
 			end
 		end
 
-		it 'should return path by controller and action' do
-			@app_class.path_to(ApplicationController, :foo)
-				.should.equal '/foo'
+		subject { app_class.path_to(*args) }
+
+		context 'controller and action' do
+			let(:args) { [ApplicationController, :foo] }
+
+			it { is_expected.to eq '/foo' }
 		end
 
-		it 'should return path by controller with default index action' do
-			@app_class.path_to(ApplicationController)
-				.should.equal '/'
+		context 'controller with default index action' do
+			let(:args) { [ApplicationController] }
+
+			it { is_expected.to eq '/' }
 		end
 
-		it 'should return path by controller and action with arguments' do
-			@app_class.path_to(ApplicationController, :hello, name: 'world')
-				.should.equal '/hello/world'
+		context 'controller and action with arguments' do
+			let(:args) { [ApplicationController, :hello, name: 'world'] }
+
+			it { is_expected.to eq '/hello/world' }
 		end
 
-		it 'should raise error if route not found' do
-			-> { @app_class.path_to(ApplicationController, :not_exist) }
-				.should.raise(Flame::Errors::RouteNotFoundError)
-				.message.should match_words('ApplicationController', 'not_exist')
+		context 'nonexistent action' do
+			let(:args) { [ApplicationController, :not_exist] }
+
+			it do
+				expect { subject }.to raise_error(
+					Flame::Errors::RouteNotFoundError,
+					/'ApplicationController' [\w\s]+ 'not_exist'/
+				)
+			end
 		end
 
-		it 'should return path with (nested) params' do
-			@app_class.path_to(
-				ApplicationController,
-				:foo,
-				params: {
-					name: 'world',
-					nested: { some: 'here', another: %w[there maybe] }
-				}
-			)
-				.should.equal '/foo?name=world' \
+		context 'nested params' do
+			let(:args) do
+				[
+					ApplicationController, :foo, params: {
+						name: 'world',
+						nested: { some: 'here', another: %w[there maybe] }
+					}
+				]
+			end
+
+			it do
+				is_expected.to eq(
+					'/foo?name=world' \
 					'&nested[some]=here&nested[another][]=there&nested[another][]=maybe'
+				)
+			end
 		end
 	end
 
 	describe '#initialize' do
-		it 'should take app parameter' do
-			another_app = @init.call.new
-			@app_class.new(another_app).instance_variable_get(:@app)
-				.should.be.same_as another_app
+		describe '@app parameter' do
+			let(:another_app) { app_class.new }
+
+			subject { app.instance_variable_get(:@app) }
+
+			it { is_expected.to be another_app }
 		end
 	end
 
 	describe '#call' do
-		it 'should return Dispatcher respond' do
-			@app_class.class_exec do
-				mount :application, '/'
-			end
+		subject { app.call(env) }
 
-			response = @app_class.new.call(@env)
-			response.should.be.kind_of Array
-			response.first.should.equal 200
-			response.last.body.should.equal ['Hello from foo!']
-		end
-
-		it 'should call app from initialize' do
-			another_app_class = @init.call
-			another_app_class.class_exec do
-				attr_reader :foo
-
-				def call(env)
-					@foo = env[:bar]
+		context 'with mounted controller' do
+			before do
+				app_class.class_exec do
+					mount :application, '/'
 				end
 			end
-			another_app = another_app_class.new
-			@app_class.new(another_app).call(@env)
-			another_app.foo.should.equal 'baz'
+
+			it { is_expected.to be_kind_of Array }
+			it { expect(subject.first).to eq 200 }
+			it { expect(subject.last.body).to eq ['Hello from foo!'] }
 		end
 
-		it 'should not call app from initialize without call method' do
-			another_app_class = @init.call
-			another_app_class.class_exec do
-				undef_method :call
+		context 'initialized with another app' do
+			let(:another_app_class) do
+				Class.new(described_class) do
+					attr_reader :foo
+
+					def call(env)
+						@foo = env[:bar]
+					end
+				end
 			end
-			another_app = another_app_class.new
-			-> { @app_class.new(another_app).call(@env) }.should.not.raise
+
+			let(:another_app) { another_app_class.new }
+
+			let(:env) { super().merge(bar: 'baz') }
+
+			before do
+				app.call(env)
+			end
+
+			subject { another_app.foo }
+
+			it { is_expected.to eq 'baz' }
+		end
+
+		context 'initialized with another app without call method' do
+			let(:another_app) { Object.new }
+
+			it { expect { subject }.not_to raise_error }
 		end
 	end
 
 	describe '.mount' do
-		it 'should add routes from controller without refinings' do
-			@app_class.class_exec do
-				mount :application
-			end
+		subject { app_class.router.routes }
 
-			@app_class.router.routes.should.equal initialize_path_hashes(
-				ApplicationController, :index, :foo, :bar, :hello, :baz, :view
-			)
-		end
-
-		it 'should can receive controller with `_controller` in name' do
-			@app_class.class_exec do
-				mount :application_controller
-			end
-
-			@app_class.router.routes.should.equal initialize_path_hashes(
-				ApplicationController, :index, :foo, :bar, :hello, :baz, :view
-			)
-		end
-
-		it 'should add routes from controller with another path' do
-			@app_class.class_exec do
-				mount :application, '/another'
-			end
-
-			@app_class.router.routes.should.equal initialize_path_hashes(
-				ApplicationController,
-				index: { ctrl_path: '/another' },
-				foo:   { ctrl_path: '/another' },
-				bar:   { ctrl_path: '/another' },
-				hello: { ctrl_path: '/another' },
-				baz:   { ctrl_path: '/another' },
-				view:  { ctrl_path: '/another' }
-			)
-		end
-
-		it 'should add routes from controller with refining block' do
-			@app_class.class_exec do
-				mount :application do
+		context 'controller without refinings' do
+			before do
+				app_class.class_exec do
+					mount :application
 				end
 			end
 
-			@app_class.router.routes.should.be.any
+			it do
+				is_expected.to eq initialize_path_hashes(
+					ApplicationController, :index, :foo, :bar, :hello, :baz, :view
+				)
+			end
 		end
 
-		it 'should mount controller and refine HTTP-methods' do
-			@app_class.class_exec do
-				mount :application do
-					post :baz
+		context 'controller with `_controller` in name' do
+			before do
+				app_class.class_exec do
+					mount :application_controller
 				end
 			end
 
-			@app_class.router.routes.should.equal initialize_path_hashes(
-				ApplicationController,
-				:index, :foo, :bar, :hello, :view, baz: { http_method: :POST }
-			)
+			it do
+				is_expected.to eq initialize_path_hashes(
+					ApplicationController, :index, :foo, :bar, :hello, :baz, :view
+				)
+			end
 		end
 
-		it 'should mount controller with overwrited action path' do
-			@app_class.class_exec do
-				mount :application do
-					get '/bat/:first/:second/:?third/:?fourth', :baz
+		context 'controller with another path' do
+			before do
+				app_class.class_exec do
+					mount :application, '/another'
 				end
 			end
 
-			@app_class.router.routes.should.equal initialize_path_hashes(
-				ApplicationController,
-				:index, :foo, :bar, :hello, :view, baz: { action_path: '/bat' }
-			)
+			it do
+				is_expected.to eq initialize_path_hashes(
+					ApplicationController,
+					index: { ctrl_path: '/another' },
+					foo:   { ctrl_path: '/another' },
+					bar:   { ctrl_path: '/another' },
+					hello: { ctrl_path: '/another' },
+					baz:   { ctrl_path: '/another' },
+					view:  { ctrl_path: '/another' }
+				)
+			end
 		end
 
-		it 'should mount controller with overwrited arguments order' do
-			@app_class.class_exec do
-				mount :application do
-					get '/baz/:second/:first/:?third/:?fourth', :baz
+		context 'controller with refining block' do
+			before do
+				app_class.class_exec do
+					mount :application do
+					end
 				end
 			end
 
-			@app_class.router.routes.should.equal initialize_path_hashes(
-				ApplicationController,
-				:index, :foo, :bar, :hello, :view,
-				baz: { action_path: '/baz/:second/:first/:?third/:?fourth' }
-			)
+			it { is_expected.to be_any }
 		end
 
-		it 'should mount controller with all of available overwrites' do
-			@app_class.class_exec do
-				mount :application do
-					post '/bat/:second/:first/:?third/:?fourth', :baz
+		context 'controller with refining HTTP-methods' do
+			before do
+				app_class.class_exec do
+					mount :application do
+						post :baz
+					end
 				end
 			end
 
-			@app_class.router.routes.should.equal initialize_path_hashes(
-				ApplicationController,
-				:index, :foo, :bar, :hello, :view,
-				baz: {
-					action_path: '/bat/:second/:first/:?third/:?fourth',
-					http_method: :POST
-				}
-			)
+			it do
+				is_expected.to eq initialize_path_hashes(
+					ApplicationController,
+					:index, :foo, :bar, :hello, :view, baz: { http_method: :POST }
+				)
+			end
 		end
 
-		it 'should mount controller without arguments in path' do
-			@app_class.class_exec do
-				mount :application do
-					post '/bat', :baz
+		context 'controller with overwrited action path' do
+			before do
+				app_class.class_exec do
+					mount :application do
+						get '/bat/:first/:second/:?third/:?fourth', :baz
+					end
 				end
 			end
 
-			@app_class.router.routes.should.equal initialize_path_hashes(
-				ApplicationController,
-				:index, :foo, :bar, :hello, :view,
-				baz: {
-					action_path: '/bat/:first/:second/:?third/:?fourth',
-					http_method: :POST
-				}
-			)
+			it do
+				is_expected.to eq initialize_path_hashes(
+					ApplicationController,
+					:index, :foo, :bar, :hello, :view, baz: { action_path: '/bat' }
+				)
+			end
 		end
 
-		it 'should mount controller when required arguments are missing' do
-			@app_class.class_exec do
-				mount :application do
-					post '/bat/:second', :baz
+		context 'controller with overwrited arguments order' do
+			before do
+				app_class.class_exec do
+					mount :application do
+						get '/baz/:second/:first/:?third/:?fourth', :baz
+					end
 				end
 			end
 
-			@app_class.router.routes.should.equal initialize_path_hashes(
-				ApplicationController,
-				:index, :foo, :bar, :hello, :view,
-				baz: {
-					action_path: '/bat/:second/:first/:?third/:?fourth',
-					http_method: :POST
-				}
-			)
+			it do
+				is_expected.to eq initialize_path_hashes(
+					ApplicationController,
+					:index, :foo, :bar, :hello, :view,
+					baz: { action_path: '/baz/:second/:first/:?third/:?fourth' }
+				)
+			end
 		end
 
-		it 'should mount controller when optional arguments are missing' do
-			@app_class.class_exec do
-				mount :application do
-					post '/bat/:second/:first', :baz
+		context 'controller with all of available overwrites' do
+			before do
+				app_class.class_exec do
+					mount :application do
+						post '/bat/:second/:first/:?third/:?fourth', :baz
+					end
 				end
 			end
 
-			@app_class.router.routes.should.equal initialize_path_hashes(
-				ApplicationController,
-				:index, :foo, :bar, :hello, :view,
-				baz: {
-					action_path: '/bat/:second/:first/:?third/:?fourth',
-					http_method: :POST
-				}
-			)
+			it do
+				is_expected.to eq initialize_path_hashes(
+					ApplicationController,
+					:index, :foo, :bar, :hello, :view,
+					baz: {
+						action_path: '/bat/:second/:first/:?third/:?fourth',
+						http_method: :POST
+					}
+				)
+			end
 		end
 
-		it 'should raise error when method does not exist' do
-			block = lambda do
-				@app_class.class_exec do
+		context 'controller without arguments in path' do
+			before do
+				app_class.class_exec do
+					mount :application do
+						post '/bat', :baz
+					end
+				end
+			end
+
+			it do
+				is_expected.to eq initialize_path_hashes(
+					ApplicationController,
+					:index, :foo, :bar, :hello, :view,
+					baz: {
+						action_path: '/bat/:first/:second/:?third/:?fourth',
+						http_method: :POST
+					}
+				)
+			end
+		end
+
+		context 'controller with missed required arguments' do
+			before do
+				app_class.class_exec do
+					mount :application do
+						post '/bat/:second', :baz
+					end
+				end
+			end
+
+			it do
+				is_expected.to eq initialize_path_hashes(
+					ApplicationController,
+					:index, :foo, :bar, :hello, :view,
+					baz: {
+						action_path: '/bat/:second/:first/:?third/:?fourth',
+						http_method: :POST
+					}
+				)
+			end
+		end
+
+		context 'controller with missing optional arguments' do
+			before do
+				app_class.class_exec do
+					mount :application do
+						post '/bat/:second/:first', :baz
+					end
+				end
+			end
+
+			it do
+				is_expected.to eq initialize_path_hashes(
+					ApplicationController,
+					:index, :foo, :bar, :hello, :view,
+					baz: {
+						action_path: '/bat/:second/:first/:?third/:?fourth',
+						http_method: :POST
+					}
+				)
+			end
+		end
+
+		context 'action does not exist' do
+			subject do
+				app_class.class_exec do
 					mount :application do
 						post :wat
 					end
 				end
 			end
 
-			block.should.raise(NameError)
-				.message.should match_words('wat', 'ApplicationController')
+			it do
+				expect { subject }.to raise_error(
+					NameError, /`wat' [\w\s]+ `ApplicationController'/
+				)
+			end
 		end
 
-		it 'should raise error when wrong HTTP-method used' do
-			block = lambda do
-				@app_class.class_exec do
+		context 'wrong HTTP-method used' do
+			subject do
+				app_class.class_exec do
 					mount :application do
 						wrong :baz
 					end
 				end
 			end
 
-			block.should.raise(NoMethodError)
-				.message.should match_words('wrong')
+			it do
+				expect { subject }.to raise_error(
+					NoMethodError, /`wrong'/
+				)
+			end
 		end
 
-		it 'should raise error with extra required path arguments' do
-			block = lambda do
-				@app_class.class_exec do
+		context 'extra required path arguments' do
+			subject do
+				app_class.class_exec do
 					mount :application do
 						get '/baz/:first/:second/:third', :baz
 					end
 				end
 			end
-			block.should.raise(Flame::Errors::RouteExtraArgumentsError)
-				.message.should match_words('ApplicationController', 'third')
+
+			it do
+				expect { subject }.to raise_error(
+					Flame::Errors::RouteExtraArgumentsError,
+					"Action 'ApplicationController#baz' has no " \
+					'required arguments [:third]'
+				)
+			end
 		end
 
-		it 'should raise error with extra optional path arguments' do
-			block = lambda do
-				@app_class.class_exec do
+		context 'extra optional path arguments' do
+			subject do
+				app_class.class_exec do
 					mount :application do
 						get '/baz/:first/:second/:?third/:?fourth/:?fifth', :baz
 					end
 				end
 			end
 
-			block.should.raise(Flame::Errors::RouteExtraArgumentsError)
-				.message.should match_words('ApplicationController', 'fifth')
+			it do
+				expect { subject }.to raise_error(
+					Flame::Errors::RouteExtraArgumentsError,
+					"Action 'ApplicationController#baz' has no " \
+					'optional arguments [:fifth]'
+				)
+			end
 		end
 
-		it 'should raise error for wrong order of optional arguments' do
-			block = lambda do
-				@app_class.class_exec do
+		context 'wrong order of optional arguments' do
+			subject do
+				app_class.class_exec do
 					mount :application do
 						get '/baz/:first/:second/:?fourth/:?third', :baz
 					end
 				end
 			end
 
-			block.should.raise(Flame::Errors::RouteArgumentsOrderError)
-				.message.should match_words(
-					"'/baz/:first/:second/:?fourth/:?third'", "':?third'", "':?fourth'"
+			it do
+				expect { subject }.to raise_error(
+					Flame::Errors::RouteArgumentsOrderError,
+					"Path '/baz/:first/:second/:?fourth/:?third' should have " \
+					"':?third' argument before ':?fourth'"
 				)
-		end
-
-		it 'should mount defaults REST actions' do
-			@app_class.class_exec do
-				mount :application_REST, '/'
 			end
-
-			@app_class.router.routes.should.equal rest_routes
 		end
 
-		it 'should overwrite existing routes' do
-			@app_class.class_exec do
-				mount :application do
-					get :baz
-					post :baz
+		describe 'mounting defaults REST actions' do
+			before do
+				app_class.class_exec do
+					mount :application_REST, '/'
 				end
 			end
 
-			@app_class.router.routes.should.equal initialize_path_hashes(
-				ApplicationController,
-				:index, :foo, :bar, :hello, :view, baz: { http_method: :POST }
-			)
+			it { is_expected.to eq rest_routes }
 		end
 
-		it 'should mount nested controllers' do
-			@app_class.class_exec do
-				mount :application do
-					get :foo
-
-					mount :application_REST, '/rest'
+		describe 'overwriting existing routes' do
+			before do
+				app_class.class_exec do
+					mount :application do
+						get :baz
+						post :baz
+					end
 				end
 			end
 
-			@app_class.router.routes.should.equal(
-				rest_routes('/application/rest').deep_merge!(
-					initialize_path_hashes(
-						ApplicationController, :index, :foo, :bar, :hello, :view, :baz
+			it do
+				is_expected.to eq initialize_path_hashes(
+					ApplicationController,
+					:index, :foo, :bar, :hello, :view, baz: { http_method: :POST }
+				)
+			end
+		end
+
+		context 'nested controllers' do
+			before do
+				app_class.class_exec do
+					mount :application do
+						get :foo
+
+						mount :application_REST, '/rest'
+					end
+				end
+			end
+
+			describe 'routes' do
+				it do
+					is_expected.to eq(
+						rest_routes('/application/rest').deep_merge!(
+							initialize_path_hashes(
+								ApplicationController, :index, :foo, :bar, :hello, :view, :baz
+							)
+						)
 					)
-				)
-			)
-
-			@app_class.router.reverse_routes.should.equal(
-				'ApplicationController' => {
-					index: '/application/',
-					foo:   '/application/foo',
-					bar:   '/application/bar',
-					hello: '/application/hello/:name',
-					view:  '/application/view',
-					baz:   '/application/baz/:first/:second/:?third/:?fourth'
-				},
-				'ApplicationRESTController' => {
-					index: '/application/rest/',
-					create: '/application/rest/',
-					show: '/application/rest/:id',
-					update: '/application/rest/:id',
-					delete: '/application/rest/:id'
-				}
-			)
-		end
-
-		it 'should mount neighboring controllers with root-with-argument action' do
-			@app_class.class_exec do
-				mount :application do
-					get '/', :baz
-
-					mount :application_REST, '/rest'
 				end
 			end
 
-			@app_class.router.routes.should.equal(
-				rest_routes('/application/rest').deep_merge!(
-					initialize_path_hashes(
-						ApplicationController, :index, :foo, :bar, :hello, :view,
-						baz: { action_path: '/:first/:second/:?third/:?fourth' }
-					)
-				)
-			)
+			describe 'reverse routes' do
+				subject { app_class.router.reverse_routes }
 
-			@app_class.router.reverse_routes.should.equal(
-				'ApplicationController' => {
-					index: '/application/',
-					foo:   '/application/foo',
-					bar:   '/application/bar',
-					hello: '/application/hello/:name',
-					view:  '/application/view',
-					baz:   '/application/:first/:second/:?third/:?fourth'
-				},
-				'ApplicationRESTController' => {
-					index: '/application/rest/',
-					create: '/application/rest/',
-					show: '/application/rest/:id',
-					update: '/application/rest/:id',
-					delete: '/application/rest/:id'
-				}
-			)
+				it do
+					is_expected.to eq(
+						'ApplicationController' => {
+							index: '/application/',
+							foo:   '/application/foo',
+							bar:   '/application/bar',
+							hello: '/application/hello/:name',
+							view:  '/application/view',
+							baz:   '/application/baz/:first/:second/:?third/:?fourth'
+						},
+						'ApplicationRESTController' => {
+							index: '/application/rest/',
+							create: '/application/rest/',
+							show: '/application/rest/:id',
+							update: '/application/rest/:id',
+							delete: '/application/rest/:id'
+						}
+					)
+				end
+			end
 		end
 
-		it 'should mount controller from the same namespace as application' do
-			app_class = Class.new(ApplicationNamespace::Application)
+		describe 'mounting neighboring controllers ' \
+		         'with root-with-argument action' do
+			before do
+				app_class.class_exec do
+					mount :application do
+						get '/', :baz
 
-			block = lambda do
+						mount :application_REST, '/rest'
+					end
+				end
+			end
+
+			describe 'routes' do
+				it do
+					is_expected.to eq(
+						rest_routes('/application/rest').deep_merge!(
+							initialize_path_hashes(
+								ApplicationController, :index, :foo, :bar, :hello, :view,
+								baz: { action_path: '/:first/:second/:?third/:?fourth' }
+							)
+						)
+					)
+				end
+			end
+
+			describe 'reverse routes' do
+				subject { app_class.router.reverse_routes }
+
+				it do
+					is_expected.to eq(
+						'ApplicationController' => {
+							index: '/application/',
+							foo:   '/application/foo',
+							bar:   '/application/bar',
+							hello: '/application/hello/:name',
+							view:  '/application/view',
+							baz:   '/application/:first/:second/:?third/:?fourth'
+						},
+						'ApplicationRESTController' => {
+							index: '/application/rest/',
+							create: '/application/rest/',
+							show: '/application/rest/:id',
+							update: '/application/rest/:id',
+							delete: '/application/rest/:id'
+						}
+					)
+				end
+			end
+		end
+
+		context 'controller from the same namespace as application' do
+			let(:app_class) { Class.new(ApplicationNamespace::Application) }
+
+			subject do
 				app_class.class_exec do
 					mount :nested
 				end
 			end
 
-			block.should.not.raise(NameError)
+			it { expect { subject }.not_to raise_error }
 		end
 
-		it 'should mount controller with refined HTTP-methods inside' do
-			@app_class.class_exec do
-				mount :application_refined
+		context 'controller with refined HTTP-methods inside' do
+			before do
+				app_class.class_exec do
+					mount :application_refined
+				end
 			end
 
-			@app_class.router.routes.should.equal initialize_path_hashes(
-				ApplicationRefinedController,
-				foo: { http_method: :GET },
-				bar: { http_method: :GET },
-				baz: { http_method: :POST },
-				qux: { http_method: :PUT },
-				quux: {
-					http_method: :DELETE,
-					action_path: '/refined_quux/:id'
-				},
-				quuz: {
-					http_method: :PATCH,
-					action_path: '/refined_quuz'
-				}
-			)
+			it do
+				is_expected.to eq initialize_path_hashes(
+					ApplicationRefinedController,
+					foo: { http_method: :GET },
+					bar: { http_method: :GET },
+					baz: { http_method: :POST },
+					qux: { http_method: :PUT },
+					quux: {
+						http_method: :DELETE,
+						action_path: '/refined_quux/:id'
+					},
+					quuz: {
+						http_method: :PATCH,
+						action_path: '/refined_quuz'
+					}
+				)
+			end
 		end
 	end
 end

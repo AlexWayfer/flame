@@ -1,13 +1,14 @@
 # frozen_string_literal: true
 
-require 'rake/testtask'
-Rake::TestTask.new(:spec) do |t|
-	t.pattern =
-		FileList['spec/**/spec_helper.rb', 'spec/**/*_spec.rb']
-		.exclude(/require_dirs/)
-end
+begin
+	require 'rspec/core/rake_task'
 
-task default: :spec
+	RSpec::Core::RakeTask.new(:spec)
+
+	task default: :spec
+rescue LoadError
+	puts 'No RSpec available'
+end
 
 task :release, %i[version] do |_t, args|
 	version = args[:version]

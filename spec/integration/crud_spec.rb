@@ -33,33 +33,83 @@ end
 describe 'CRUD Controller' do
 	include Rack::Test::Methods
 
-	it 'should return list of items' do
-		get '/crud'
-		last_response.should.be.ok
-		last_response.body.should.equal 'List of items'
+	describe 'list of items' do
+		before { get '/crud' }
+
+		describe 'last_response' do
+			subject { last_response }
+
+			it { is_expected.to be_ok }
+
+			describe 'body' do
+				subject { super().body }
+
+				it { is_expected.to eq 'List of items' }
+			end
+		end
 	end
 
-	it 'should create item' do
-		post '/crud'
-		last_response.should.be.ok
-		last_response.body.should.equal 'Create item'
+	describe 'create item' do
+		before { post '/crud' }
+
+		describe 'last_response' do
+			subject { last_response }
+
+			it { is_expected.to be_ok }
+
+			describe 'body' do
+				subject { super().body }
+
+				it { is_expected.to eq 'Create item' }
+			end
+		end
 	end
 
-	it 'should show item' do
-		get '/crud/2'
-		last_response.should.be.ok
-		last_response.body.should.equal 'Show item 2'
+	describe 'show item' do
+		before { get '/crud/2' }
+
+		describe 'last_response' do
+			subject { last_response }
+
+			it { is_expected.to be_ok }
+
+			describe 'body' do
+				subject { super().body }
+
+				it { is_expected.to eq 'Show item 2' }
+			end
+		end
 	end
 
-	it 'should update item' do
-		put '/crud/4'
-		last_response.should.be.ok
-		last_response.body.should.equal 'Edit item 4'
+	describe 'update item' do
+		before { put '/crud/4' }
+
+		describe 'last_response' do
+			subject { last_response }
+
+			it { is_expected.to be_ok }
+
+			describe 'body' do
+				subject { super().body }
+
+				it { is_expected.to eq 'Edit item 4' }
+			end
+		end
 	end
 
-	it 'should delete item' do
-		delete '/crud/8'
-		last_response.should.be.ok
-		last_response.body.should.equal 'Delete item 8'
+	describe 'delete item' do
+		before { delete '/crud/8' }
+
+		describe 'last_response' do
+			subject { last_response }
+
+			it { is_expected.to be_ok }
+
+			describe 'body' do
+				subject { super().body }
+
+				it { is_expected.to eq 'Delete item 8' }
+			end
+		end
 	end
 end

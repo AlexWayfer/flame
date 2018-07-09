@@ -1,68 +1,81 @@
 # frozen_string_literal: true
 
 describe Flame::Application::Config do
-	before do
-		@app_class = Class.new(Flame::Application)
-		@hash = {
+	let(:app_class) { Class.new(Flame::Application) }
+
+	let(:config_hash) do
+		{
 			foo: 1,
 			bar: 2,
 			baz: proc { 3 },
 			another_baz: proc { |a| a * 2 }
 		}
-		@init = proc do |app: @app_class, hash: @hash|
-			Flame::Application::Config.new(app, hash)
-		end
-		@config = @init.call
 	end
 
-	describe '#initialize' do
-		it 'should receive application' do
-			config = @init.call(app: @app_class)
-			config.instance_variable_get(:@app)
-				.should.equal @app_class
-		end
-
-		it 'should receive hash' do
-			config = @init.call(hash: @hash)
-			config.should.equal @hash
-		end
-	end
+	let(:config) { Flame::Application::Config.new(app_class, config_hash) }
 
 	describe '#[]' do
-		it 'should behave like a Hash for regular values' do
-			@config[:foo].should.equal 1
+		describe 'regular values' do
+			subject { config[:foo] }
+
+			it { is_expected.to eq 1 }
 		end
 
-		it 'should call procs without parameters from values' do
-			@config[:baz].should.equal 3
-			@config[:another_baz].should.be.kind_of Proc
+		describe 'proc values' do
+			context 'wihout parameters' do
+				subject { config[:baz] }
+
+				it { is_expected.to eq 3 }
+			end
+
+			context 'wih parameters' do
+				subject { config[:another_baz] }
+
+				it { is_expected.to be_kind_of Proc }
+			end
 		end
 	end
 
 	describe '#load_yaml' do
-		before do
-			@yaml = { foo: 1, bar: 'baz' }
+		let(:yaml) { { foo: 1, bar: 'baz' } }
+
+		subject { app_class.config[key] }
+
+		let(:key) { :example }
+
+		context 'String filename' do
+			before do
+				app_class.config.load_yaml 'example.yml'
+			end
+
+			it { is_expected.to eq yaml }
 		end
 
-		it 'should load YAML file to #config' do
-			@app_class.config.load_yaml 'example.yml'
-			@app_class.config[:example].should.equal @yaml
+		context 'Symbol basename' do
+			before do
+				app_class.config.load_yaml :example
+			end
+
+			it { is_expected.to eq yaml }
 		end
 
-		it 'should load YAML file to #config by symbol basename' do
-			@app_class.config.load_yaml :example
-			@app_class.config[:example].should.equal @yaml
+		context 'refined key' do
+			let(:key) { :another }
+
+			before do
+				app_class.config.load_yaml :example, key: key
+			end
+
+			it { is_expected.to eq yaml }
 		end
 
-		it 'should load YAML file to #config with other key' do
-			@app_class.config.load_yaml :example, key: :another
-			@app_class.config[:another].should.equal @yaml
-		end
+		context ':set option is false' do
+			before do
+				@loaded = app_class.config.load_yaml :example, set: false
+			end
 
-		it 'should load YAML file without allocating to #config' do
-			yaml = @app_class.config.load_yaml :example, set: false
-			yaml.should.equal @yaml
-			@app_class.config[:example].should.equal nil
+			it { expect(@loaded).to eq yaml }
+			it { is_expected.to be_nil }
 		end
 	end
 end

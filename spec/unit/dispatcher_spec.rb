@@ -43,317 +43,467 @@ class DispatcherApplication < Flame::Application
 end
 
 describe Flame::Dispatcher do
-	before do
-		@init = lambda do |method: 'GET', path: '/hello/world', query: nil|
-			@env = {
-				Rack::REQUEST_METHOD => method,
-				Rack::PATH_INFO => path,
-				Rack::RACK_INPUT => StringIO.new,
-				Rack::RACK_ERRORS => StringIO.new,
-				Rack::QUERY_STRING => query
-			}
-			Flame::Dispatcher.new(DispatcherApplication, @env)
-		end
-		@dispatcher = @init.call
+	let(:method) { 'GET' }
+	let(:path) { '/hello/world' }
+	let(:query) { nil }
+
+	let(:env) do
+		{
+			Rack::REQUEST_METHOD => method,
+			Rack::PATH_INFO => path,
+			Rack::RACK_INPUT => StringIO.new,
+			Rack::RACK_ERRORS => StringIO.new,
+			Rack::QUERY_STRING => query
+		}
 	end
 
+	let(:dispatcher) { Flame::Dispatcher.new(DispatcherApplication, env) }
+
 	describe 'attrs' do
-		it 'should have request reader' do
-			@dispatcher.request.should.be.instance_of Flame::Dispatcher::Request
+		describe 'request reader' do
+			subject { dispatcher.request }
+
+			it { is_expected.to be_instance_of Flame::Dispatcher::Request }
 		end
 
-		it 'should have response reader' do
-			@dispatcher.response.should.be.instance_of Flame::Dispatcher::Response
+		describe 'response reader' do
+			subject { dispatcher.response }
+
+			it { is_expected.to be_instance_of Flame::Dispatcher::Response }
 		end
 	end
 
 	describe '#initialize' do
-		it 'should take @app_class variable' do
-			@dispatcher.instance_variable_get(:@app_class)
-				.should.equal DispatcherApplication
+		describe 'instance variables' do
+			subject { dispatcher.instance_variable_get(instance_variable) }
+
+			describe '@app_class' do
+				let(:instance_variable) { :@app_class }
+
+				it { is_expected.to eq DispatcherApplication }
+			end
+
+			describe '@env' do
+				let(:instance_variable) { :@env }
+
+				it { is_expected.to eq env }
+			end
 		end
 
-		it 'should take @env variable' do
-			@dispatcher.instance_variable_get(:@env)
-				.should.equal @env
+		describe 'request from env' do
+			subject { dispatcher.request.env }
+
+			it { is_expected.to eq env }
 		end
 
-		it 'should take @request variable from env' do
-			@dispatcher.request.env.should.equal @env
-		end
+		describe 'response' do
+			subject { dispatcher.response }
 
-		it 'should initialize @response variable' do
-			@dispatcher.response.should.be.instance_of Flame::Dispatcher::Response
+			it { is_expected.to be_instance_of Flame::Dispatcher::Response }
 		end
 	end
 
 	describe '#run!' do
-		it 'should return respond from existing route' do
-			respond = @dispatcher.run!.last
-			respond.status.should.equal 200
-			respond.body.should.equal ['Hello, world!']
+		subject(:response) { dispatcher.run!.last }
+
+		subject { response.body }
+
+		context 'existing route' do
+			after do
+				expect(response.status).to eq 200
+			end
+
+			it { is_expected.to eq ['Hello, world!'] }
+
+			context 'nil in after-hook' do
+				let(:path) { 'action_with_after_hook' }
+
+				it { is_expected.to eq ['Body of action'] }
+			end
+
+			context 'empty body' do
+				let(:path) { 'foo' }
+
+				it { is_expected.to eq [''] }
+			end
+
+			context 'static file' do
+				let(:path) { 'test.txt' }
+
+				it { is_expected.to eq ["Test static\n"] }
+			end
+
+			context 'static file in gem' do
+				let(:path) { 'favicon.ico' }
+
+				it do
+					is_expected.to eq [
+						File.read(File.join(__dir__, '../../public/favicon.ico'))
+					]
+				end
+			end
+
+			context 'static file before route executing' do
+				let(:path) { 'test' }
+
+				it { is_expected.to eq ["Static file\n"] }
+			end
+
+			context 'HEAD method' do
+				let(:method) { 'HEAD' }
+
+				it { is_expected.to eq [] }
+			end
 		end
 
-		it 'should return respond from existing route with nil in after-hook' do
-			respond = @init.call(path: 'action_with_after_hook').run!.last
-			respond.status.should.equal 200
-			respond.body.should.equal ['Body of action']
+		context 'not existing route' do
+			after do
+				expect(response.status).to eq 404
+			end
+
+			context 'neither route nor static file was found' do
+				let(:path) { 'bar' }
+
+				it { is_expected.to eq ['<h1>Not Found</h1>'] }
+			end
+
+			context 'route with required argument and path without' do
+				let(:path) { 'hello' }
+
+				it { is_expected.to eq ['<h1>Not Found</h1>'] }
+			end
 		end
 
-		it 'should return status 200 for existing route with empty body' do
-			respond = @init.call(path: 'foo').run!.last
-			respond.status.should.equal 200
-			respond.body.should.equal ['']
-		end
+		context 'not allowed HTTP-method' do
+			after do
+				expect(response.status).to eq 405
+			end
 
-		it 'should return content of existing static file' do
-			respond = @init.call(path: 'test.txt').run!.last
-			respond.status.should.equal 200
-			respond.body.should.equal ["Test static\n"]
-		end
+			let(:method) { 'POST' }
 
-		it 'should return content of existing static file in gem' do
-			respond = @init.call(path: 'favicon.ico').run!.last
-			respond.status.should.equal 200
-			favicon_file = File.join __dir__, '../../public/favicon.ico'
-			respond.body.should.equal [File.read(favicon_file)]
-		end
+			subject { response.headers['Allow'] }
 
-		it 'should return content of existing static file before route executing' do
-			respond = @init.call(path: 'test').run!.last
-			respond.status.should.equal 200
-			respond.body.should.equal ["Static file\n"]
-		end
-
-		it 'should return 404 if neither route nor static file was found' do
-			respond = @init.call(path: 'bar').run!.last
-			respond.status.should.equal 404
-			respond.body.should.equal ['<h1>Not Found</h1>']
-		end
-
-		it 'should return 404 for route with required argument by path without' do
-			respond = @init.call(path: 'hello').run!.last
-			respond.status.should.equal 404
-			respond.body.should.equal ['<h1>Not Found</h1>']
-		end
-
-		it 'should not return body for HEAD methods' do
-			respond = @init.call(method: 'HEAD').run!.last
-			respond.status.should.equal 200
-			respond.body.should.equal []
-		end
-
-		it 'should return 405 for not allowed HTTP-method with Allow header' do
-			respond = @init.call(method: 'POST').run!.last
-			respond.headers['Allow'].should.equal 'GET, OPTIONS'
-			respond.status.should.equal 405
+			it { is_expected.to eq 'GET, OPTIONS' }
 		end
 
 		describe 'OPTIONS HTTP-method' do
-			before do
-				@respond = @init.call(method: 'OPTIONS').run!.last
+			let(:method) { 'OPTIONS' }
+
+			describe 'status' do
+				subject { response.status }
+
+				context 'existing route' do
+					it { is_expected.to eq 200 }
+				end
+
+				context 'not existing route' do
+					let(:path) { '/hello' }
+
+					it { is_expected.to eq 404 }
+				end
 			end
 
-			should 'return 200 for existing route' do
-				@respond.status.should.equal 200
+			describe 'body' do
+				subject { response.body }
+
+				it { is_expected.to eq [''] }
 			end
 
-			should 'return 404 for not-existing route' do
-				dispatcher = @init.call(method: 'OPTIONS', path: '/hello')
-				respond = dispatcher.run!.last
-				respond.status.should.equal 404
-			end
+			describe '`Allow` header' do
+				subject { response.headers['Allow'] }
 
-			should 'not return body' do
-				@respond.body.should.equal ['']
-			end
+				context 'existing route' do
+					let(:path) { '/' }
 
-			should 'contain `Allow` header with appropriate HTTP-methods' do
-				dispatcher = @init.call(method: 'OPTIONS', path: '/')
-				respond = dispatcher.run!.last
-				respond.headers['Allow'].should.equal 'GET, POST, OPTIONS'
-			end
+					it { is_expected.to eq 'GET, POST, OPTIONS' }
+				end
 
-			should 'not return `Allow` header for not-existing route' do
-				dispatcher = @init.call(method: 'OPTIONS', path: '/hello')
-				respond = dispatcher.run!.last
-				respond.headers.key?('Allow').should.equal false
-			end
+				context 'not existing route' do
+					let(:path) { '/hello' }
 
-			should 'return `Allow` header for route with optional parameters' do
-				dispatcher = @init.call(method: 'OPTIONS', path: '/baz')
-				respond = dispatcher.run!.last
-				respond.headers.key?('Allow').should.equal true
+					subject { response.headers.key?('Allow') }
+
+					it { is_expected.to be false }
+				end
+
+				context 'route with optional parameters' do
+					let(:path) { '/baz' }
+
+					it { is_expected.to eq 'GET, OPTIONS' }
+				end
 			end
 		end
 	end
 
 	describe '#status' do
-		it 'should return 200 by default' do
-			@dispatcher.status.should.equal 200
+		subject { dispatcher.status }
+
+		describe 'default' do
+			it { is_expected.to eq 200 }
 		end
 
-		it 'should take status' do
-			@dispatcher.status 101
-			@dispatcher.status.should.equal 101
+		describe 'setting' do
+			before do
+				dispatcher.status 101
+			end
+
+			it { is_expected.to eq 101 }
+
+			describe 'in response' do
+				subject { dispatcher.response.status }
+
+				it { is_expected.to eq 101 }
+			end
 		end
 
-		it 'should set status to response' do
-			@dispatcher.status 101
-			@dispatcher.response.status.should.equal 101
-		end
+		describe 'X-Cascade header for 404 status' do
+			before do
+				dispatcher.status 404
+			end
 
-		it 'should set X-Cascade header for 404 status' do
-			@dispatcher.status 404
-			@dispatcher.response['X-Cascade'].should.equal 'pass'
+			subject { dispatcher.response['X-Cascade'] }
+
+			it { is_expected.to eq 'pass' }
 		end
 	end
 
 	describe '#body' do
-		it 'should set @body variable' do
-			@dispatcher.body 'Hello!'
-			@dispatcher.instance_variable_get(:@body).should.equal 'Hello!'
+		subject { dispatcher.body }
+
+		before do
+			dispatcher.body 'Hello!'
 		end
 
-		it 'should get @body variable' do
-			@dispatcher.body 'Hello!'
-			@dispatcher.body.should.equal 'Hello!'
-		end
+		it { is_expected.to eq 'Hello!' }
 	end
 
 	describe '#params' do
-		it 'should return params from request with Symbol keys' do
-			@init.call(path: '/hello', query: 'name=world&when=now').params
-				.should.equal Hash[name: 'world', when: 'now']
+		subject { dispatcher.params }
+
+		context 'request with Symbol keys' do
+			let(:path) { '/hello' }
+			let(:query) { 'name=world&when=now' }
+
+			it { is_expected.to eq Hash[name: 'world', when: 'now'] }
+			it { is_expected.not_to be dispatcher.request.params }
+			it { is_expected.to be dispatcher.params }
 		end
 
-		it 'should not be the same Hash as params from request' do
-			dispatcher = @init.call(path: '/hello', query: 'name=world&when=now')
-			dispatcher.params.should.not.be.same_as dispatcher.request.params
-		end
+		context 'invalid %-encoding query' do
+			let(:path) { '/foo' }
+			let(:query) { 'bar=%%' }
 
-		it 'should cache Hash of params' do
-			dispatcher = @init.call(path: '/hello', query: 'name=world&when=now')
-			dispatcher.params.should.be.same_as dispatcher.params
-		end
-
-		it 'should not break with invalid %-encoding query' do
-			lambda do
-				dispatcher = @init.call(path: '/foo', query: 'bar=%%')
-				dispatcher.params
-			end
-				.should.not.raise(ArgumentError)
+			it { expect { subject }.not_to raise_error }
 		end
 	end
 
 	describe '#session' do
-		it 'should return Object from Request' do
-			@dispatcher.session.should.be.same_as @dispatcher.request.session
-		end
+		subject { dispatcher.session }
+
+		it { is_expected.to be dispatcher.request.session }
 	end
 
 	describe '#cookies' do
-		it 'should return instance of Flame::Cookies' do
-			@dispatcher.cookies.should.be.instance_of Flame::Dispatcher::Cookies
-		end
+		subject { dispatcher.cookies }
 
-		it 'should cache the object' do
-			@dispatcher.cookies.should.be.same_as @dispatcher.cookies
-		end
+		it { is_expected.to be_instance_of Flame::Dispatcher::Cookies }
+
+		it { is_expected.to be dispatcher.cookies }
 	end
 
 	describe '#config' do
-		it 'should return config from app' do
-			@dispatcher.config
-				.should.be.same_as @dispatcher.instance_variable_get(:@app_class).config
+		subject { dispatcher.config }
+
+		it do
+			is_expected.to be dispatcher.instance_variable_get(:@app_class).config
 		end
 	end
 
 	describe '#halt' do
-		it 'should just throw without changes if no arguments' do
-			-> { @dispatcher.halt }.should.throw(:halt)
-			@dispatcher.status.should.equal 200
-			@dispatcher.body.should.equal @dispatcher.default_body
+		before do
+			expect { dispatcher.halt(*args) }.to throw_symbol(:halt)
 		end
 
-		it 'should take new status and write default body' do
-			-> { @dispatcher.halt 500 }.should.throw(:halt)
-			@dispatcher.status.should.equal 500
-			@dispatcher.body.should.equal @dispatcher.default_body
+		context 'no arguments' do
+			let(:args) { [] }
+
+			describe 'status' do
+				subject { dispatcher.status }
+
+				it { is_expected.to eq 200 }
+			end
+
+			describe 'body' do
+				subject { dispatcher.body }
+
+				it { is_expected.to eq dispatcher.default_body }
+			end
 		end
 
-		it 'should not write default body for status without entity body' do
-			-> { @dispatcher.halt 101 }.should.throw(:halt)
-			@dispatcher.status.should.equal 101
-			@dispatcher.body.should.be.empty
+		context 'new status' do
+			let(:args) { [500] }
+
+			describe 'status' do
+				subject { dispatcher.status }
+
+				it { is_expected.to eq 500 }
+			end
+
+			describe 'body' do
+				subject { dispatcher.body }
+
+				it { is_expected.to eq dispatcher.default_body }
+			end
 		end
 
-		it 'should take new body' do
-			-> { @dispatcher.halt 404, 'Nobody here' }.should.throw(:halt)
-			@dispatcher.status.should.equal 404
-			@dispatcher.body.should.equal 'Nobody here'
+		context 'new status without entity body' do
+			let(:args) { [101] }
+
+			describe 'status' do
+				subject { dispatcher.status }
+
+				it { is_expected.to eq 101 }
+			end
+
+			describe 'body' do
+				subject { dispatcher.body }
+
+				it { is_expected.to be_empty }
+			end
 		end
 
-		it 'should take new headers' do
-			-> { @dispatcher.halt 200, 'Cats!', 'Content-Type' => 'animal/cat' }
-				.should.throw(:halt)
-			@dispatcher.status.should.equal 200
-			@dispatcher.body.should.equal 'Cats!'
-			@dispatcher.response.headers['Content-Type'].should.equal 'animal/cat'
+		context 'new status and body' do
+			let(:args) { [404, 'Nobody here'] }
+
+			describe 'status' do
+				subject { dispatcher.status }
+
+				it { is_expected.to eq 404 }
+			end
+
+			describe 'body' do
+				subject { dispatcher.body }
+
+				it { is_expected.to eq 'Nobody here' }
+			end
 		end
 
-		it 'should take Controller#redirect method' do
-			url = 'http://example.com'
-			controller = DispatcherController.new(@dispatcher)
-			-> { @dispatcher.halt controller.redirect(url, 301) }
-				.should.throw(:halt)
-			@dispatcher.status.should.equal 301
-			@dispatcher.response.location.should.equal url
+		context 'new status, body and headers' do
+			let(:args) { [200, 'Cats!', 'Content-Type' => 'animal/cat'] }
+
+			describe 'status' do
+				subject { dispatcher.status }
+
+				it { is_expected.to eq 200 }
+			end
+
+			describe 'body' do
+				subject { dispatcher.body }
+
+				it { is_expected.to eq 'Cats!' }
+			end
+
+			describe 'headers' do
+				subject { dispatcher.response.headers }
+
+				it { is_expected.to include 'Content-Type' => 'animal/cat' }
+			end
+		end
+
+		context 'receiving result of `Controller#redirect`' do
+			let(:controller) { DispatcherController.new(dispatcher) }
+			let(:args) { [controller.redirect('http://example.com', 301)] }
+
+			describe 'status' do
+				subject { dispatcher.status }
+
+				it { is_expected.to eq 301 }
+			end
+
+			describe 'location' do
+				subject { dispatcher.response.location }
+
+				it { is_expected.to eq 'http://example.com' }
+			end
 		end
 	end
 
 	describe '#dump_error' do
+		let(:error) { RuntimeError.new 'Just an example error' }
+
 		before do
-			@error = RuntimeError.new 'Just an example error'
-			@error.set_backtrace(caller)
+			dispatcher.dump_error(error)
 		end
 
-		it 'should write full information to @env[Rack::RACK_ERRORS]' do
-			@dispatcher.dump_error(@error)
-			@dispatcher.instance_variable_get(:@env)[Rack::RACK_ERRORS].string
-				.should match_words(
-					Time.now.strftime('%Y-%m-%d %H:%M:%S'),
-					@error.class.name, @error.message # , __FILE__ (because of minitest)
-				)
+		subject do
+			dispatcher.instance_variable_get(:@env)[Rack::RACK_ERRORS].string
+		end
+
+		it do
+			is_expected.to match_words(
+				Time.now.strftime('%Y-%m-%d %H:%M:%S'), error.class.name, error.message
+			)
 		end
 	end
 
 	describe '#default_body' do
-		it 'should return default body as <h1> for any setted status' do
-			@dispatcher.status 200
-			@dispatcher.default_body.should.equal '<h1>OK</h1>'
+		describe 'depends on status' do
+			subject { dispatcher.default_body }
 
-			@dispatcher.status 404
-			@dispatcher.default_body.should.equal '<h1>Not Found</h1>'
+			before do
+				dispatcher.status status
+			end
 
-			@dispatcher.status 500
-			@dispatcher.default_body.should.equal '<h1>Internal Server Error</h1>'
+			context 'status 200' do
+				let(:status) { 200 }
+
+				it { is_expected.to eq '<h1>OK</h1>' }
+			end
+
+			context 'status 404' do
+				let(:status) { 404 }
+
+				it { is_expected.to eq '<h1>Not Found</h1>' }
+			end
+
+			context 'status 500' do
+				let(:status) { 500 }
+
+				it { is_expected.to eq '<h1>Internal Server Error</h1>' }
+			end
 		end
 
-		should 'not be called from `execute`' do
-			dispatcher = @init.call(path: 'redirect_from_before')
-			dispatcher.run!
-			dispatcher.request.env[:execute_before_called].should.equal 1
+		describe 'calls from `execute`' do
+			let(:path) { 'redirect_from_before' }
+
+			before do
+				dispatcher.run!
+			end
+
+			subject { dispatcher.request.env[:execute_before_called] }
+
+			it { is_expected.to eq 1 }
 		end
 	end
 
-	it 'should not break for invalid %-encoding in requests' do
-		lambda do
-			dispatcher = @init.call(path: '/foo', query: 'bar=%%')
-			dispatcher.run!
-			dispatcher.status.should.equal 400
-			dispatcher.body.should.equal '<h1>Bad Request</h1>'
+	describe 'breaking for invalid %-encoding in requests' do
+		let(:path) { '/foo' }
+		let(:query) { 'bar=%%' }
+
+		before do
+			expect { dispatcher.run! }.not_to raise_error
 		end
-			.should.not.raise(ArgumentError)
+
+		describe 'status' do
+			subject { dispatcher.status }
+
+			it { is_expected.to eq 400 }
+		end
+
+		describe 'body' do
+			subject { dispatcher.body }
+
+			it { is_expected.to eq '<h1>Bad Request</h1>' }
+		end
 	end
 end

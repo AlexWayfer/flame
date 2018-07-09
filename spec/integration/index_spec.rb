@@ -17,15 +17,35 @@ end
 describe IndexController do
 	include Rack::Test::Methods
 
-	it 'should return index' do
-		get '/'
-		last_response.should.be.ok
-		last_response.body.should.equal 'This is index'
+	describe 'index' do
+		before { get '/' }
+
+		describe 'last_response' do
+			subject { last_response }
+
+			it { is_expected.to be_ok }
+
+			describe 'body' do
+				subject { super().body }
+
+				it { is_expected.to eq 'This is index' }
+			end
+		end
 	end
 
-	it 'should return default 404' do
-		get '/404'
-		last_response.should.be.not_found
-		last_response.body.should.equal '<h1>Not Found</h1>'
+	describe 'default 404' do
+		before { get '/404' }
+
+		describe 'last_response' do
+			subject { last_response }
+
+			it { is_expected.to be_not_found }
+
+			describe 'body' do
+				subject { super().body }
+
+				it { is_expected.to eq '<h1>Not Found</h1>' }
+			end
+		end
 	end
 end

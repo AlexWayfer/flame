@@ -1,67 +1,58 @@
 # frozen_string_literal: true
 
 describe Flame::Dispatcher::Request do
-	before do
-		@env_init = proc do |method: :PATCH, query: ''|
-			{
-				Rack::REQUEST_METHOD => 'POST',
-				Rack::PATH_INFO => '/hello/great/world',
-				Rack::QUERY_STRING => query,
-				Rack::RACK_INPUT => StringIO.new("_method=#{method}"),
-				Rack::RACK_REQUEST_FORM_HASH => { '_method' => method.to_s }
-			}
-		end
-		@env = @env_init.call
-		@request_init = proc do |env = @env|
-			Flame::Dispatcher::Request.new(env)
-		end
-		@request = @request_init.call
+	let(:method) { :PATCH }
+	let(:query) { '' }
+
+	let(:env) do
+		{
+			Rack::REQUEST_METHOD => 'POST',
+			Rack::PATH_INFO => '/hello/great/world',
+			Rack::QUERY_STRING => query,
+			Rack::RACK_INPUT => StringIO.new("_method=#{method}"),
+			Rack::RACK_REQUEST_FORM_HASH => { '_method' => method.to_s }
+		}
 	end
 
-	it 'should be Rack::Request child' do
-		@request.should.be.kind_of Rack::Request
-	end
+	subject(:request) { Flame::Dispatcher::Request.new(env) }
+
+	it { is_expected.to be_kind_of Rack::Request }
 
 	describe '#path' do
-		it 'should return Flame::Path by requested path' do
-			@request.path.should.be.kind_of Flame::Path
-			@request.path.should.equal '/hello/great/world'
-		end
+		subject { request.path }
+
+		it { is_expected.to be_kind_of Flame::Path }
+		it { is_expected.to eq '/hello/great/world' }
 	end
 
 	describe '#http_method' do
-		it 'should have priority to return HTTP-method from parameter' do
-			@request.http_method.should.equal :PATCH
+		subject(:http_method) { request.http_method }
+
+		describe 'priority to return HTTP-method from parameter' do
+			it { is_expected.to eq :PATCH }
 		end
 
-		it 'should return symbolized value' do
-			@request.http_method.should.be.kind_of Symbol
+		it { is_expected.to be_kind_of Symbol }
+
+		context 'downcased input' do
+			let(:method) { :put }
+
+			it { is_expected.to eq :PUT }
 		end
 
-		it 'should return upcased value' do
-			env = @env_init.call(method: :put)
-			@request_init.call(env).http_method.should.equal :PUT
-		end
+		describe 'cache computed value' do
+			subject { Flame::Dispatcher::Request }
 
-		it 'should cache computed value' do
-			custom_request_class = Class.new(Flame::Dispatcher::Request)
-			custom_request_class.class_exec do
-				attr_reader :params_execs
-
-				def params
-					@params_execs ||= 0
-					@params_execs += 1
-					super
-				end
+			before do
+				is_expected.to have_received(:params).once
+				3.times { http_method }
 			end
-			request = custom_request_class.new(@env)
-			3.times { request.http_method }
-			request.params_execs.should.equal 1
 		end
 
-		it 'should not break with invalid %-encoding query' do
-			env = @env_init.call(query: 'bar=%%')
-			-> { @request_init.call(env).http_method }.should.not.raise(ArgumentError)
+		context 'invalid %-encoding query' do
+			let(:query) { 'bar=%%' }
+
+			it { expect { subject }.not_to raise_error }
 		end
 	end
 end

@@ -2,30 +2,28 @@
 
 describe 'Flame::Errors' do
 	describe Flame::Errors::TemplateNotFoundError do
-		before do
-			@init = lambda do |controller|
-				Flame::Errors::TemplateNotFoundError.new(controller, :foo)
-			end
+		subject(:error) do
+			Flame::Errors::TemplateNotFoundError.new(controller, :foo)
 		end
 
-		describe 'controller class' do
-			before do
-				@error = @init.call(ErrorsController)
+		context 'controller class' do
+			let(:controller) { ErrorsController }
 
-				@correct_message = "Template 'foo' not found for 'ErrorsController'"
+			let(:correct_message) do
+				"Template 'foo' not found for 'ErrorsController'"
 			end
 
-			behaves_like 'error with correct output'
+			it_behaves_like 'error with correct output'
 		end
 
-		describe 'controller object' do
-			before do
-				@error = @init.call(ErrorsController.new(nil))
+		context 'controller object' do
+			let(:controller) { ErrorsController.new(nil) }
 
-				@correct_message = "Template 'foo' not found for 'ErrorsController'"
+			let(:correct_message) do
+				"Template 'foo' not found for 'ErrorsController'"
 			end
 
-			behaves_like 'error with correct output'
+			it_behaves_like 'error with correct output'
 		end
 	end
 end

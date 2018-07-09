@@ -4,84 +4,109 @@ class StaticApp < Flame::Application
 end
 
 describe Flame::Dispatcher::Static do
-	before do
-		@app = StaticApp
-		@file = 'test.txt'
-		@env = {
+	let(:app) { StaticApp }
+
+	let(:file) { 'test.txt' }
+
+	let(:file_mtime) { File.mtime File.join(__dir__, 'public', file) }
+
+	let(:path) { "/#{file}" }
+
+	let(:env) do
+		{
 			Rack::REQUEST_METHOD => 'GET',
-			Rack::PATH_INFO => "/#{@file}"
+			Rack::PATH_INFO => path
 		}
-		@dispatcher = Flame::Dispatcher.new(@app, @env)
-		@result = @dispatcher.send(:try_static)
 	end
 
-	shared 'response with Cache-Control' do
-		should 'have Cache-Control with public and max-age value' do
-			@dispatcher.response[Rack::CACHE_CONTROL]
-				.should.equal 'public, max-age=31536000'
-		end
-	end
+	let(:dispatcher) { Flame::Dispatcher.new(app, env) }
 
-	describe 'not cached' do
-		it 'should return content of static file ' \
-		   'with Cache-Control as public and max-age' do
-			@result.should.equal "Test static\n"
+	subject(:try_static) { dispatcher.send(:try_static) }
+
+	context 'not cached' do
+		context 'static file ' do
+			it { is_expected.to eq "Test static\n" }
 		end
 
-		it 'should return content of symbolic link to file' do
-			@env[Rack::PATH_INFO] = '/symlink'
-			dispatcher = Flame::Dispatcher.new(@app, @env)
-			dispatcher.send(:try_static).should.equal "Test static\n"
+		context 'symbolic link to file' do
+			let(:path) { '/symlink' }
+
+			it { is_expected.to eq "Test static\n" }
 		end
 
-		it 'should return content of file by URL-encoded request' do
-			@env[Rack::PATH_INFO] =
+		context 'URL-encoded request' do
+			let(:path) do
 				'/%D1%82%D0%B5%D1%81%D1%82%D0%BE%D0%B2%D1%8B%D0%B9%20' \
 				'%D1%84%D0%B0%D0%B9%D0%BB'
-			dispatcher = Flame::Dispatcher.new(@app, @env)
-			dispatcher.send(:try_static).should.equal "Тестовый файл\n"
+			end
+
+			it { is_expected.to eq "Тестовый файл\n" }
 		end
 
-		it 'should return content of file by request with `+` instead of spaces' do
-			@env[Rack::PATH_INFO] = '/тестовый+файл'
-			dispatcher = Flame::Dispatcher.new(@app, @env)
-			dispatcher.send(:try_static).should.equal "Тестовый файл\n"
+		context 'request with `+` instead of spaces' do
+			let(:path) { '/тестовый+файл' }
+
+			it { is_expected.to eq "Тестовый файл\n" }
 		end
 
-		it 'should return with Last-Modified' do
-			file_mtime = File.mtime File.join(__dir__, 'public', @file)
-			@dispatcher.response['Last-Modified'].should.equal file_mtime.httpdate
-		end
+		describe 'headers' do
+			before do
+				try_static
+			end
 
-		behaves_like 'response with Cache-Control'
+			subject { dispatcher.response[header] }
+
+			describe '`Last-Modified`' do
+				let(:header) { 'Last-Modified' }
+
+				it { is_expected.to eq file_mtime.httpdate }
+			end
+
+			describe '`Cache-Control`' do
+				let(:header) { Rack::CACHE_CONTROL }
+
+				it { is_expected.to eq 'public, max-age=31536000' }
+			end
+		end
 	end
 
-	describe 'cached' do
+	context 'cached' do
+		let(:env) { super().merge('HTTP_IF_MODIFIED_SINCE' => file_mtime.httpdate) }
+
 		before do
-			file_mtime = File.mtime File.join(__dir__, 'public', @file)
-			@env['HTTP_IF_MODIFIED_SINCE'] = file_mtime.httpdate
-			@dispatcher = Flame::Dispatcher.new(@app, @env)
-			catch(:halt) { @dispatcher.send(:try_static) }
+			expect { dispatcher.send(:try_static) }.to throw_symbol(:halt)
 		end
 
-		it 'should return 304 with Cache-Control as public and max-age ' \
-		   'for cached file' do
-			@dispatcher.status.should.equal 304
-			@dispatcher.body.should.equal ''
+		context 'cached file' do
+			describe 'status' do
+				subject { dispatcher.status }
+
+				it { is_expected.to eq 304 }
+			end
+
+			describe 'body' do
+				subject { dispatcher.body }
+
+				it { is_expected.to be_empty }
+			end
 		end
 
-		behaves_like 'response with Cache-Control'
+		describe '`Cache-Control` header' do
+			subject { dispatcher.response[Rack::CACHE_CONTROL] }
+
+			it { is_expected.to eq 'public, max-age=31536000' }
+		end
 	end
 
-	it 'should not found non-existing file' do
-		@env[Rack::PATH_INFO] = '/non-existing_file'
-		dispatcher = Flame::Dispatcher.new(@app, @env)
-		dispatcher.send(:try_static).should.equal nil
+	context 'nonexistent file' do
+		let(:path) { '/nonexistent_file' }
+
+		it { is_expected.to be_nil }
 	end
 
-	it 'should not raise error about invalid encoding' do
-		@env[Rack::PATH_INFO] = '/%EF%BF%BD%8%EF%BF%BD'
-		dispatcher = Flame::Dispatcher.new(@app, @env)
-		-> { dispatcher.send(:try_static) }.should.not.raise(ArgumentError)
+	context 'invalid encoding' do
+		let(:path) { '/%EF%BF%BD%8%EF%BF%BD' }
+
+		it { expect { subject }.not_to raise_error }
 	end
 end

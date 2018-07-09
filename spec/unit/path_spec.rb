@@ -9,278 +9,339 @@ class PathController
 end
 
 describe Flame::Path do
-	before do
-		@init = proc { |*args| Flame::Path.new(*args) }
-		@path = @init.call '/foo/:first/:second/:?third'
+	def path_initialize(*args)
+		Flame::Path.new(*args)
 	end
 
+	subject(:path) { path_initialize(*path_args) }
+
+	let(:other)    { path_initialize(*other_args) }
+
+	let(:path_args) { '/foo/:first/:second/:?third' }
+
 	describe '.merge' do
-		it 'should merge from Array of Strings' do
-			Flame::Path.merge(%w[foo bar baz])
-				.should.equal 'foo/bar/baz'
+		subject { Flame::Path.merge(*path_args) }
+
+		context 'Array of Strings' do
+			let(:path_args) { %w[foo bar baz] }
+
+			it { is_expected.to eq 'foo/bar/baz' }
 		end
 
-		it 'should merge from multiple parts as Strings' do
-			Flame::Path.merge('/foo/bar', '/baz/bat')
-				.should.equal '/foo/bar/baz/bat'
+		context 'multiple parts as Strings' do
+			let(:path_args) { ['/foo/bar', '/baz/bat'] }
+
+			it { is_expected.to eq '/foo/bar/baz/bat' }
 		end
 
-		it 'should merge from multiple parts as Flame::Path' do
-			first_path = @init.call('/foo/bar')
-			second_path = @init.call('/baz/bat')
-			Flame::Path.merge(first_path, second_path)
-				.should.equal '/foo/bar/baz/bat'
+		context 'multiple parts as Flame::Path' do
+			let(:path_args) do
+				[path_initialize('/foo/bar'), path_initialize('/baz/bat')]
+			end
+
+			it { is_expected.to eq '/foo/bar/baz/bat' }
 		end
 
-		it 'should merge without extra slashes' do
-			Flame::Path.merge('///foo/bar//', '//baz/bat///')
-				.should.equal '/foo/bar/baz/bat/'
+		describe 'without extra slashes' do
+			let(:path_args) { ['///foo/bar//', '//baz/bat///'] }
+
+			it { is_expected.to eq '/foo/bar/baz/bat/' }
 		end
 	end
 
 	describe '#initialize' do
-		it 'should receive path as String' do
-			path = '/foo/bar'
-			@init.call(path).to_s.should.equal path
+		subject { super().to_s }
+
+		context 'String parameter' do
+			let(:path_args) { '/foo/bar' }
+
+			it { is_expected.to eq path_args }
 		end
 
-		it 'should receive many path parts' do
-			@init.call('/foo', '/bar', 'baz').to_s.should.equal '/foo/bar/baz'
+		context 'many path parts' do
+			let(:path_args) { ['/foo', '/bar', 'baz'] }
+
+			it { is_expected.to eq '/foo/bar/baz' }
 		end
 
-		describe 'with path as Flame::Path' do
-			should 'works' do
-				path = @init.call('/foo/bar')
-				@init.call(path).to_s.should.equal path
-			end
+		describe 'Flame::Path parameter' do
+			subject { path }
 
-			should 'not return the same object' do
-				path = @init.call('/foo/bar')
-				@init.call(path).to_s.should.not.be.same_as path
-			end
+			let(:path_args) { path_initialize('/foo/bar') }
+
+			it { is_expected.to eq path_args }
+
+			it { is_expected.not_to be path_args }
 		end
 	end
 
 	describe '#parts' do
-		it 'should return array of path parts' do
-			@init.call('/foo/bar/baz').parts.should.equal %w[foo bar baz]
-		end
+		let(:path_args) { '/foo/bar/baz' }
+
+		subject { super().parts }
+
+		it { is_expected.to eq %w[foo bar baz] }
 	end
 
 	describe '#freeze' do
-		it 'should freeze path' do
-			@path.to_s.should.be.frozen
+		describe '#to_s' do
+			subject { super().to_s }
+
+			it { is_expected.to be_frozen }
 		end
 
-		it 'should freeze path parts' do
-			@path.parts.each { |part| part.should.be.frozen }
-			@path.parts.should.be.frozen
+		describe 'path parts' do
+			subject { super().parts }
+
+			it { is_expected.to all be_frozen }
+			it { is_expected.to be_frozen }
 		end
 	end
 
 	describe '#+' do
-		describe 'with Flame::Path argument' do
-			before do
-				@part = Flame::Path.new('/:?fourth')
+		subject { super() + part }
+
+		shared_examples 'correct addition' do
+			it do
+				is_expected.to eq(
+					Flame::Path.new('/foo/:first/:second/:?third/:?fourth')
+				)
 			end
 
-			should 'return new concatenated Flame::Path' do
-				result = @path + @part
-				expected = Flame::Path.new('/foo/:first/:second/:?third/:?fourth')
-				result.should.equal expected
-			end
+			it { is_expected.to be_kind_of Flame::Path }
 
-			should 'return new instance of Flame::Path' do
-				result = @path + @part
-				result.should.be.kind_of Flame::Path
-			end
+			it { is_expected.not_to be path }
 
-			should 'not be the same as the first part' do
-				result = @path + @part
-				result.should.not.be.same_as @path
-			end
-
-			should 'not be the same as the second part' do
-				result = @path + @part
-				result.should.not.be.same_as @part
-			end
+			it { is_expected.not_to be part }
 		end
 
-		describe 'with String argument' do
-			before do
-				@part = '/:?fourth'
-			end
+		context 'Flame::Path argument' do
+			let(:part) { path_initialize('/:?fourth') }
 
-			should 'return new concatenated Flame::Path' do
-				result = @path + @part
-				expected = Flame::Path.new('/foo/:first/:second/:?third/:?fourth')
-				result.should.equal expected
-			end
+			it_behaves_like 'correct addition'
+		end
 
-			should 'return new instance of Flame::Path' do
-				result = @path + @part
-				result.should.be.kind_of Flame::Path
-			end
+		context 'String argument' do
+			let(:part) { '/:?fourth' }
 
-			should 'not be the same as the first part' do
-				result = @path + @part
-				result.should.not.be.same_as @path
-			end
+			it_behaves_like 'correct addition'
 		end
 	end
 
 	describe '#<=>' do
-		it 'should return 1 for other route with less count of path parts' do
-			(@path <=> @init.call('/bar/:first/:second'))
-				.should.equal(1)
+		subject { super() <=> other }
+
+		context 'other with less count of path parts' do
+			let(:other_args) { '/bar/:first/:second' }
+
+			it { is_expected.to eq(1) }
 		end
 
-		it 'should return -1 for other route with greater count of path parts' do
-			(@init.call('/bar/:first/:second') <=> @path)
-				.should.equal(-1)
+		context 'other with greater count of path parts' do
+			let(:other_args) { '/bar/:first/:second/:?third/:?fourth' }
+
+			it { is_expected.to eq(-1) }
 		end
 
-		it 'should return 0 for other route with equal count of path parts' do
-			(@path <=> @init.call('/bar/:first/:second/:?third'))
-				.should.equal(0)
+		context 'other with equal count of path parts' do
+			let(:other_args) { '/bar/:first/:second/:?third' }
+
+			it { is_expected.to eq(0) }
 		end
 
-		it 'should return 1 for other route with arguments' do
-			(@init.call('/route/export_cards') <=> @init.call('/route/:id'))
-				.should.equal(1)
+		context 'other route with arguments' do
+			let(:path_args)  { '/route/export_cards' }
+			let(:other_args) { '/route/:id' }
+
+			it { is_expected.to eq(1) }
 		end
 	end
 
 	describe '#==' do
-		it 'should compare by parts' do
-			(@path == @init.call('/foo/:first/:second/:?third'))
-				.should.equal true
+		subject { super() == other }
+
+		context 'other is Path' do
+			context 'equal' do
+				let(:other) { path_initialize('/foo/:first/:second/:?third') }
+
+				it { is_expected.to be true }
+			end
+
+			context 'inequal' do
+				let(:other) { path_initialize('/foo/:first/:second') }
+
+				it { is_expected.to be false }
+			end
 		end
 
-		it 'should receive String' do
-			(@path == '/foo/:first/:second/:?third')
-				.should.equal true
+		context 'other is String' do
+			context 'equal' do
+				let(:other) { '/foo/:first/:second/:?third' }
+
+				it { is_expected.to be true }
+			end
+
+			context 'inequal' do
+				let(:other) { '/foo/:first/:second' }
+
+				it { is_expected.to be false }
+			end
 		end
 	end
 
 	describe '#adapt' do
-		before do
-			@adapt_init = proc do |path: nil, action: :baz|
-				Flame::Path.new(path).adapt(PathController, action).to_s
-			end
+		subject { Flame::Path.new(path).adapt(PathController, action).to_s }
+
+		context 'path without action name and parameters' do
+			let(:path) { nil }
+			let(:action) { :baz }
+
+			it { is_expected.to eq '/baz/:first/:second/:?third' }
 		end
 
-		it 'should complete path with action name and parameters' do
-			@adapt_init.call
-				.should.equal '/baz/:first/:second/:?third'
+		context 'path without parameters' do
+			let(:path) { '/foo' }
+			let(:action) { :baz }
+
+			it { is_expected.to eq '/foo/:first/:second/:?third' }
 		end
 
-		it 'should complete path with parameters' do
-			@adapt_init.call(path: '/foo')
-				.should.equal '/foo/:first/:second/:?third'
+		context 'path without some parameters' do
+			let(:path) { '/foo/:second' }
+			let(:action) { :baz }
+
+			it { is_expected.to eq '/foo/:second/:first/:?third' }
 		end
 
-		it 'should complete path with missing parameters' do
-			@adapt_init.call(path: '/foo/:second')
-				.should.equal '/foo/:second/:first/:?third'
+		context 'action without parameters' do
+			let(:path) { nil }
+			let(:action) { :foo }
+
+			it { is_expected.to eq '/foo' }
 		end
 
-		it 'should complete path without ending slash' \
-		   ' if action has no parameters' do
-			@adapt_init.call(action: :foo)
-				.should.equal '/foo'
-		end
+		context 'path with all parameters' do
+			let(:path) { '/baz/:first/:second/:?third' }
+			let(:action) { :baz }
 
-		it 'should complete path without ending slash' \
-		   ' if initial path has all parameters' do
-			path = '/baz/:first/:second/:?third'
-			@adapt_init.call(path: path)
-				.should.equal path
+			it { is_expected.to eq path }
 		end
 	end
 
 	describe '#extract_arguments' do
-		it 'should return arguments from other path' do
-			@path.extract_arguments(
-				@init.call('/foo/bar/baz')
-			).should.equal Hash[first: 'bar', second: 'baz']
+		subject { super().extract_arguments(other) }
+
+		context 'regular arguments' do
+			let(:other_args) { '/foo/bar/baz' }
+
+			it { is_expected.to eq Hash[first: 'bar', second: 'baz'] }
 		end
 
-		it 'should return decoded arguments from other path' do
-			@path.extract_arguments(
-				@init.call('/foo/another%20bar/baz')
-			).should.equal Hash[first: 'another bar', second: 'baz']
+		context 'encoded arguments' do
+			let(:other_args) { '/foo/another%20bar/baz' }
+
+			it { is_expected.to eq Hash[first: 'another bar', second: 'baz'] }
 		end
 
-		it 'should return arguments with spaces instead of `+` from other path' do
-			@path.extract_arguments(
-				@init.call('/foo/another+bar/baz')
-			).should.equal Hash[first: 'another bar', second: 'baz']
+		context 'arguments with spaces instead of `+`' do
+			let(:other_args) { '/foo/another+bar/baz' }
+
+			it { is_expected.to eq Hash[first: 'another bar', second: 'baz'] }
 		end
 
-		should 'extract missing optional argument before static part as nil' do
-			@init.call('/foo/:?bar/baz').extract_arguments(
-				@init.call('/foo/baz')
-			).should.equal Hash[bar: nil]
+		context 'missing optional argument before static part' do
+			let(:path_args)  { '/foo/:?bar/baz' }
+			let(:other_args) { '/foo/baz' }
+
+			it { is_expected.to eq Hash[bar: nil] }
 		end
 
-		should 'extract arguments after optional argument at start correctly' do
-			@init.call('/:?foo/bar/:?baz/qux/:id').extract_arguments(
-				@init.call('/bar/baz/qux/2')
-			).should.equal Hash[foo: nil, baz: 'baz', id: '2']
+		context 'arguments after optional argument at start' do
+			let(:path_args)  { '/:?foo/bar/:?baz/qux/:id' }
+			let(:other_args) { '/bar/baz/qux/2' }
+
+			it { is_expected.to eq Hash[foo: nil, baz: 'baz', id: '2'] }
 		end
 
-		should 'extract optional argument after missing optional argument' do
-			@init.call('/:?foo/bar/:?baz').extract_arguments(
-				@init.call('/bar/baz')
-			).should.equal Hash[foo: nil, baz: 'baz']
+		context 'optional argument after missing optional argument' do
+			let(:path_args)  { '/:?foo/bar/:?baz' }
+			let(:other_args) { '/bar/baz' }
+
+			it { is_expected.to eq Hash[foo: nil, baz: 'baz'] }
 		end
 
-		should 'not return optional argument for path with slash at the end' do
-			@path.extract_arguments(
-				@init.call('/foo/bar/baz//')
-			).should.equal Hash[first: 'bar', second: 'baz']
+		context 'path with slash at the end' do
+			let(:other_args) { '/foo/bar/baz//' }
+
+			it { is_expected.to eq Hash[first: 'bar', second: 'baz'] }
 		end
 	end
 
 	describe '#assign_arguments' do
-		it 'should assign arguments' do
-			@path.assign_arguments(
-				first: 'bar',
-				second: 'baz'
-			).should.equal '/foo/bar/baz'
+		subject { super().assign_arguments(args) }
+
+		context 'all arguments correct' do
+			let(:args) { { first: 'bar', second: 'baz' } }
+
+			it { is_expected.to eq '/foo/bar/baz' }
 		end
 
-		it 'should not assign arguments without one required' do
-			-> { @path.assign_arguments(first: 'bar') }
-				.should.raise(Flame::Errors::ArgumentNotAssignedError)
-				.message.should match_words(':second', '/foo/:first/:second/:?third')
+		context 'arguments without one required' do
+			let(:args) { { first: 'bar' } }
+
+			it do
+				expect { subject }.to raise_error(
+					Flame::Errors::ArgumentNotAssignedError,
+					%r{':second'[\w\s]+'/foo/:first/:second/:\?third'}
+				)
+			end
 		end
 	end
 
 	describe '#to_s' do
-		it 'should return full path as String' do
-			@init.call('/foo', 'bar', '/baz').to_s.should.equal '/foo/bar/baz'
-		end
+		subject { super().to_s }
+
+		let(:path_args) { ['/foo', 'bar', '/baz'] }
+
+		it { is_expected.to eq '/foo/bar/baz' }
 	end
 
 	describe '#to_str' do
-		it 'should return full path as String' do
-			@init.call('/foo', 'bar', '/baz').to_str.should.equal '/foo/bar/baz'
-		end
+		subject { super().to_str }
 
-		it 'should allow concatenate Flame::Path object to Strings' do
-			('/foo' + @init.call('/bar', 'baz')).should.equal '/foo/bar/baz'
+		let(:path_args) { ['/foo', 'bar', '/baz'] }
+
+		it { is_expected.to eq '/foo/bar/baz' }
+
+		describe 'concatenate Flame::Path object to Strings' do
+			subject { string + path }
+
+			let(:string)    { '/foo' }
+			let(:path_args) { ['/bar', 'baz'] }
+
+			it { is_expected.to eq '/foo/bar/baz' }
 		end
 	end
 
 	describe '#to_routes_with_endpoint' do
-		it 'should return the nested Hash with path parts as keys with endpoint' do
-			path = @init.call('/foo/bar/baz')
-			routes, endpoint = path.to_routes_with_endpoint
-			routes.should.equal('foo' => { 'bar' => { 'baz' => {} } })
-			endpoint.should.equal({})
-			endpoint.should.be.same_as routes.dig(*path.parts)
+		subject(:result) { path.to_routes_with_endpoint }
+
+		let(:routes)   { result.first }
+		let(:endpoint) { result.last }
+
+		let(:path_args) { '/foo/bar/baz' }
+
+		describe 'routes' do
+			subject { routes }
+
+			it { is_expected.to eq('foo' => { 'bar' => { 'baz' => {} } }) }
+		end
+
+		describe 'endpoint' do
+			subject { endpoint }
+
+			it { is_expected.to eq({}) }
+			it { is_expected.to be routes.dig(*path.parts) }
 		end
 	end
 end

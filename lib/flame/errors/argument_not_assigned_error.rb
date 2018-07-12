@@ -9,14 +9,9 @@ module Flame
 			## @param argument [Flame::Path::Part, String, Symbol]
 			##   not assigned argument
 			def initialize(path, argument)
-				@path = path
-				@argument = argument
-			end
-
-			## Calculated message of the error
-			## @return [String] message of the error
-			def message
-				"Argument '#{@argument}' for path '#{@path}' is not assigned"
+				super(
+					"Argument '#{argument}' for path '#{path}' is not assigned"
+				)
 			end
 		end
 	end

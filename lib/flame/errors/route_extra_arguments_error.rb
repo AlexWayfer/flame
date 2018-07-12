@@ -13,30 +13,19 @@ module Flame
 			## @option extra [Symbol] :place extra arguments in controller or path
 			## @option extra [Array<Symbol>] :args extra arguments
 			def initialize(ctrl, action, path, extra)
-				@ctrl = ctrl
-				@action = action
-				@path = path
-				@extra = extra
-				@extra[:type_name] = {
-					req: 'required',
-					opt: 'optional'
-				}[@extra[:type]]
-			end
+				extra[:type_name] = { req: 'required', opt: 'optional' }[extra[:type]]
 
-			## Calculated message of the error
-			## @return [String] message of the error
-			def message
-				case @extra[:place]
-				when :ctrl
+				entity = {
 					## Error if path has no arguments, that controller's method has
 					## NOTE: It isn't using because `Flame::Path#adopt`
-					"Path '#{@path}' has no #{@extra[:type_name]}" \
-						" arguments #{@extra[:args].inspect}"
-				when :path
+					ctrl: "Path '#{path}'",
 					## Error if path has more arguments, than controller's method
-					"Action '#{@ctrl}##{@action}' has no #{@extra[:type_name]}" \
-						" arguments #{@extra[:args].inspect}"
-				end
+					path: "Action '#{ctrl}##{action}'"
+				}[extra[:place]]
+
+				super(
+					"#{entity} has no #{extra[:type_name]} arguments #{extra[:args].inspect}"
+				)
 			end
 		end
 	end

@@ -3,23 +3,15 @@
 describe 'Flame::Errors' do
 	describe Flame::Errors::RouteArgumentsOrderError do
 		before do
-			@init = proc do |path:, wrong_ordered_arguments:|
-				Flame::Errors::RouteArgumentsOrderError.new(
-					path, wrong_ordered_arguments
-				)
-			end
+			path = '/foo/:first/:second/:?fourth/:?third'
+
+			@error =
+				Flame::Errors::RouteArgumentsOrderError.new(path, %w[:?third :?fourth])
+
+			@correct_message =
+				"Path '#{path}' should have ':?third' argument before ':?fourth'"
 		end
 
-		describe '#message' do
-			it 'should be correct for wrong order of optional arguments' do
-				path = '/foo/:first/:second/:?fourth/:?third'
-				@init.call(
-					path: path,
-					wrong_ordered_arguments: %w[:?third :?fourth]
-				).message.should.equal(
-					"Path '#{path}' should have ':?third' argument before ':?fourth'"
-				)
-			end
-		end
+		behaves_like 'error with correct output'
 	end
 end

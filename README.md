@@ -1,8 +1,8 @@
-<h1 align="center">
+<p align="center">
 	<img src="https://raw.githubusercontent.com/AlexWayfer/flame/master/public/favicon.ico" height="150" alt="Flame Logo" title="Logo from open-source Elusive-Iconfont (https://github.com/reduxframework/elusive-iconfont)" />
-	<br>
-	Flame
-</h1>
+</p>
+
+<h1 align="center">Flame</h1>
 
 <p align="center">
 	<a href="https://travis-ci.org/AlexWayfer/flame"><img src="https://img.shields.io/travis/AlexWayfer/flame.svg?style=flat-square" alt="Travis" /></a>

@@ -19,6 +19,7 @@ module Flame
 			def try_static(*args)
 				file = find_static(*args)
 				return nil unless file.exist?
+				halt 400 unless file.allowed?
 				return_static(file)
 			end
 
@@ -34,11 +35,16 @@ module Flame
 			class StaticFile
 				def initialize(filename, dir)
 					@filename = filename.to_s
-					@file_path = File.join dir, CGI.unescape(@filename)
+					@directory = File.expand_path dir
+					@file_path = File.expand_path File.join dir, CGI.unescape(@filename)
 				end
 
 				def exist?
 					File.exist?(@file_path) && File.file?(@file_path)
+				end
+
+				def allowed?
+					@file_path.start_with? @directory
 				end
 
 				def mtime

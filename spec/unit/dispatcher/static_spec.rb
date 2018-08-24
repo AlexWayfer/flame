@@ -24,7 +24,7 @@ describe Flame::Dispatcher::Static do
 	subject(:try_static) { dispatcher.send(:try_static) }
 
 	context 'not cached' do
-		context 'static file ' do
+		context 'static file' do
 			it { is_expected.to eq "Test static\n" }
 		end
 
@@ -74,7 +74,7 @@ describe Flame::Dispatcher::Static do
 		let(:env) { super().merge('HTTP_IF_MODIFIED_SINCE' => file_mtime.httpdate) }
 
 		before do
-			expect { dispatcher.send(:try_static) }.to throw_symbol(:halt)
+			expect { try_static }.to throw_symbol(:halt)
 		end
 
 		context 'cached file' do
@@ -108,5 +108,25 @@ describe Flame::Dispatcher::Static do
 		let(:path) { '/%EF%BF%BD%8%EF%BF%BD' }
 
 		it { expect { subject }.not_to raise_error }
+	end
+
+	context 'file outside public directory' do
+		before do
+			expect { try_static }.to throw_symbol(:halt)
+		end
+
+		let(:path) { '/%2E%2E/%2E%2E/config/example.yml' }
+
+		describe 'status' do
+			subject { dispatcher.status }
+
+			it { is_expected.to eq 400 }
+		end
+
+		describe 'body' do
+			subject { dispatcher.body }
+
+			it { is_expected.to eq '<h1>Bad Request</h1>' }
+		end
 	end
 end

@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative '../../../lib/flame/errors/template_not_found_error'
+
 describe 'Flame::Errors' do
 	describe Flame::Errors::TemplateNotFoundError do
 		subject(:error) do

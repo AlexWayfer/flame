@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'cgi'
+
 module Flame
 	class Dispatcher
 		## Module for working with static files

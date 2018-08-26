@@ -4,9 +4,10 @@ require 'forwardable'
 require 'gorilla_patch/namespace'
 
 require_relative 'controller/path_to'
-require_relative 'render'
 
 module Flame
+	autoload :Render, "#{__dir__}/render"
+
 	## Class initialize when Dispatcher found route with it
 	## For new request and response
 	class Controller

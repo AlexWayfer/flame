@@ -1,4 +1,4 @@
-rspec_task:
+test_task:
   container:
     matrix:
       image: ruby:2.5
@@ -6,4 +6,4 @@ rspec_task:
   bundle_cache:
     folder: /usr/local/bundle
     populate_script: bundle update
-  rspec_script: bundle exec rspec
+  test_script: bundle exec rake

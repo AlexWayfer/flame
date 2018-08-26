@@ -1,0 +1,7 @@
+rspec_task:
+  container:
+    matrix:
+      image: ruby:2.5
+      image: ruby:2.4
+  bundle_script: bundle install
+  rspec_script: bundle exec rspec

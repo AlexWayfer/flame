@@ -1,5 +1,6 @@
 Layout/Tab:
   Enabled: false
+  IndentationWidth: 2
 Layout/IndentationWidth:
   Width: 1
 Layout/MultilineMethodCallIndentation:

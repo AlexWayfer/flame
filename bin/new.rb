@@ -10,7 +10,10 @@ require_relative 'new/app'
 module FlameCLI
 	## Command for generating new objects
 	class New < Thor
-		desc 'app APP_NAME', 'Generate new application directory with sub-directories'
+		desc(
+			'app APP_NAME',
+			'Generate new application directory with sub-directories'
+		)
 		def app(app_name)
 			self.class::App.new app_name
 		end

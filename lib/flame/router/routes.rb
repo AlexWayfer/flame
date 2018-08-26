@@ -15,7 +15,9 @@ module Flame
 				path = Flame::Path.new(*path_parts)
 				return if path.parts.empty?
 				nested_routes = self.class.new Flame::Path.new(*path.parts[1..-1])
-				# path.parts.reduce(result) { |hash, part| hash[part] ||= self.class.new }
+				# path.parts.reduce(result) do |hash, part|
+				# 	hash[part] ||= self.class.new
+				# end
 				self[path.parts.first] = nested_routes
 			end
 

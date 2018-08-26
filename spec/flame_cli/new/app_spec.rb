@@ -86,7 +86,8 @@ describe 'FlameCLI::New::App' do
 
 			it do
 				is_expected.to match_words(
-					'use Rack::Session::Cookie, FB::Application.config[:session][:cookie]',
+					'use Rack::Session::Cookie, ' \
+						'FB::Application.config[:session][:cookie]',
 					'FB::Application.config[:server][environment.to_s][:logs_dir]',
 					'FB::Application.config[:logger] = Logger.new',
 					'FB::DB.loggers <<',
@@ -178,7 +179,8 @@ describe 'FlameCLI::New::App' do
 			File.write(
 				'Gemfile',
 				File.read('Gemfile').sub(
-					"gem 'flame', github: 'AlexWayfer/flame'\n", "gem 'flame', path: '..'\n"
+					"gem 'flame', github: 'AlexWayfer/flame'\n",
+					"gem 'flame', path: '..'\n"
 				)
 			)
 

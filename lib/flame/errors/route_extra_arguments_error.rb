@@ -24,7 +24,8 @@ module Flame
 				}[extra[:place]]
 
 				super(
-					"#{entity} has no #{extra[:type_name]} arguments #{extra[:args].inspect}"
+					"#{entity} has no " \
+						"#{extra[:type_name]} arguments #{extra[:args].inspect}"
 				)
 			end
 		end

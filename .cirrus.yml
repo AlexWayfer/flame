@@ -3,5 +3,7 @@ rspec_task:
     matrix:
       image: ruby:2.5
       image: ruby:2.4
-  bundle_script: bundle install
+  bundle_cache:
+    folder: /usr/local/bundle
+    populate_script: bundle update
   rspec_script: bundle exec rspec

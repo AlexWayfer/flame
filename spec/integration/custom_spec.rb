@@ -21,7 +21,11 @@ class CustomController < Flame::Controller
 	# end
 
 	def error
-		raise StandardError
+		raise 'Test'
+	end
+
+	def syntax_error
+		ERB.new('<% % %>').result(binding)
 	end
 
 	private
@@ -29,10 +33,6 @@ class CustomController < Flame::Controller
 	def execute(action)
 		@action = action
 		super
-	rescue StandardError => exception
-		@rescued = true
-		body default_body
-		raise exception
 	end
 
 	def not_found
@@ -43,8 +43,13 @@ class CustomController < Flame::Controller
 
 	def default_body
 		result = "Some page about #{status} code"
-		result += "; rescued is #{@rescued}" if status == 500
+		result += "; exception is #{@exception.class}" if status == 500
 		result
+	end
+
+	def server_error(exception)
+		@exception = exception
+		super
 	end
 end
 
@@ -137,18 +142,38 @@ describe CustomController do
 	end
 
 	describe 'custom 500' do
-		before { get '/custom/error' }
+		shared_examples 'custom 500' do
+			describe 'last_response' do
+				subject { last_response }
 
-		describe 'last_response' do
-			subject { last_response }
+				it { is_expected.to be_server_error }
 
-			it { is_expected.to be_server_error }
+				describe 'body' do
+					subject { super().body }
 
-			describe 'body' do
-				subject { super().body }
-
-				it { is_expected.to eq 'Some page about 500 code; rescued is true' }
+					it do
+						is_expected.to eq(
+							"Some page about 500 code; exception is #{exception}"
+						)
+					end
+				end
 			end
+		end
+
+		context 'regular error' do
+			before { get '/custom/error' }
+
+			let(:exception) { RuntimeError }
+
+			it_behaves_like 'custom 500'
+		end
+
+		context 'syntax error' do
+			before { get '/custom/syntax_error' }
+
+			let(:exception) { SyntaxError }
+
+			it_behaves_like 'custom 500'
 		end
 	end
 

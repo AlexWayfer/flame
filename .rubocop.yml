@@ -8,6 +8,9 @@ Layout/MultilineMethodCallIndentation:
 Layout/AlignParameters:
   EnforcedStyle: with_fixed_indentation
 
+Style/ParenthesesAroundCondition:
+  AllowInMultilineConditions: true
+
 AllCops:
   TargetRubyVersion: 2.4
 

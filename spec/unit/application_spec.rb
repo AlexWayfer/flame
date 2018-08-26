@@ -81,26 +81,124 @@ module ApplicationNamespace
 	end
 end
 
-def initialize_path_hash(controller:, action:, http_method: :GET, **options)
+module ApplicationControllers
+	class Controller < Flame::Controller
+	end
+
+	module Site
+		class Controller < ApplicationControllers::Controller
+		end
+
+		class IndexController < Site::Controller
+			def index; end
+
+			def about; end
+		end
+
+		class PagesController < Site::Controller
+			def show(id); end
+		end
+
+		module Cabinet
+			class Controller < Site::Controller
+			end
+
+			class IndexController < Cabinet::Controller
+				def index; end
+			end
+
+			class SignInController < Cabinet::Controller
+				def index; end
+
+				def sign_in_post; end
+				post '/', :sign_in_post
+			end
+
+			module Common
+				class Controller < Cabinet::Controller
+				end
+			end
+
+			module Admin
+				class IndexController < Cabinet::Controller
+					def index; end
+				end
+
+				class UsersController < Cabinet::Common::Controller
+					def index; end
+
+					def show(id); end
+
+					def update(id); end
+
+					def delete(id); end
+				end
+			end
+		end
+	end
+
+	module API
+		class Controller < ApplicationControllers::Controller
+		end
+
+		class IndexController < API::Controller
+			def index; end
+
+			def about; end
+		end
+
+		class FooController < API::Controller
+			def show(id); end
+		end
+
+		module Restricted
+			class Controller < API::Controller
+			end
+
+			class IndexController < Restricted::Controller
+				def index; end
+			end
+
+			class UsersController < Restricted::Controller
+				def index; end
+
+				def show(id); end
+
+				def update(id); end
+
+				def delete(id); end
+			end
+		end
+	end
+
+	class Application < Flame::Application
+	end
+end
+
+def initialize_path_hash(
+	controller:, prefix:, action:, http_method: :GET, **options
+)
 	route = Flame::Router::Route.new(controller, action)
 	ctrl_path = options.fetch :ctrl_path, controller.path
 	action_path = Flame::Path.new(
 		options.fetch(:action_path, action == :index ? '/' : action)
 	).adapt(controller, action)
 	path_routes, endpoint =
-		Flame::Path.new(ctrl_path, action_path).to_routes_with_endpoint
+		Flame::Path.new(prefix, ctrl_path, action_path).to_routes_with_endpoint
 	endpoint[http_method] = route
 	path_routes
 end
 
 using GorillaPatch::DeepMerge
 
-def initialize_path_hashes(controller, *actions, **actions_with_options)
+def initialize_path_hashes(
+	controller, *actions, prefix: nil, **actions_with_options
+)
 	actions.map { |action| [action, {}] }.to_h
 		.merge(actions_with_options)
 		.each_with_object({}) do |(action, options), result|
 			result.deep_merge! initialize_path_hash(
-				controller: controller, action: action, **options
+				controller: controller, prefix: prefix, action: action, **options
 			)
 		end
 end
@@ -289,7 +387,7 @@ describe Flame::Application do
 	describe '.path_to' do
 		before do
 			app_class.class_exec do
-				mount ApplicationController, '/'
+				mount :application, '/'
 			end
 		end
 
@@ -870,6 +968,70 @@ describe Flame::Application do
 						action_path: '/:id'
 					}
 				)
+			end
+		end
+
+		describe 'auto-mount nested controllers' do
+			let(:app_class) { Class.new(ApplicationControllers::Application) }
+
+			before do
+				app_class.class_exec do
+					mount :site
+
+					mount :api, nested: false do
+						mount :foo
+					end
+				end
+			end
+
+			it do
+				is_expected.to eq initialize_path_hashes(
+					ApplicationControllers::Site::IndexController, :index, :about
+				).deep_merge! initialize_path_hashes(
+					ApplicationControllers::Site::PagesController,
+					prefix: :site,
+					show: { action_path: '/:id' }
+				).deep_merge! initialize_path_hashes(
+					ApplicationControllers::Site::Cabinet::IndexController, :index,
+					prefix: :site
+				).deep_merge! initialize_path_hashes(
+					ApplicationControllers::Site::Cabinet::SignInController, :index,
+					prefix: 'site/cabinet',
+					sign_in_post: { http_method: :POST, action_path: '/' }
+				).deep_merge! initialize_path_hashes(
+					ApplicationControllers::Site::Cabinet::Admin::IndexController, :index,
+					prefix: 'site/cabinet'
+				).deep_merge! initialize_path_hashes(
+					ApplicationControllers::Site::Cabinet::Admin::UsersController,
+					:index,
+					prefix: 'site/cabinet/admin',
+					show: { action_path: '/:id' },
+					update: { http_method: :PUT, action_path: '/:id' },
+					delete: {
+						http_method: :DELETE, action_path: '/:id'
+					}
+				).deep_merge! initialize_path_hashes(
+					ApplicationControllers::API::IndexController, :index, :about
+				).deep_merge! initialize_path_hashes(
+					ApplicationControllers::API::FooController,
+					prefix: :api,
+					show: { action_path: '/:id' }
+				)
+			end
+
+			context 'nonexistent controller name' do
+				subject do
+					app_class.class_exec do
+						mount :nonexistent
+					end
+				end
+
+				it do
+					expect { subject }.to raise_error(
+						Flame::Errors::ControllerNotFoundError,
+						"Controller 'nonexistent' not found for 'ApplicationControllers'"
+					)
+				end
 			end
 		end
 	end

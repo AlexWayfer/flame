@@ -64,9 +64,8 @@ end
 # app.rb
 
 class App < Flame::Application
-  mount IndexController do
+  mount :index do
     get '/hello', :hello_world
-    defaults
   end
 end
 

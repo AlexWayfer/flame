@@ -113,10 +113,10 @@ module Flame
 			##   mount :cabinet do # Cabinet::IndexController
 			##     mount :articles # Cabinet::ArticlesController
 			##   end
-			def mount(controller_name, path = nil, &block)
+			def mount(controller_name, path = nil, nested: true, &block)
 				## Add routes from controller to glob array
 				router.add Router::RoutesRefine.new(
-					router, namespace, controller_name, path, &block
+					namespace, controller_name, path, nested: nested, &block
 				)
 			end
 

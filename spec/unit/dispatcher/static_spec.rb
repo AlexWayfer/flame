@@ -48,4 +48,12 @@ describe Flame::Dispatcher::Static do
 		dispatcher.status.should.equal 304
 		dispatcher.body.should.equal ''
 	end
+
+	it 'should return 400 for file outside public directory' do
+		@env[Rack::PATH_INFO] = '/%2E%2E/%2E%2E/config/example.yml'
+		dispatcher = Flame::Dispatcher.new(@app, @env)
+		catch(:halt) { dispatcher.send(:try_static).should.equal nil }
+		dispatcher.status.should.equal 400
+		dispatcher.body.should.equal '<h1>Bad Request</h1>'
+	end
 end

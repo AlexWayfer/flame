@@ -5,6 +5,8 @@ Layout/IndentationWidth:
   Width: 1
 Layout/MultilineMethodCallIndentation:
   EnforcedStyle: indented
+Layout/AlignParameters:
+  EnforcedStyle: with_fixed_indentation
 
 AllCops:
   TargetRubyVersion: 2.4

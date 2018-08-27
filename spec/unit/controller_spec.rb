@@ -201,10 +201,43 @@ describe Flame::Controller do
 
 		context 'static file with version' do
 			let(:file) { 'test.txt' }
-			let(:mtime) { File.mtime File.join(__dir__, 'public', file) }
-			let(:args) { ["/#{file}", version: true] }
+			let!(:mtime) { File.mtime File.join(__dir__, 'public', file) }
+			let(:times) { 5 }
 
-			it { is_expected.to eq "http://localhost:3000/#{file}?v=#{mtime.to_i}" }
+			before do
+				controller.config[:environment] = environment
+			end
+
+			shared_examples 'correct URL' do
+				before do
+					expect(File).to receive(:mtime).and_call_original
+						.exactly(expected_times).times
+				end
+
+				it do
+					times.times do
+						expect(
+							controller.url_to("/#{file}", version: true)
+						).to eq(
+							"http://localhost:3000/#{file}?v=#{mtime.to_i}"
+						)
+					end
+				end
+			end
+
+			context 'production environment' do
+				let(:environment) { 'production' }
+				let(:expected_times) { 1 }
+
+				it_behaves_like 'correct URL'
+			end
+
+			context 'development environment' do
+				let(:environment) { 'development' }
+				let(:expected_times) { times }
+
+				it_behaves_like 'correct URL'
+			end
 		end
 	end
 

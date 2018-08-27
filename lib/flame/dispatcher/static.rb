@@ -21,7 +21,7 @@ module Flame
 			def try_static(*args)
 				file = find_static(*args)
 				return nil unless file.exist?
-				halt 400 unless file.allowed?
+				halt 400 unless file.within_directory
 				return_static(file)
 			end
 
@@ -35,26 +35,22 @@ module Flame
 
 			## Class for static files with helpers methods
 			class StaticFile
+				attr_reader :extname, :within_directory
+
 				def initialize(filename, dir)
 					@filename = filename.to_s
 					@directory = File.expand_path dir
 					@file_path = File.expand_path File.join dir, CGI.unescape(@filename)
+					@extname = File.extname(@file_path)
+					@within_directory = @file_path.start_with? @directory
 				end
 
 				def exist?
 					File.exist?(@file_path) && File.file?(@file_path)
 				end
 
-				def allowed?
-					@file_path.start_with? @directory
-				end
-
 				def mtime
 					File.mtime(@file_path)
-				end
-
-				def extname
-					File.extname(@file_path)
 				end
 
 				def newer?(http_since)
@@ -66,8 +62,7 @@ module Flame
 				end
 
 				def path(with_version: false)
-					path = @filename
-					with_version ? "#{path}?v=#{mtime.to_i}" : path
+					with_version ? "#{@filename}?v=#{mtime.to_i}" : @filename
 				end
 			end
 

@@ -8,7 +8,7 @@
 	<a href="https://cirrus-ci.com/github/AlexWayfer/flame/master"><img src="https://api.cirrus-ci.com/github/AlexWayfer/flame.svg?branch=master" alt="Cirrus CI" /></a>
 	<a href="https://codecov.io/gh/AlexWayfer/flame"><img src="https://img.shields.io/codecov/c/github/AlexWayfer/flame.svg?style=flat-square" alt="Codecov" /></a>
 	<a href="https://codeclimate.com/github/AlexWayfer/flame"><img src="https://img.shields.io/codeclimate/maintainability/AlexWayfer/flame.svg?style=flat-square" alt="Code Climate" /></a>
-	<a href="https://gemnasium.com/github.com/AlexWayfer/flame"><img src="https://img.shields.io/gemnasium/AlexWayfer/flame.svg?style=flat-square" alt="Gemnasium" /></a>
+	<a href="https://depfu.com/repos/AlexWayfer/flame"><img src="https://img.shields.io/depfu/depfu/example-ruby.svg?style=flat-square" alt="Depfu" /></a>
 	<a href="http://inch-ci.org/github/AlexWayfer/flame"><img src="http://inch-ci.org/github/AlexWayfer/flame.svg?branch=master&style=flat-square" alt="Docs" /></a>
 	<a href="https://rubygems.org/gems/flame"><img src="https://img.shields.io/gem/v/flame.svg?style=flat-square" alt="Gem" /></a>
 	<a href="https://github.com/AlexWayfer/flame/blob/master/LICENSE"><img src="https://img.shields.io/github/license/mashape/apistatus.svg?style=flat-square" alt="MIT license" /></a>

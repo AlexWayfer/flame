@@ -5,6 +5,6 @@ test_task:
       image: ruby:2.4
   bundle_cache:
     folder: /usr/local/bundle
-    fingerprint_script: echo $RUBY_VERSION
+    fingerprint_script: echo $CIRRUS_TASK_NAME:$CIRRUS_OS:$RUBY_VERSION
     populate_script: bundle update
   test_script: bundle exec rake

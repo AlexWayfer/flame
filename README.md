@@ -5,7 +5,7 @@
 <h1 align="center">Flame</h1>
 
 <p align="center">
-	<a href="https://travis-ci.org/AlexWayfer/flame"><img src="https://img.shields.io/travis/AlexWayfer/flame.svg?style=flat-square" alt="Travis" /></a>
+	<a href="https://cirrus-ci.com/github/AlexWayfer/flame/master"><img src="https://api.cirrus-ci.com/github/AlexWayfer/flame.svg?branch=master" alt="Cirrus CI" /></a>
 	<a href="https://codecov.io/gh/AlexWayfer/flame"><img src="https://img.shields.io/codecov/c/github/AlexWayfer/flame.svg?style=flat-square" alt="Codecov" /></a>
 	<a href="https://codeclimate.com/github/AlexWayfer/flame"><img src="https://img.shields.io/codeclimate/maintainability/AlexWayfer/flame.svg?style=flat-square" alt="Code Climate" /></a>
 	<a href="https://gemnasium.com/github.com/AlexWayfer/flame"><img src="https://img.shields.io/gemnasium/AlexWayfer/flame.svg?style=flat-square" alt="Gemnasium" /></a>

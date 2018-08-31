@@ -33,21 +33,38 @@ module Flame
 			end
 
 			## Re-define public instance method from module
+			## @param mod [Module] Module for including to controller
+			## @param exclude [Array<Symbol>] Actions for excluding
+			##   from module public instance methods
+			## @param only [Array<Symbol>] Actions for re-defining
+			##   from module public instance methods
 			## @example Define actions from module in controller
 			##   class MyController < BaseController
 			##     include with_actions Module1
 			##     include with_actions Module2
 			##     ....
 			##   end
-			def with_actions(mod, exclude: [])
+			## @example Define actions from module exclude some actions in controller
+			##   class MyController < BaseController
+			##     include with_actions Module1, exclude: %i[action1 action2 ...]
+			##     include with_actions Module2, exclude: %i[action1 action2 ...]
+			##     ....
+			##   end
+			## @example Define actions from module according list in controller
+			##   class MyController < BaseController
+			##     include with_actions Module1, only: %i[action1 action2 ...]
+			##     include with_actions Module2, only: %i[action1 action2 ...]
+			##     ....
+			##   end
+			def with_actions(mod, exclude: [], only: nil)
 				Module.new do
 					@mod = mod
-					@exclude = exclude
+					@methods_to_define = only || (@mod.public_instance_methods - exclude)
 
 					def self.included(ctrl)
 						ctrl.include @mod
 
-						(@mod.public_instance_methods - @exclude).each do |meth|
+						@methods_to_define.each do |meth|
 							ctrl.send :define_method, meth, @mod.public_instance_method(meth)
 						end
 					end

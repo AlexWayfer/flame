@@ -607,6 +607,16 @@ describe Flame::Controller do
 				end
 			end
 
+			context 'only actions' do
+				let(:args) { [{ only: %i[included_action] }] }
+
+				it do
+					is_expected.to eq(
+						(SomeActions.public_instance_methods & %i[included_action]).sort
+					)
+				end
+			end
+
 			context '+ .inherit_actions' do
 				let(:inherited_controller) do
 					Class.new(controller_class) do

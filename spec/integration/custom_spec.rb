@@ -28,6 +28,10 @@ class CustomController < Flame::Controller
 		ERB.new('<% % %>').result(binding)
 	end
 
+	def merge_query_parameter(_id)
+		path_to :merge_query_parameter, params.merge(lang: 'ru')
+	end
+
 	private
 
 	def execute(action)
@@ -206,6 +210,30 @@ describe CustomController do
 
 				it { is_expected.to eq 'Some page about 302 code' }
 			end
+		end
+	end
+
+	describe 'merge query parameter' do
+		before { get path }
+
+		let(:path_without) { '/custom/merge_query_parameter/2?foo=bar' }
+
+		subject { last_response.body }
+
+		shared_examples 'correct path' do
+			it { is_expected.to eq "#{path_without}&lang=ru" }
+		end
+
+		context 'when does not exist' do
+			let(:path) { path_without }
+
+			it_behaves_like 'correct path'
+		end
+
+		context 'when exists' do
+			let(:path) { "#{path_without}&lang=en" }
+
+			it_behaves_like 'correct path'
 		end
 	end
 end

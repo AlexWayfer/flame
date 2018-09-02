@@ -307,10 +307,9 @@ describe Flame::Application do
 		context 'nested params' do
 			let(:args) do
 				[
-					ApplicationController, :foo, params: {
-						name: 'world',
-						nested: { some: 'here', another: %w[there maybe] }
-					}
+					ApplicationController, :foo,
+					name: 'world',
+					nested: { some: 'here', another: %w[there maybe] }
 				]
 			end
 

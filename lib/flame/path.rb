@@ -120,9 +120,9 @@ module Flame
 			## Not argument
 			return part unless part.arg?
 			## Not required argument
-			return args[part[2..-1].to_sym] if part.opt_arg?
+			return args.delete(part[2..-1].to_sym) if part.opt_arg?
 			## Required argument
-			param = args[part[1..-1].to_sym]
+			param = args.delete(part[1..-1].to_sym)
 			## Required argument is nil
 			error = Errors::ArgumentNotAssignedError.new(@path, part)
 			raise error if param.nil?

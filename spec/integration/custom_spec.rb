@@ -38,6 +38,7 @@ class CustomController < Flame::Controller
 		@action = action
 		return halt redirect :foo if request.path.include? '/old_foo'
 		super
+		{ a: 1 }
 	end
 
 	def not_found

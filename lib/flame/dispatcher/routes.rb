@@ -45,12 +45,12 @@ module Flame
 				route = router.find_nearest_route(request.path)
 				## Return standard `default_body` if the route not found
 				return default_body unless route
-				## Execute `not_found` method for the founded route
 				if response.not_found?
+					## Execute `not_found` method as action for the founded route
 					execute_route(route, :not_found)
+					body
 				else
-					controller = route.controller.new(self)
-					body controller.send(:default_body)
+					route.controller.new(self).send(:default_body)
 				end
 			end
 		end

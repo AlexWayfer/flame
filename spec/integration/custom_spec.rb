@@ -36,6 +36,7 @@ class CustomController < Flame::Controller
 
 	def execute(action)
 		@action = action
+		return halt redirect :foo if request.path.include? '/old_foo'
 		super
 	end
 
@@ -53,6 +54,7 @@ class CustomController < Flame::Controller
 
 	def server_error(exception)
 		@exception = exception
+		p exception
 		super
 	end
 end
@@ -234,6 +236,20 @@ describe CustomController do
 			let(:path) { "#{path_without}&lang=en" }
 
 			it_behaves_like 'correct path'
+		end
+	end
+
+	describe 'execute `not_found` through `execute`' do
+		before { get '/custom/old_foo' }
+
+		subject { last_response }
+
+		it { is_expected.to be_redirect }
+
+		describe 'location' do
+			subject { super().location }
+
+			it { is_expected.to eq '/custom/foo' }
 		end
 	end
 end

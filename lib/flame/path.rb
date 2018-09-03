@@ -7,6 +7,9 @@ require_relative 'errors/argument_not_assigned_error'
 module Flame
 	## Class for working with paths
 	class Path
+		extend Forwardable
+		def_delegators :to_s, :include?
+
 		## Merge parts of path to one path
 		## @param parts [Array<String, Flame::Path>] parts of expected path
 		## @return [Flame::Path] path from parts

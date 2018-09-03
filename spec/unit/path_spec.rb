@@ -344,4 +344,22 @@ describe Flame::Path do
 			it { is_expected.to be routes.dig(*path.parts) }
 		end
 	end
+
+	describe '#include?' do
+		subject { super().include?(*args) }
+
+		let(:path_args) { '/foo/bar/baz' }
+
+		context 'existing part' do
+			let(:args) { '/bar/baz' }
+
+			it { is_expected.to be true }
+		end
+
+		context 'nonexistent part' do
+			let(:args) { '/barr' }
+
+			it { is_expected.to be false }
+		end
+	end
 end

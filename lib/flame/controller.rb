@@ -139,7 +139,7 @@ module Flame
 		end
 
 		def not_found
-			body default_body
+			default_body
 		end
 
 		## Default method for Internal Server Error, can be inherited

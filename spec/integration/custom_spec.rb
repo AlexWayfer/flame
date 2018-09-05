@@ -68,12 +68,12 @@ end
 describe CustomController do
 	include Rack::Test::Methods
 
+	subject { last_response }
+
 	describe 'foo' do
 		before { get '/custom/foo' }
 
 		describe 'last_response' do
-			subject { last_response }
-
 			it { is_expected.to be_ok }
 
 			describe 'body' do
@@ -88,8 +88,6 @@ describe CustomController do
 		before { get '/custom/hello' }
 
 		describe 'last_response' do
-			subject { last_response }
-
 			it { is_expected.to be_ok }
 
 			describe 'body' do
@@ -104,8 +102,6 @@ describe CustomController do
 		before { get '/custom/hello/Alex' }
 
 		describe 'last_response' do
-			subject { last_response }
-
 			it { is_expected.to be_ok }
 
 			describe 'body' do
@@ -120,8 +116,6 @@ describe CustomController do
 		before { get '/custom/foo/404' }
 
 		describe 'last_response' do
-			subject { last_response }
-
 			it { is_expected.to be_not_found }
 
 			describe 'body' do
@@ -136,8 +130,6 @@ describe CustomController do
 		before { get '/custom/404' }
 
 		describe 'last_response' do
-			subject { last_response }
-
 			it { is_expected.to be_not_found }
 
 			describe 'Custom-Header' do
@@ -151,8 +143,6 @@ describe CustomController do
 	describe 'custom 500' do
 		shared_examples 'custom 500' do
 			describe 'last_response' do
-				subject { last_response }
-
 				it { is_expected.to be_server_error }
 
 				describe 'body' do
@@ -188,8 +178,6 @@ describe CustomController do
 		before { head '/custom/foo' }
 
 		describe 'last_response' do
-			subject { last_response }
-
 			it { is_expected.to be_ok }
 
 			describe 'body' do
@@ -204,8 +192,6 @@ describe CustomController do
 		before { get '/custom/redirecting' }
 
 		describe 'last_response' do
-			subject { last_response }
-
 			it { is_expected.to be_redirect }
 
 			describe 'body' do
@@ -221,7 +207,7 @@ describe CustomController do
 
 		let(:path_without) { '/custom/merge_query_parameter/2?foo=bar' }
 
-		subject { last_response.body }
+		subject { super().body }
 
 		shared_examples 'correct path' do
 			it { is_expected.to eq "#{path_without}&lang=ru" }
@@ -242,8 +228,6 @@ describe CustomController do
 
 	describe 'execute `not_found` through `execute`' do
 		before { get '/custom/old_foo' }
-
-		subject { last_response }
 
 		it { is_expected.to be_redirect }
 

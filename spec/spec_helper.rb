@@ -10,7 +10,7 @@ SimpleCov.start do
 end
 SimpleCov.start
 
-if ENV['CODECOV']
+if ENV['CODECOV_TOKEN']
 	require 'codecov'
 	SimpleCov.formatter = SimpleCov::Formatter::Codecov
 end

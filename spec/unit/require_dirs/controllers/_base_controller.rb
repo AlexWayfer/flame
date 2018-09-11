@@ -2,6 +2,6 @@
 
 module RequireDirs
 	class Controller < Flame::Controller
-		@service = RequireDirs::SomeService
+		@service = RequireDirs::Services::AnotherService
 	end
 end

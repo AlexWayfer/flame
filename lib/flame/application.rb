@@ -89,7 +89,7 @@ module Flame
 								ignore.any? { |regexp| regexp.match?(file) }
 						end
 				files
-					.sort_by { |s| [*s.split('/').map { |part| part[0] }, s] }
+					.sort_by { |file| [File.basename(file)[0], file] }
 					.each { |file| require File.expand_path(file) }
 			end
 

@@ -7,6 +7,10 @@ module Flame
 	class Router
 		## Class for Route in Router.routes
 		class Route
+			extend Forwardable
+
+			def_delegators :to_s, :inspect
+
 			attr_reader :controller, :action
 
 			## Create a new instance
@@ -27,6 +31,10 @@ module Flame
 						public_send(method) == other.public_send(method)
 					)
 				end
+			end
+
+			def to_s
+				"#{controller}##{action}"
 			end
 		end
 	end

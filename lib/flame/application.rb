@@ -88,9 +88,10 @@ module Flame
 							File.executable?(file) ||
 								ignore.any? { |regexp| regexp.match?(file) }
 						end
-				files
-					.sort_by { |file| [File.basename(file)[0], file] }
-					.each { |file| require File.expand_path(file) }
+				files.sort_by! do |file|
+					[File.basename(file).start_with?('_') ? 1 : 2, file]
+				end
+				files.each { |file| require File.expand_path(file) }
 			end
 
 			## Mount controller in application class

@@ -66,15 +66,23 @@ module Flame
 			end
 
 			def refined_http_methods
-				@refined_http_methods ||= []
+				@refined_http_methods ||= {}
 			end
 
 			private
 
 			Flame::Router::HTTP_METHODS.each do |http_method|
 				downcased_http_method = http_method.downcase
-				define_method(downcased_http_method) do |action_path, action = nil|
-					refined_http_methods << [downcased_http_method, action_path, action]
+				define_method(
+					downcased_http_method
+				) do |action_or_action_path, action = nil|
+					action, action_path =
+						if action
+							[action, action_or_action_path]
+						else
+							[action_or_action_path, nil]
+						end
+					refined_http_methods[action] = [downcased_http_method, action_path]
 				end
 			end
 
@@ -83,15 +91,15 @@ module Flame
 				def included(ctrl)
 					ctrl.include @mod
 
-					if @mod.respond_to? :refined_http_methods
-						ctrl.refined_http_methods.concat @mod.refined_http_methods
-					else
-						@methods_to_define.each do |meth|
-							ctrl.send(
-								:define_method, meth, @mod.public_instance_method(meth)
-							)
-						end
+					@methods_to_define.each do |meth|
+						ctrl.send :define_method, meth, @mod.public_instance_method(meth)
 					end
+
+					return unless @mod.respond_to? :refined_http_methods
+
+					ctrl.refined_http_methods.merge!(
+						@mod.refined_http_methods.slice(*@methods_to_define)
+					)
 				end
 			end
 

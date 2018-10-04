@@ -183,7 +183,7 @@ module Flame
 			## Execute block of refinings end sorting routes
 			def execute(&block)
 				@controller.refined_http_methods
-					.each do |http_method, action_path, action|
+					.each do |action, (http_method, action_path)|
 						send(http_method, action_path, action)
 					end
 				instance_exec(&block) if block

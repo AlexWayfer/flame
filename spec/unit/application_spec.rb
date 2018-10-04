@@ -32,7 +32,7 @@ module TestRefinedActions
 end
 
 class ApplicationRefinedController < Flame::Controller
-	include with_actions TestRefinedActions
+	include with_actions TestRefinedActions, exclude: %i[injected]
 
 	def foo; end
 
@@ -834,7 +834,6 @@ describe Flame::Application do
 						http_method: :PATCH,
 						action_path: '/refined_quuz'
 					},
-					injected: { http_method: :POST },
 					update: {
 						http_method: :PUT,
 						action_path: '/module/update'

@@ -22,7 +22,18 @@ class ApplicationController < Flame::Controller
 	end
 end
 
+module TestRefinedActions
+	extend Flame::Controller::Actions
+
+	post def injected; end
+
+	put 'module/update',
+		def update; end
+end
+
 class ApplicationRefinedController < Flame::Controller
+	include with_actions TestRefinedActions
+
 	def foo; end
 
 	get def bar; end
@@ -31,7 +42,8 @@ class ApplicationRefinedController < Flame::Controller
 
 	put def qux; end
 
-	delete '/refined_quux/:id', def quux(id); end
+	delete '/refined_quux/:id',
+		def quux(id); end
 
 	def quuz; end
 	patch '/refined_quuz', :quuz
@@ -821,6 +833,11 @@ describe Flame::Application do
 					quuz: {
 						http_method: :PATCH,
 						action_path: '/refined_quuz'
+					},
+					injected: { http_method: :POST },
+					update: {
+						http_method: :PUT,
+						action_path: '/module/update'
 					}
 				)
 			end

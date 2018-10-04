@@ -61,15 +61,41 @@ module Flame
 					@mod = mod
 					@methods_to_define = only || (@mod.public_instance_methods - exclude)
 
-					def self.included(ctrl)
-						ctrl.include @mod
+					extend ModuleWithActions
+				end
+			end
 
+			def refined_http_methods
+				@refined_http_methods ||= []
+			end
+
+			private
+
+			Flame::Router::HTTP_METHODS.each do |http_method|
+				downcased_http_method = http_method.downcase
+				define_method(downcased_http_method) do |action_path, action = nil|
+					refined_http_methods << [downcased_http_method, action_path, action]
+				end
+			end
+
+			## Base module for module `with_actions`
+			module ModuleWithActions
+				def included(ctrl)
+					ctrl.include @mod
+
+					if @mod.respond_to? :refined_http_methods
+						ctrl.refined_http_methods.concat @mod.refined_http_methods
+					else
 						@methods_to_define.each do |meth|
-							ctrl.send :define_method, meth, @mod.public_instance_method(meth)
+							ctrl.send(
+								:define_method, meth, @mod.public_instance_method(meth)
+							)
 						end
 					end
 				end
 			end
+
+			private_constant :ModuleWithActions
 		end
 	end
 end

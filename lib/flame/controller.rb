@@ -27,19 +27,6 @@ module Flame
 				parts = [modules.last] if parts.empty?
 				Flame::Path.merge nil, parts.join('_')
 			end
-
-			def refined_http_methods
-				@refined_http_methods ||= []
-			end
-
-			private
-
-			Flame::Router::HTTP_METHODS.each do |http_method|
-				downcased_http_method = http_method.downcase
-				define_method(downcased_http_method) do |action_path, action = nil|
-					refined_http_methods << [downcased_http_method, action_path, action]
-				end
-			end
 		end
 
 		extend Forwardable

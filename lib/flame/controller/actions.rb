@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'gorilla_patch/slice'
+
 module Flame
 	class Controller
 		## Module for work with actions
@@ -88,6 +90,8 @@ module Flame
 
 			## Base module for module `with_actions`
 			module ModuleWithActions
+				using GorillaPatch::Slice
+
 				def included(ctrl)
 					ctrl.include @mod
 

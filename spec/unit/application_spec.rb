@@ -31,7 +31,7 @@ module TestRefinedActions
 		def update; end
 end
 
-class ApplicationRefinedController < Flame::Controller
+class ApplicationRefinedActionsController < Flame::Controller
 	include with_actions TestRefinedActions, exclude: %i[injected]
 
 	def foo; end
@@ -47,6 +47,14 @@ class ApplicationRefinedController < Flame::Controller
 
 	def quuz; end
 	patch '/refined_quuz', :quuz
+end
+
+class ApplicationRefinedPathController < Flame::Controller
+	PATH = '/that_path_is_refined'
+
+	def index; end
+
+	def show(id); end
 end
 
 ## Test controller with REST methods for Application
@@ -75,7 +83,7 @@ end
 
 def initialize_path_hash(controller:, action:, http_method: :GET, **options)
 	route = Flame::Router::Route.new(controller, action)
-	ctrl_path = options.fetch :ctrl_path, controller.default_path
+	ctrl_path = options.fetch :ctrl_path, controller.path
 	action_path = Flame::Path.new(
 		options.fetch(:action_path, action == :index ? '/' : action)
 	).adapt(controller, action)
@@ -815,13 +823,13 @@ describe Flame::Application do
 		context 'controller with refined HTTP-methods inside' do
 			before do
 				app_class.class_exec do
-					mount :application_refined
+					mount :application_refined_actions
 				end
 			end
 
 			it do
 				is_expected.to eq initialize_path_hashes(
-					ApplicationRefinedController,
+					ApplicationRefinedActionsController,
 					foo: { http_method: :GET },
 					bar: { http_method: :GET },
 					baz: { http_method: :POST },
@@ -837,6 +845,29 @@ describe Flame::Application do
 					update: {
 						http_method: :PUT,
 						action_path: '/module/update'
+					}
+				)
+			end
+		end
+
+		context 'controller with refined path inside' do
+			before do
+				app_class.class_exec do
+					mount ApplicationRefinedPathController
+				end
+			end
+
+			it do
+				is_expected.to eq initialize_path_hashes(
+					ApplicationRefinedPathController,
+					index: {
+						ctrl_path: '/that_path_is_refined',
+						http_method: :GET
+					},
+					show: {
+						ctrl_path: '/that_path_is_refined',
+						http_method: :GET,
+						action_path: '/:id'
 					}
 				)
 			end

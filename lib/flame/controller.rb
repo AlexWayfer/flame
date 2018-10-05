@@ -16,6 +16,14 @@ module Flame
 		extend Actions
 
 		class << self
+			def path
+				return self::PATH if const_defined?(:PATH)
+
+				default_path
+			end
+
+			private
+
 			using GorillaPatch::Inflections
 
 			## Default root path of the controller for requests

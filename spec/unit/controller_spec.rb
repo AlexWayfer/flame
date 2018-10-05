@@ -46,6 +46,10 @@ class AnotherControllerController < Flame::Controller
 	end
 end
 
+class RefinedPathController < Flame::Controller
+	PATH = '/that_path_is_refined'
+end
+
 module Nested
 	class IndexController < Flame::Controller
 		def index; end
@@ -101,25 +105,33 @@ describe Flame::Controller do
 		it { is_expected.to eq ControllerController.public_instance_methods(false) }
 	end
 
-	describe '.default_path' do
-		subject { controller_class.default_path }
+	describe '.path' do
+		subject { controller_class.path }
 
-		context 'one-word named controller' do
-			let(:controller_class) { ControllerController }
+		context 'without PATH constant (default)' do
+			context 'one-word named controller' do
+				let(:controller_class) { ControllerController }
 
-			it { is_expected.to eq '/controller' }
+				it { is_expected.to eq '/controller' }
+			end
+
+			context 'two-word named controller' do
+				let(:controller_class) { AnotherControllerController }
+
+				it { is_expected.to eq '/another_controller' }
+			end
+
+			context 'nested in module index controller' do
+				let(:controller_class) { Nested::IndexController }
+
+				it { is_expected.to eq '/nested' }
+			end
 		end
 
-		context 'two-word named controller' do
-			let(:controller_class) { AnotherControllerController }
+		context 'with PATH constant (refined)' do
+			let(:controller_class) { RefinedPathController }
 
-			it { is_expected.to eq '/another_controller' }
-		end
-
-		context 'nested in module index controller' do
-			let(:controller_class) { Nested::IndexController }
-
-			it { is_expected.to eq '/nested' }
+			it { is_expected.to eq '/that_path_is_refined' }
 		end
 	end
 

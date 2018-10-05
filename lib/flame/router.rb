@@ -79,7 +79,7 @@ module Flame
 			def initialize(router, namespace_name, controller_name, path, &block)
 				@router = router
 				@controller = constantize_controller namespace_name, controller_name
-				@path = Flame::Path.new(path || @controller.default_path)
+				@path = Flame::Path.new(path || @controller.path)
 				@routes, @endpoint = @path.to_routes_with_endpoint
 				@reverse_routes = {}
 				execute(&block)

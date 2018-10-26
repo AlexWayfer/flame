@@ -39,6 +39,9 @@ class ControllerController < Flame::Controller
 	def hooks_reroute
 		reroute AnotherControllerController, :hooked
 	end
+
+	post '/refinement_path_for_create',
+		def create; end
 end
 
 ## Another controller for Controller tests
@@ -101,10 +104,14 @@ end
 ## Module for Controller tests
 module SomeActions
 	include ForeignPublicMethods
+	extend Flame::Controller::Actions
 
 	def included_action; end
 
 	def another_included_action; end
+
+	post '/refined_path',
+		def refined_action; end
 
 	private
 
@@ -699,12 +706,21 @@ describe Flame::Controller do
 				let(:args) { [] }
 
 				it { is_expected.to eq controller_class.actions.sort }
+
+				it 'saves refinements' do
+					expect(inherited_controller.refined_http_methods)
+						.to eq(controller_class.refined_http_methods)
+				end
 			end
 
 			context 'specific actions' do
 				let(:args) { [%i[foo bar baz]] }
 
 				it { is_expected.to eq %i[foo bar baz].sort }
+
+				it 'drops excluded refinements' do
+					expect(inherited_controller.refined_http_methods).to be_empty
+				end
 			end
 
 			context 'excluded actions' do
@@ -726,6 +742,11 @@ describe Flame::Controller do
 				let(:args) { [] }
 
 				it { is_expected.to eq SomeActions.public_instance_methods(false).sort }
+
+				it 'saves refinements' do
+					expect(inherited_controller.refined_http_methods)
+						.to eq(SomeActions.refined_http_methods)
+				end
 			end
 
 			context 'excluded actions' do
@@ -749,6 +770,10 @@ describe Flame::Controller do
 							SomeActions.public_instance_methods(false) & %i[included_action]
 						).sort
 					)
+				end
+
+				it 'drops excluded refinements' do
+					expect(inherited_controller.refined_http_methods).to be_empty
 				end
 			end
 

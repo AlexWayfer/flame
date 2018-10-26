@@ -6,6 +6,8 @@ module Flame
 	class Controller
 		## Module for work with actions
 		module Actions
+			using GorillaPatch::Slice
+
 			## Shortcut for not-inherited public methods: actions
 			## @return [Array<Symbol>] array of actions (public instance methods)
 			def actions
@@ -28,10 +30,7 @@ module Flame
 			##     inherit_actions exclude: %i[edit update]
 			##   end
 			def inherit_actions(actions = superclass.actions, exclude: [])
-				(actions - exclude).each do |public_method|
-					um = superclass.public_instance_method(public_method)
-					define_method public_method, um
-				end
+				copy_actions_from(superclass, actions - exclude)
 			end
 
 			## Re-define public instance method from module
@@ -60,11 +59,12 @@ module Flame
 			##   end
 			def with_actions(mod, exclude: [], only: nil)
 				Module.new do
-					@mod = mod
-					@methods_to_define =
-						only || (@mod.public_instance_methods(false) - exclude)
-
-					extend ModuleWithActions
+					define_singleton_method(:included) do |target|
+						target.send(
+							:copy_actions_from, mod,
+							only || mod.public_instance_methods(false) - exclude
+						)
+					end
 				end
 			end
 
@@ -73,6 +73,18 @@ module Flame
 			end
 
 			private
+
+			def copy_actions_from(source, actions)
+				actions.each do |action|
+					define_method(action, source.public_instance_method(action))
+				end
+
+				return unless source.respond_to?(:refined_http_methods)
+
+				refined_http_methods.merge!(
+					source.refined_http_methods.slice(*actions)
+				)
+			end
 
 			Flame::Router::HTTP_METHODS.each do |http_method|
 				downcased_http_method = http_method.downcase
@@ -88,27 +100,6 @@ module Flame
 					refined_http_methods[action] = [downcased_http_method, action_path]
 				end
 			end
-
-			## Base module for module `with_actions`
-			module ModuleWithActions
-				using GorillaPatch::Slice
-
-				def included(ctrl)
-					ctrl.include @mod
-
-					@methods_to_define.each do |meth|
-						ctrl.send :define_method, meth, @mod.public_instance_method(meth)
-					end
-
-					return unless @mod.respond_to? :refined_http_methods
-
-					ctrl.refined_http_methods.merge!(
-						@mod.refined_http_methods.slice(*@methods_to_define)
-					)
-				end
-			end
-
-			private_constant :ModuleWithActions
 		end
 	end
 end

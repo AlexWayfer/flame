@@ -61,7 +61,8 @@ module Flame
 			def with_actions(mod, exclude: [], only: nil)
 				Module.new do
 					@mod = mod
-					@methods_to_define = only || (@mod.public_instance_methods - exclude)
+					@methods_to_define =
+						only || (@mod.public_instance_methods(false) - exclude)
 
 					extend ModuleWithActions
 				end

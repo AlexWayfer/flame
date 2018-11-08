@@ -62,8 +62,14 @@ module Nested
 	end
 end
 
+module ForeignPublicMethods
+	def cache; end
+end
+
 ## Module for Controller tests
 module SomeActions
+	include ForeignPublicMethods
+
 	def included_action; end
 
 	def another_included_action; end
@@ -639,7 +645,7 @@ describe Flame::Controller do
 			context 'without arguments' do
 				let(:args) { [] }
 
-				it { is_expected.to eq SomeActions.public_instance_methods.sort }
+				it { is_expected.to eq SomeActions.public_instance_methods(false).sort }
 			end
 
 			context 'excluded actions' do
@@ -647,7 +653,9 @@ describe Flame::Controller do
 
 				it do
 					is_expected.to eq(
-						(SomeActions.public_instance_methods - %i[included_action]).sort
+						(
+							SomeActions.public_instance_methods(false) - %i[included_action]
+						).sort
 					)
 				end
 			end
@@ -657,7 +665,9 @@ describe Flame::Controller do
 
 				it do
 					is_expected.to eq(
-						(SomeActions.public_instance_methods & %i[included_action]).sort
+						(
+							SomeActions.public_instance_methods(false) & %i[included_action]
+						).sort
 					)
 				end
 			end
@@ -673,7 +683,8 @@ describe Flame::Controller do
 				it do
 					is_expected.to eq(
 						(
-							ControllerController.actions + SomeActions.public_instance_methods
+							ControllerController.actions +
+								SomeActions.public_instance_methods(false)
 						).sort
 					)
 				end

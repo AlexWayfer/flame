@@ -52,11 +52,23 @@ describe Flame::Application::Config do
 		end
 
 		context 'Symbol basename' do
-			before do
-				app_class.config.load_yaml :example
+			context '`.yml` file' do
+				before do
+					app_class.config.load_yaml :example
+				end
+
+				it { is_expected.to eq yaml }
 			end
 
-			it { is_expected.to eq yaml }
+			context '`.yaml` file' do
+				let(:key) { :example2 }
+
+				before do
+					app_class.config.load_yaml :example2
+				end
+
+				it { is_expected.to eq(foo: 2, bar: 'qux') }
+			end
 		end
 
 		context 'refined key' do

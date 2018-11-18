@@ -162,4 +162,46 @@ describe Flame::Router::Routes do
 			it { is_expected.to be_nil }
 		end
 	end
+
+	describe '#to_s' do
+		subject { routes.to_s }
+
+		before do
+			routes['foo']['bar'][:GET] = 42
+			routes['foo']['bar']['bar'] = described_class.new
+			routes['foo']['bar']['baz'][:DELETE] = 84
+			routes['foo']['bar']['bar'][:POST] = 36
+			routes['foo']['bar']['baz'][:GET] = 62
+		end
+
+		it do
+			is_expected.to eq <<~OUTPUT
+				\e[1m   GET /foo/bar\e[22m
+				       \e[3m\e[36m42\e[0m\e[23m
+				\e[1m  POST /foo/bar/bar\e[22m
+				       \e[3m\e[36m36\e[0m\e[23m
+				\e[1m   GET /foo/bar/baz\e[22m
+				       \e[3m\e[36m62\e[0m\e[23m
+				\e[1mDELETE /foo/bar/baz\e[22m
+				       \e[3m\e[36m84\e[0m\e[23m
+			OUTPUT
+		end
+
+		describe 'output without color chars' do
+			subject { super().gsub(/\e\[(\d+)m/, '') }
+
+			it do
+				is_expected.to eq <<~OUTPUT
+					   GET /foo/bar
+					       42
+					  POST /foo/bar/bar
+					       36
+					   GET /foo/bar/baz
+					       62
+					DELETE /foo/bar/baz
+					       84
+				OUTPUT
+			end
+		end
+	end
 end

@@ -70,6 +70,36 @@ module Flame
 				methods.push(:OPTIONS).join(', ')
 			end
 
+			PADDING_SIZE = Router::HTTP_METHODS.map(&:size).max
+			PADDING_FORMAT = "%#{PADDING_SIZE}.#{PADDING_SIZE}s"
+
+			## Output routes in human readable format
+			def to_s(prefix = nil)
+				sort.map do |key, value|
+					if key.is_a?(Symbol)
+						<<~OUTPUT
+							\e[1m#{format PADDING_FORMAT, key} #{prefix}\e[22m
+							#{' ' * PADDING_SIZE} \e[3m\e[36m#{value}\e[0m\e[23m
+						OUTPUT
+					else
+						value.to_s(Flame::Path.new(prefix, key))
+					end
+				end.join
+			end
+
+			## Sort routes for human readability
+			def sort
+				sort_by do |key, _value|
+					[
+						if key.is_a?(Symbol)
+						then Router::HTTP_METHODS.index(key)
+						else Float::INFINITY
+						end,
+						key.to_s
+					]
+				end
+			end
+
 			private
 
 			def first_arg_key

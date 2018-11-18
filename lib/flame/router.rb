@@ -5,9 +5,6 @@ require 'gorilla_patch/inflections'
 require 'gorilla_patch/namespace'
 require 'gorilla_patch/transform'
 
-require_relative 'router/routes'
-require_relative 'router/route'
-
 require_relative 'router/controller_finder'
 require_relative 'errors/controller_not_found_error'
 
@@ -16,6 +13,8 @@ module Flame
 	class Router
 		HTTP_METHODS = %i[GET POST PUT PATCH DELETE].freeze
 
+		require_relative 'router/route'
+		require_relative 'router/routes'
 		require_relative 'router/routes_refine'
 
 		extend Forwardable

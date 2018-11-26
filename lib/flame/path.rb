@@ -181,7 +181,7 @@ module Flame
 		class Part
 			extend Forwardable
 
-			def_delegators :to_s, :[], :hash, :empty?, :b, :inspect
+			def_delegators :to_s, :[], :hash, :size, :empty?, :b, :inspect
 
 			ARG_CHAR = ':'
 			ARG_CHAR_OPT = '?'

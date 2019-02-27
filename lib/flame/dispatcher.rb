@@ -4,7 +4,6 @@ require 'gorilla_patch/symbolize'
 
 require_relative 'dispatcher/request'
 require_relative 'dispatcher/response'
-require_relative 'dispatcher/cookies'
 
 require_relative 'dispatcher/static'
 require_relative 'dispatcher/routes'
@@ -85,11 +84,6 @@ module Flame
 		## Session object as Hash
 		def session
 			request.session
-		end
-
-		## Cookies object as Hash
-		def cookies
-			@cookies ||= Cookies.new(request.cookies, response)
 		end
 
 		## Application-config object as Hash

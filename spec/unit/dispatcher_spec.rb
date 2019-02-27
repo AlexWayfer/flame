@@ -303,14 +303,6 @@ describe Flame::Dispatcher do
 		it { is_expected.to be dispatcher.request.session }
 	end
 
-	describe '#cookies' do
-		subject { dispatcher.cookies }
-
-		it { is_expected.to be_instance_of Flame::Dispatcher::Cookies }
-
-		it { is_expected.to be dispatcher.cookies }
-	end
-
 	describe '#config' do
 		subject { dispatcher.config }
 

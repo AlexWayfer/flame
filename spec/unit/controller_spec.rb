@@ -162,6 +162,14 @@ describe Flame::Controller do
 		end
 	end
 
+	describe '#cookies' do
+		subject { controller.cookies }
+
+		it { is_expected.to be_instance_of Flame::Controller::Cookies }
+
+		it { is_expected.to be controller.cookies }
+	end
+
 	describe '#path_to' do
 		subject { controller.path_to(*args) }
 

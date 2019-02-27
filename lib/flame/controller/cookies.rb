@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Flame
-	class Dispatcher
+	class Controller
 		## Helper class for cookies
 		class Cookies
 			## Create an instance of Cookies

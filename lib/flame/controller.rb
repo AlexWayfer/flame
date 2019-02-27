@@ -4,6 +4,7 @@ require 'forwardable'
 require 'gorilla_patch/namespace'
 
 require_relative 'controller/actions'
+require_relative 'controller/cookies'
 require_relative 'controller/path_to'
 
 ## Just because of `autoload`
@@ -49,6 +50,11 @@ module Flame
 		## @param dispatcher [Flame::Dispatcher] host dispatcher
 		def initialize(dispatcher)
 			@dispatcher = dispatcher
+		end
+
+		## Cookies object as Hash
+		def cookies
+			@cookies ||= Cookies.new(request.cookies, response)
 		end
 
 		include Flame::Controller::PathTo

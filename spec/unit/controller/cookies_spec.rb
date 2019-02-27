@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-describe Flame::Dispatcher::Cookies do
+describe Flame::Controller::Cookies do
 	let(:env) do
 		{
 			'HTTP_COOKIE' => 'foo=bar; baz=bat'
@@ -11,7 +11,7 @@ describe Flame::Dispatcher::Cookies do
 	let(:response) { Flame::Dispatcher::Response.new }
 
 	subject(:cookies) do
-		Flame::Dispatcher::Cookies.new(request.cookies, response)
+		Flame::Controller::Cookies.new(request.cookies, response)
 	end
 
 	describe '#initialize' do

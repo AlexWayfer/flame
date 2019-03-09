@@ -102,11 +102,13 @@ end
 
 def read_filewatcher_pids
 	return unless File.exist?(filewatcher_pids_file)
+
 	File.read(filewatcher_pids_file).split($RS)
 end
 
 def delete_filewatcher_pids_file
 	return unless File.exist?(filewatcher_pids_file)
+
 	File.delete filewatcher_pids_file
 end
 

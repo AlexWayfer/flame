@@ -11,8 +11,10 @@ module Flame
 				http_method = request.http_method
 				http_method = :GET if http_method == :HEAD
 				return unless available_endpoint
+
 				route = available_endpoint[http_method]
 				return unless route || available_endpoint.allow
+
 				halt(405, nil, 'Allow' => available_endpoint.allow) unless route
 				status 200
 				execute_route route
@@ -41,10 +43,12 @@ module Flame
 			def default_body_of_nearest_route
 				## Return nil if must be no body for current HTTP status
 				return if Rack::Utils::STATUS_WITH_NO_ENTITY_BODY.include?(status)
+
 				## Find the nearest route by the parts of requested path
 				route = router.find_nearest_route(request.path)
 				## Return standard `default_body` if the route not found
 				return default_body unless route
+
 				if response.not_found?
 					## Execute `not_found` method as action for the founded route
 					execute_route(route, :not_found)

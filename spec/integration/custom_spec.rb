@@ -36,8 +36,11 @@ class CustomController < Flame::Controller
 
 	def execute(action)
 		@action = action
+
 		return halt redirect :foo if request.path.include? '/old_foo'
+
 		super
+
 		{ a: 1 }
 	end
 

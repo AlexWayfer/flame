@@ -77,6 +77,7 @@ module Flame
 					request.params.symbolize_keys(deep: true)
 				rescue ArgumentError => e
 					raise unless e.message.include?('invalid %-encoding')
+
 					{}
 				end
 		end
@@ -94,6 +95,7 @@ module Flame
 		## Available routes endpoint
 		def available_endpoint
 			return @available_endpoint if defined? @available_endpoint
+
 			@available_endpoint = router.navigate(*request.path.parts)
 		end
 
@@ -147,12 +149,14 @@ module Flame
 			request.params
 		rescue ArgumentError => e
 			raise unless e.message.include?('invalid %-encoding')
+
 			halt 400
 		end
 
 		## Return response if HTTP-method is OPTIONS
 		def try_options
 			return unless request.http_method == :OPTIONS
+
 			allow = available_endpoint&.allow
 			halt 404 unless allow
 			response.headers['Allow'] = allow

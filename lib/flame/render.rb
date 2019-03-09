@@ -29,15 +29,19 @@ module Flame
 			@controller = controller
 			@scope = options.delete(:scope) { @controller }
 			@layout = options.delete(:layout) { 'layout.*' }
+
 			## Options for Tilt Template
 			@tilt_options = options.delete(:tilt)
+
 			## And get the rest variables to locals
 			@locals = options.merge(options.delete(:locals) { {} })
+
 			## Find filename
 			@filename = find_file(path)
 			unless @filename
 				raise Flame::Errors::TemplateNotFoundError.new(controller, path)
 			end
+
 			@layout = nil if File.basename(@filename)[0] == '_'
 		end
 
@@ -48,6 +52,7 @@ module Flame
 			@cache = cache
 			## Compile Tilt to instance hash
 			return unless @filename
+
 			tilt = compile_file
 			## Render Tilt from instance hash with new options
 			layout_render tilt.render(@scope, @locals, &block)
@@ -64,6 +69,7 @@ module Flame
 		def compile_file(filename = @filename)
 			cached = @controller.cached_tilts[filename]
 			return cached if @cache && cached
+
 			compiled = Tilt.new(filename, nil, @tilt_options)
 			@controller.cached_tilts[filename] ||= compiled if @cache
 			compiled
@@ -151,8 +157,10 @@ module Flame
 		## @param result [String] result of template rendering
 		def layout_render(content)
 			return content unless @layout
+
 			layout_files = find_layouts(@layout)
 			return content if layout_files.empty?
+
 			layout_files.each_with_object(content.dup) do |layout_file, result|
 				layout = compile_file(layout_file)
 				result.replace layout.render(@scope, @locals) { result }

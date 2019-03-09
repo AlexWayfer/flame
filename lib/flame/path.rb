@@ -54,10 +54,12 @@ module Flame
 			self_parts, other_parts = [self, other].map(&:parts)
 			parts_size = self_parts.size <=> other_parts.size
 			return parts_size unless parts_size.zero?
+
 			self_parts.zip(other_parts)
 				.reduce(0) do |result, (self_part, other_part)|
 					break -1 if self_part.arg? && !other_part.arg?
 					break 1 if other_part.arg? && !self_part.arg?
+
 					result
 				end
 		end
@@ -124,11 +126,13 @@ module Flame
 			return part unless part.arg?
 			## Not required argument
 			return args.delete(part[2..-1].to_sym) if part.opt_arg?
+
 			## Required argument
 			param = args.delete(part[1..-1].to_sym)
 			## Required argument is nil
 			error = Errors::ArgumentNotAssignedError.new(@path, part)
 			raise error if param.nil?
+
 			## All is ok
 			param
 		end

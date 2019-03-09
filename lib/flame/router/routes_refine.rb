@@ -86,8 +86,10 @@ module Flame
 			def rest
 				self.class.rest_routes.each do |rest_route|
 					action = rest_route[:action]
-					next if !@controller.actions.include?(action) ||
-					        find_reverse_route(action)
+					if !@controller.actions.include?(action) || find_reverse_route(action)
+						next
+					end
+
 					send(*rest_route.values.map(&:downcase))
 				end
 			end
@@ -117,6 +119,7 @@ module Flame
 			def remove_old_routes(action, new_route)
 				old_path = @reverse_routes[@controller.to_s]&.delete(action)
 				return unless old_path
+
 				@routes.dig(*old_path.parts)
 					.delete_if { |_method, old_route| old_route == new_route }
 			end

@@ -20,6 +20,7 @@ module Flame
 
 				controller = @namespace.const_get(found_controller_name)
 				return controller if controller < Flame::Controller
+
 				controller::IndexController
 			end
 

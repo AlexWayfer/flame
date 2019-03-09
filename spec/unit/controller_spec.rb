@@ -41,7 +41,9 @@ class AnotherControllerController < Flame::Controller
 
 	def execute(method)
 		return body 'Another execute' if method == :bar
+
 		super
+
 		'after-hook' if method == :hooked
 	end
 end

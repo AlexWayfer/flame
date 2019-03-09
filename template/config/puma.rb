@@ -17,6 +17,7 @@ rackup 'config.ru'
 require 'fileutils'
 
 raise 'Unknown directory for pid files!' unless env_config[:pids_dir]
+
 pids_dir = File.join root_dir, env_config[:pids_dir]
 FileUtils.mkdir_p pids_dir
 
@@ -24,6 +25,7 @@ pidfile File.join pids_dir, env_config[:pid_file]
 state_path File.join pids_dir, 'puma.state'
 
 raise 'Unknown directory for log files!' unless env_config[:logs_dir]
+
 log_dir = File.join root_dir, env_config[:logs_dir]
 FileUtils.mkdir_p log_dir
 

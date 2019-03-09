@@ -65,7 +65,9 @@ module Flame
 			##   # => "/articles/new?author_id=1"
 			def path_to(ctrl, action = :index, args = {})
 				path = router.path_of(ctrl, action)
+
 				raise Errors::RouteNotFoundError.new(ctrl, action) unless path
+
 				args = args.deep_dup
 				path = path.assign_arguments(args)
 				path = '/' if path.empty?

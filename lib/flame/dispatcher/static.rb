@@ -21,6 +21,7 @@ module Flame
 			def try_static(*args)
 				file = find_static(*args)
 				return nil unless file.exist?
+
 				halt 400 unless file.within_directory
 				return_static(file)
 			end

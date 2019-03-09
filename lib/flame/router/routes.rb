@@ -14,6 +14,7 @@ module Flame
 			def initialize(*path_parts)
 				path = Flame::Path.new(*path_parts)
 				return if path.parts.empty?
+
 				nested_routes = self.class.new Flame::Path.new(*path.parts[1..-1])
 				# path.parts.reduce(result) do |hash, part|
 				# 	hash[part] ||= self.class.new
@@ -50,6 +51,7 @@ module Flame
 			def navigate(*path_parts)
 				path_parts = Flame::Path.new(*path_parts).parts
 				return dig_through_opt_args if path_parts.empty?
+
 				endpoint =
 					self[path_parts.first] ||
 					dig(first_opt_arg_key, path_parts.first) ||
@@ -67,6 +69,7 @@ module Flame
 			def allow
 				methods = keys.select { |key| key.is_a? Symbol }
 				return if methods.empty?
+
 				methods.push(:OPTIONS).join(', ')
 			end
 

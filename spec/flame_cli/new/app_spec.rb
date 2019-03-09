@@ -54,10 +54,13 @@ describe 'FlameCLI::New::App' do
 				.map do |filename|
 					filename_pathname = Pathname.new(filename)
 						.relative_path_from(template_dir_pathname)
+
 					next if File.dirname(filename).split(File::SEPARATOR).include? 'views'
+
 					if filename_pathname.extname == template_ext
 						filename_pathname = filename_pathname.sub_ext('')
 					end
+
 					File.join app_name, filename_pathname
 				end
 				.compact

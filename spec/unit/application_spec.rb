@@ -343,11 +343,11 @@ describe Flame::Application do
 				subject { super()[key] }
 
 				{
-					root_dir:    __dir__,
-					public_dir:  File.join(__dir__, 'public'),
-					views_dir:   File.join(__dir__, 'views'),
-					config_dir:  File.join(__dir__, 'config'),
-					tmp_dir:     File.join(__dir__, 'tmp'),
+					root_dir: __dir__,
+					public_dir: File.join(__dir__, 'public'),
+					views_dir: File.join(__dir__, 'views'),
+					config_dir: File.join(__dir__, 'config'),
+					tmp_dir: File.join(__dir__, 'tmp'),
 					environment: 'development'
 				}.each do |key, value|
 					describe key.to_s do
@@ -538,11 +538,11 @@ describe Flame::Application do
 				is_expected.to eq initialize_path_hashes(
 					ApplicationController,
 					index: { ctrl_path: '/another' },
-					foo:   { ctrl_path: '/another' },
-					bar:   { ctrl_path: '/another' },
+					foo: { ctrl_path: '/another' },
+					bar: { ctrl_path: '/another' },
 					hello: { ctrl_path: '/another' },
-					baz:   { ctrl_path: '/another' },
-					view:  { ctrl_path: '/another' }
+					baz: { ctrl_path: '/another' },
+					view: { ctrl_path: '/another' }
 				)
 			end
 		end
@@ -838,11 +838,11 @@ describe Flame::Application do
 					is_expected.to eq(
 						'ApplicationController' => {
 							index: '/application/',
-							foo:   '/application/foo',
-							bar:   '/application/bar',
+							foo: '/application/foo',
+							bar: '/application/bar',
 							hello: '/application/hello/:name',
-							view:  '/application/view',
-							baz:   '/application/baz/:first/:second/:?third/:?fourth'
+							view: '/application/view',
+							baz: '/application/baz/:first/:second/:?third/:?fourth'
 						},
 						'ApplicationRESTController' => {
 							index: '/application/rest/',
@@ -888,11 +888,11 @@ describe Flame::Application do
 					is_expected.to eq(
 						'ApplicationController' => {
 							index: '/application/',
-							foo:   '/application/foo',
-							bar:   '/application/bar',
+							foo: '/application/foo',
+							bar: '/application/bar',
 							hello: '/application/hello/:name',
-							view:  '/application/view',
-							baz:   '/application/:first/:second/:?third/:?fourth'
+							view: '/application/view',
+							baz: '/application/:first/:second/:?third/:?fourth'
 						},
 						'ApplicationRESTController' => {
 							index: '/application/rest/',

@@ -29,6 +29,7 @@ module Flame
 				extra_arguments = first_extra_arguments
 				## Raise error if extra arguments
 				return true unless extra_arguments
+
 				raise Errors::RouteExtraArgumentsError.new(
 					@ctrl, @action, @path, extra_arguments
 				)
@@ -37,6 +38,7 @@ module Flame
 			def order_valid?
 				wrong_ordered_arguments = first_wrong_ordered_arguments
 				return true unless wrong_ordered_arguments
+
 				raise Errors::RouteArgumentsOrderError.new(
 					@path, wrong_ordered_arguments
 				)
@@ -48,6 +50,7 @@ module Flame
 					.each_with_object(req: [], opt: []) do |part, hash|
 						## Take only argument parts
 						next unless part.arg?
+
 						## Memorize arguments
 						hash[part.opt_arg? ? :opt : :req] << part.clean.to_sym
 					end

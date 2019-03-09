@@ -107,8 +107,11 @@ if File.exist? DB_CONFIG_FILE
 		def update_pgpass
 			pgpass_lines =
 				File.exist?(PGPASS_FILE) ? File.read(PGPASS_FILE).split($RS) : []
+
 			return if pgpass_lines&.include? PGPASS_LINE
+
 			File.write PGPASS_FILE, pgpass_lines.push(PGPASS_LINE, nil).join($RS)
+
 			File.chmod(0o600, PGPASS_FILE)
 		end
 
@@ -135,8 +138,11 @@ if File.exist? DB_CONFIG_FILE
 					files = filenames.map { |filename| new filename: filename }.sort!
 					files.reject!(&:disabled) unless disabled
 					files.select!(&:disabled) unless enabled
+
 					return files unless only_one
+
 					return files.first if files.size < 2
+
 					raise 'More than one file mathes the query'
 				end
 
@@ -224,7 +230,9 @@ if File.exist? DB_CONFIG_FILE
 
 				def rename(vars = {})
 					vars.each { |key, value| send :"#{key}=", value }
+
 					return unless @filename.is_a? String
+
 					File.rename @filename, new_filename
 					self.filename = new_filename
 				end
@@ -296,7 +304,6 @@ if File.exist? DB_CONFIG_FILE
 
 			desc 'Change version of migration to latest'
 			task :reversion, :filename do |_t, args|
-				# rubocop:disable Style/IfUnlessModifier
 				if args[:filename].nil?
 					abort 'You must specify a migration name or version'
 				end
@@ -394,7 +401,7 @@ if File.exist? DB_CONFIG_FILE
 				DB_DUMP_FORMATS = %w[custom plain].freeze
 
 				DB_DUMP_EXTENSIONS = {
-					'plain'  => '.sql',
+					'plain' => '.sql',
 					'custom' => '.dump'
 				}.freeze
 
@@ -416,7 +423,7 @@ if File.exist? DB_CONFIG_FILE
 					#{DB_DUMPS_DIR}#{Regexp.escape(File::SEPARATOR)}
 					#{DB_CONFIG[:database]}_#{DB_DUMP_TIMESTAMP_REGEXP}
 					(#{regexp_escaped_db_dump_extensions.join('|')})
-				$/xo
+				$/xo.freeze
 
 				def self.all
 					Dir[File.join(DB_DUMPS_DIR, '*')]
@@ -658,6 +665,7 @@ namespace :locales do
 		locales.each_with_index do |locale, ind|
 			locales[ind..-1].each do |other_locale|
 				next if locale == other_locale
+
 				compare_locales(locale, other_locale)
 				compare_locales(other_locale, locale)
 			end
@@ -673,6 +681,7 @@ namespace :static do
 			grep_options = '--exclude-dir={\.git,log} --color=always'
 			found = `grep -ir '#{basename}' ./ #{grep_options}`
 			next unless found.empty? && File.dirname(file) != @skipping_dir
+
 			filename = file.sub(__dir__, '')
 			case Question.new("Delete #{filename} ?", %w[yes no skip]).answer
 			when 'yes'
@@ -748,7 +757,9 @@ task :update, :branch, :without_restart do |_t, args|
 	server = './server'
 	sh "git checkout #{args[:branch]}"
 	sh "git pull origin #{args[:branch]}"
+
 	next if args[:without_restart]
+
 	sh 'bundle check || bundle install'
 	sh "#{server} stop"
 	sh 'rake config:check'
@@ -799,6 +810,7 @@ namespace :assets do
 		desc 'Build styles assets'
 		task :styles do
 			next unless File.exist? styles_input_file
+
 			FileUtils.mkdir_p styles_output_dir
 			sh "sass #{styles_input_file} #{styles_output_file} -t compact"
 		end
@@ -806,6 +818,7 @@ namespace :assets do
 		desc 'Build scripts assets'
 		task :scripts do
 			next unless File.exist? scripts_input_file
+
 			sh 'yarn run webpack' \
 			   " --entry #{scripts_input_file}" \
 			   " --output-path #{scripts_output_dir}" \

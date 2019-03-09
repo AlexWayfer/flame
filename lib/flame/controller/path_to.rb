@@ -29,7 +29,9 @@ module Flame
 			def path_to_back
 				back_path = request.referer
 				return back_path if back_path && back_path != request.url
+
 				return path_to :index if self.class.actions.include?(:index)
+
 				'/'
 			end
 

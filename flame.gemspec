@@ -16,12 +16,12 @@ Gem::Specification.new do |s|
 	s.license     = 'MIT'
 
 	s.metadata = {
-		'bug_tracker_uri'   => 'https://github.com/AlexWayfer/flame/issues',
+		'bug_tracker_uri' => 'https://github.com/AlexWayfer/flame/issues',
 		'documentation_uri' =>
 			"http://www.rubydoc.info/gems/flame/#{Flame::VERSION}",
-		'homepage_uri'      => 'https://github.com/AlexWayfer/flame',
-		'source_code_uri'   => 'https://github.com/AlexWayfer/flame',
-		'wiki_uri'          => 'https://github.com/AlexWayfer/flame/wiki'
+		'homepage_uri' => 'https://github.com/AlexWayfer/flame',
+		'source_code_uri' => 'https://github.com/AlexWayfer/flame',
+		'wiki_uri' => 'https://github.com/AlexWayfer/flame/wiki'
 	}
 
 	s.required_ruby_version = '>= 2.4.0'
@@ -42,7 +42,7 @@ Gem::Specification.new do |s|
 	s.add_development_dependency 'rack-utf8_sanitizer', '~> 1.3'
 	s.add_development_dependency 'rake', '~> 12'
 	s.add_development_dependency 'rspec', '~> 3.7'
-	s.add_development_dependency 'rubocop', '~> 0.54'
+	s.add_development_dependency 'rubocop', '~> 0.65.0'
 	s.add_development_dependency 'simplecov', '~> 0'
 
 	s.files = Dir['{lib,public,template}/**/{*,.*}']

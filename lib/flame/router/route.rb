@@ -26,6 +26,7 @@ module Flame
 			## @return [true, false] equal or not
 			def ==(other)
 				return false unless other.is_a? self.class
+
 				%i[controller action].reduce(true) do |result, method|
 					result && (
 						public_send(method) == other.public_send(method)

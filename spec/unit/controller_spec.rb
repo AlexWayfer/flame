@@ -8,7 +8,37 @@ class ControllerController < Flame::Controller
 		view
 	end
 
-	def baz; end
+	def baz
+		reroute AnotherControllerController, :baz
+	end
+
+	def object_hash
+		hash
+	end
+
+	def respond_for_reroute
+		'Hello from reroute'
+	end
+
+	def current_reroute
+		reroute :respond_for_reroute
+	end
+
+	def hash_reroute
+		reroute :object_hash
+	end
+
+	def index_reroute
+		reroute AnotherControllerController
+	end
+
+	def execute_reroute
+		reroute AnotherControllerController, :bar
+	end
+
+	def hooks_reroute
+		reroute AnotherControllerController, :hooked
+	end
 end
 
 ## Another controller for Controller tests
@@ -469,6 +499,46 @@ describe Flame::Controller do
 			subject { controller.status }
 
 			it { is_expected.to eq 301 }
+		end
+	end
+
+	describe '#reroute' do
+		subject { controller.public_send(action) }
+
+		context 'specified action of specified controller' do
+			let(:action) { :baz }
+
+			it { is_expected.to eq 'Another baz' }
+		end
+
+		context 'specified action of current controller' do
+			let(:action) { :current_reroute }
+
+			it { is_expected.to eq 'Hello from reroute' }
+		end
+
+		describe 'no recreation of current controller' do
+			let(:action) { :hash_reroute }
+
+			it { is_expected.to eq controller.object_hash }
+		end
+
+		describe 'index action by default' do
+			let(:action) { :index_reroute }
+
+			it { is_expected.to eq 'Another index' }
+		end
+
+		describe 'calling `execute` method of called controller' do
+			let(:action) { :execute_reroute }
+
+			it { is_expected.to eq 'Another execute' }
+		end
+
+		describe 'saving result of action as body regardless of after-hooks' do
+			let(:action) { :hooks_reroute }
+
+			it { is_expected.to eq 'Another hooked' }
 		end
 	end
 

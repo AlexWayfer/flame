@@ -55,4 +55,23 @@ describe Flame::Dispatcher::Request do
 			it { expect { subject }.not_to raise_error }
 		end
 	end
+
+	describe '#headers' do
+		let(:env) do
+			super().merge(
+				'HTTP_VERSION' => 'HTTP/1.1',
+				'HTTP_CACHE_CONTROL' => 'max-age=0'
+			)
+		end
+
+		subject { request.headers }
+
+		it { is_expected.to be_an_instance_of(Hash) }
+		it do
+			is_expected.to include(
+				'Version' => 'HTTP/1.1',
+				'Cache-Control' => 'max-age=0'
+			)
+		end
+	end
 end

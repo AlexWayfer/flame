@@ -58,7 +58,6 @@ class CustomController < Flame::Controller
 
 	def server_error(exception)
 		@exception = exception
-		p exception
 		super
 	end
 end

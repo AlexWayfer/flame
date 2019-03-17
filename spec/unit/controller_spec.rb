@@ -747,6 +747,11 @@ describe Flame::Controller do
 					expect(inherited_controller.refined_http_methods)
 						.to eq(SomeActions.refined_http_methods)
 				end
+
+				it 'saves private methods' do
+					expect(inherited_controller.private_instance_methods)
+						.to include(*SomeActions.private_instance_methods)
+				end
 			end
 
 			context 'excluded actions' do

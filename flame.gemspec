@@ -27,19 +27,18 @@ Gem::Specification.new do |s|
 	s.required_ruby_version = '>= 2.4.0'
 
 	s.add_runtime_dependency 'addressable', '~> 2.5'
-	s.add_runtime_dependency 'gorilla_patch', '~> 3'
+	s.add_runtime_dependency 'gorilla_patch', '~> 3.0'
 	s.add_runtime_dependency 'memery', '~> 1.0'
-	s.add_runtime_dependency 'rack', '~> 2'
-	s.add_runtime_dependency 'tilt', '>= 2.0', '< 3'
+	s.add_runtime_dependency 'rack', '~> 2.0'
+	s.add_runtime_dependency 'tilt', '~> 2.0'
 
-	s.add_development_dependency 'codecov', '~> 0'
-	s.add_development_dependency 'pry', '~> 0'
+	s.add_development_dependency 'codecov', '~> 0.1.14'
 	s.add_development_dependency 'pry-byebug', '~> 3.5'
-	s.add_development_dependency 'rack-test', '~> 1'
-	s.add_development_dependency 'rake', '~> 12'
+	s.add_development_dependency 'rack-test', '~> 1.1'
+	s.add_development_dependency 'rake', '~> 12.3'
 	s.add_development_dependency 'rspec', '~> 3.7'
 	s.add_development_dependency 'rubocop', '~> 0.65.0'
-	s.add_development_dependency 'simplecov', '~> 0'
+	s.add_development_dependency 'simplecov', '~> 0.16.1'
 
 	s.files = Dir['{lib,public}/**/{*,.*}']
 end

@@ -1,8 +1,4 @@
-test_task:
-  container:
-    matrix:
-      image: ruby:2.5
-      image: ruby:2.4
+bundle_cache: &bundle_cache
   bundle_cache:
     folder: /usr/local/bundle
     fingerprint_script:
@@ -11,6 +7,20 @@ test_task:
       - cat Gemfile
       - cat *.gemspec
     populate_script: bundle update
+
+
+test_task:
+  container:
+    matrix:
+      image: ruby:2.5
+      image: ruby:2.4
+  <<: *bundle_cache
   environment:
     CODECOV_TOKEN: ENCRYPTED[fc3cdd6692dedbd2133ce8100d2cf236617d6acddc313b5f90f1994d3f62400fcc17fa2af079e8568fb3e85ee5803735]
   test_script: bundle exec rake
+
+rubocop_task:
+  container:
+    image: ruby:2.5
+  <<: *bundle_cache
+  rubocop_script: bundle exec rubocop

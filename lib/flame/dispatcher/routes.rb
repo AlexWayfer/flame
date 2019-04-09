@@ -30,13 +30,13 @@ module Flame
 				# route.execute(self)
 				controller = route.controller.new(self)
 				controller.send(:execute, action)
-			rescue StandardError, SyntaxError => exception
+			rescue StandardError, SyntaxError => e
 				# p 'rescue from dispatcher'
-				dump_error(exception)
+				dump_error(e)
 				status 500
-				controller&.send(:server_error, exception)
-				# p 're raise exception from dispatcher'
-				# raise exception
+				controller&.send(:server_error, e)
+				# p 're raise error from dispatcher'
+				# raise e
 			end
 
 			## Generate a default body of nearest route

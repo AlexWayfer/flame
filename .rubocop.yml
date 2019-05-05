@@ -9,6 +9,20 @@ Layout/AlignParameters:
   EnforcedStyle: with_fixed_indentation
 Layout/AlignArguments:
   EnforcedStyle: with_fixed_indentation
+Layout/IndentFirstArrayElement:
+  EnforcedStyle: consistent
+Layout/IndentFirstArgument:
+  EnforcedStyle: consistent
+Layout/MultilineArrayBraceLayout:
+  EnforcedStyle: new_line
+Layout/FirstArrayElementLineBreak:
+  Enabled: true
+Layout/FirstHashElementLineBreak:
+  Enabled: true
+Layout/FirstMethodArgumentLineBreak:
+  Enabled: true
+Layout/FirstMethodParameterLineBreak:
+  Enabled: true
 
 Style/ParenthesesAroundCondition:
   AllowInMultilineConditions: true

@@ -115,7 +115,7 @@ describe Flame::Dispatcher::Static do
 			expect { try_static }.to throw_symbol(:halt)
 		end
 
-		let(:path) { '/%2E%2E/%2E%2E/config/example.yml' }
+		let(:path) { '/%2E%2E/%2E%2E/configs/example.yml' }
 
 		describe 'status' do
 			subject { dispatcher.status }

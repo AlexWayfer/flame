@@ -135,7 +135,7 @@ module Flame
 			## Initialize default for config directories
 			def default_config_dirs(root_dir:)
 				result = { root_dir: File.realpath(root_dir) }
-				%i[public views config tmp].each do |key|
+				%i[public views configs tmp].each do |key|
 					result[:"#{key}_dir"] =
 						proc { File.join(config[:root_dir], key.to_s) }
 				end

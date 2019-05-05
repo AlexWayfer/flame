@@ -39,7 +39,7 @@ module Flame
 			##   config.load_yaml('smtp.yaml', set: false)
 			def load_yaml(file, key: nil, set: true)
 				file = "#{file}.y{a,}ml" if file.is_a? Symbol
-				file_path = Dir[File.join(self[:config_dir], file)].first
+				file_path = Dir[File.join(self[:configs_dir], file)].first
 				yaml = YAML.load_file(file_path)
 				key ||= File.basename(file, '.*')
 				self[key.to_sym] = yaml if set

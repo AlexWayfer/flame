@@ -7,6 +7,8 @@ Layout/MultilineMethodCallIndentation:
   EnforcedStyle: indented
 Layout/AlignParameters:
   EnforcedStyle: with_fixed_indentation
+Layout/AlignArguments:
+  EnforcedStyle: with_fixed_indentation
 
 Style/ParenthesesAroundCondition:
   AllowInMultilineConditions: true

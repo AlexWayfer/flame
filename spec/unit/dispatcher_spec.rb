@@ -164,13 +164,13 @@ describe Flame::Dispatcher do
 			context 'neither route nor static file was found' do
 				let(:path) { 'bar' }
 
-				it { is_expected.to eq ['<h1>Not Found</h1>'] }
+				it { is_expected.to eq ['Not Found'] }
 			end
 
 			context 'route with required argument and path without' do
 				let(:path) { 'hello' }
 
-				it { is_expected.to eq ['<h1>Not Found</h1>'] }
+				it { is_expected.to eq ['Not Found'] }
 			end
 		end
 
@@ -449,19 +449,19 @@ describe Flame::Dispatcher do
 			context 'status 200' do
 				let(:status) { 200 }
 
-				it { is_expected.to eq '<h1>OK</h1>' }
+				it { is_expected.to eq 'OK' }
 			end
 
 			context 'status 404' do
 				let(:status) { 404 }
 
-				it { is_expected.to eq '<h1>Not Found</h1>' }
+				it { is_expected.to eq 'Not Found' }
 			end
 
 			context 'status 500' do
 				let(:status) { 500 }
 
-				it { is_expected.to eq '<h1>Internal Server Error</h1>' }
+				it { is_expected.to eq 'Internal Server Error' }
 			end
 		end
 
@@ -495,7 +495,7 @@ describe Flame::Dispatcher do
 		describe 'body' do
 			subject { dispatcher.body }
 
-			it { is_expected.to eq '<h1>Bad Request</h1>' }
+			it { is_expected.to eq 'Bad Request' }
 		end
 	end
 end

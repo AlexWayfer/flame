@@ -44,7 +44,7 @@ describe IndexController do
 			describe 'body' do
 				subject { super().body }
 
-				it { is_expected.to eq '<h1>Not Found</h1>' }
+				it { is_expected.to eq 'Not Found' }
 			end
 		end
 	end

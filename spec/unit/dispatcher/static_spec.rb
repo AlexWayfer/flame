@@ -126,7 +126,7 @@ describe Flame::Dispatcher::Static do
 		describe 'body' do
 			subject { dispatcher.body }
 
-			it { is_expected.to eq '<h1>Bad Request</h1>' }
+			it { is_expected.to eq 'Bad Request' }
 		end
 	end
 end

@@ -134,7 +134,7 @@ module Flame
 		## Generate default body of error page
 		def default_body
 			# response.headers[Rack::CONTENT_TYPE] = 'text/html'
-			"<h1>#{Rack::Utils::HTTP_STATUS_CODES[status]}</h1>"
+			Rack::Utils::HTTP_STATUS_CODES[status]
 		end
 
 		## All cached tilts (views) for application by Flame::Render

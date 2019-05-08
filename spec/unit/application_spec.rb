@@ -346,7 +346,7 @@ describe Flame::Application do
 					root_dir: __dir__,
 					public_dir: File.join(__dir__, 'public'),
 					views_dir: File.join(__dir__, 'views'),
-					configs_dir: File.join(__dir__, 'configs'),
+					config_dir: File.join(__dir__, 'config'),
 					tmp_dir: File.join(__dir__, 'tmp'),
 					environment: 'development'
 				}.each do |key, value|

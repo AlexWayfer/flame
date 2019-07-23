@@ -180,6 +180,12 @@ describe Flame::Controller do
 		end
 	end
 
+	describe '.config' do
+		subject { controller_class.config }
+
+		it { is_expected.to be ControllerApplication.config }
+	end
+
 	describe 'delegators' do
 		subject { controller.methods }
 
@@ -199,6 +205,12 @@ describe Flame::Controller do
 
 			it { is_expected.to eq dispatcher }
 		end
+	end
+
+	describe '#config' do
+		subject { controller.config }
+
+		it { is_expected.to be ControllerApplication.config }
 	end
 
 	describe '#cookies' do

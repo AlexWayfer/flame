@@ -6,7 +6,7 @@ module Flame
 	class Router
 		## Helper class for controller routing refine
 		class RoutesRefine
-			attr_reader :routes, :reverse_routes
+			attr_reader :routes, :reverse_routes, :controller
 
 			## Defaults REST routes (methods, pathes, controllers actions)
 			def self.rest_routes

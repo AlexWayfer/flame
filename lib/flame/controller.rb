@@ -17,10 +17,16 @@ module Flame
 		extend Actions
 
 		class << self
+			attr_writer :app_class
+
 			def path
 				return self::PATH if const_defined?(:PATH)
 
 				default_path
+			end
+
+			def config
+				@app_class.config
 			end
 
 			private

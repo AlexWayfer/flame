@@ -36,7 +36,6 @@ module Flame
 		def add(routes_refine)
 			routes.deep_merge! routes_refine.routes
 			reverse_routes.merge! routes_refine.reverse_routes
-			routes_refine.controller.app_class = app
 		end
 
 		## Find the nearest route by path

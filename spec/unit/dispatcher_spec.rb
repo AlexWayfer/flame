@@ -77,6 +77,12 @@ describe Flame::Dispatcher do
 		describe 'instance variables' do
 			subject { dispatcher.instance_variable_get(instance_variable) }
 
+			describe '@app_class' do
+				let(:instance_variable) { :@app_class }
+
+				it { is_expected.to eq DispatcherApplication }
+			end
+
 			describe '@env' do
 				let(:instance_variable) { :@env }
 
@@ -301,7 +307,7 @@ describe Flame::Dispatcher do
 		subject { dispatcher.config }
 
 		it do
-			is_expected.to be DispatcherApplication.config
+			is_expected.to be dispatcher.instance_variable_get(:@app_class).config
 		end
 	end
 

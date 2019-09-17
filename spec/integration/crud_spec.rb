@@ -25,9 +25,16 @@ class CRUDController < Flame::Controller
 	end
 end
 
+class NestedCRUDController < Flame::Controller
+	def create
+		'Create nested item'
+	end
+end
+
 ## Mount example controller to app
 class IntegrationApp
-	mount :CRUD
+	mount :CRUD, '/crud'
+	mount NestedCRUDController, '/crud/:item_id/nested'
 end
 
 describe 'CRUD Controller' do
@@ -109,6 +116,22 @@ describe 'CRUD Controller' do
 				subject { super().body }
 
 				it { is_expected.to eq 'Delete item 8' }
+			end
+		end
+	end
+
+	describe 'create nested item' do
+		before { post '/crud/2/nested' }
+
+		describe 'last_response' do
+			subject { last_response }
+
+			it { is_expected.to be_ok }
+
+			describe 'body' do
+				subject { super().body }
+
+				it { is_expected.to eq 'Create nested item' }
 			end
 		end
 	end

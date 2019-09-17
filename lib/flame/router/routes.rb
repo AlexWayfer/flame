@@ -53,10 +53,10 @@ module Flame
 				return dig_through_opt_args if path_parts.empty?
 
 				endpoint =
-					self[path_parts.first] ||
-					dig(first_opt_arg_key, path_parts.first) ||
-					self[first_arg_key]
-				endpoint&.navigate(*path_parts[1..-1])
+					self[path_parts.first] || dig(first_opt_arg_key, path_parts.first)
+
+				endpoint&.navigate(*path_parts[1..-1]) ||
+					find_among_arg_keys(path_parts[1..-1])
 			end
 
 			## Dig through optional arguments as keys
@@ -105,9 +105,12 @@ module Flame
 
 			private
 
-			def first_arg_key
+			def find_among_arg_keys(path_parts)
 				keys.find do |key|
-					key.is_a?(Flame::Path::Part) && key.arg?
+					next unless key.is_a?(Flame::Path::Part) && key.arg?
+
+					result = self[key].navigate(*path_parts)
+					break result if result
 				end
 			end
 

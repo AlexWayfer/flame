@@ -44,9 +44,10 @@ describe Flame::Dispatcher::Request do
 			subject { Flame::Dispatcher::Request }
 
 			before do
-				is_expected.to have_received(:params).once
-				3.times { http_method }
+				is_expected.to receive(:params).once
 			end
+
+			it { 3.times { http_method } }
 		end
 
 		context 'invalid %-encoding query' do

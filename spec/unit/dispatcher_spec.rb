@@ -12,13 +12,9 @@ class DispatcherController < Flame::Controller
 		"Hello, #{name}!"
 	end
 
-	def baz(var = nil)
-		"Hello, #{var}!"
-	end
+	def baz(var = nil); end
 
-	def test
-		'Route content'
-	end
+	def test; end
 
 	def action_with_after_hook
 		'Body of action'

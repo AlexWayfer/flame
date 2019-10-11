@@ -50,13 +50,9 @@ class AnotherControllerController < Flame::Controller
 		'Another index'
 	end
 
-	def hello(name = 'world')
-		"Hello, #{name}!"
-	end
+	def hello(name = 'world'); end
 
-	def bar
-		'Another bar'
-	end
+	def bar; end
 
 	def baz
 		'Another baz'

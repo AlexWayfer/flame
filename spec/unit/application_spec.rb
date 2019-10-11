@@ -7,13 +7,9 @@ class ApplicationController < Flame::Controller
 		'Hello from foo!'
 	end
 
-	def bar
-		'Hello from bar!'
-	end
+	def bar; end
 
-	def hello(name)
-		"Hello, #{name}!"
-	end
+	def hello(name); end
 
 	def baz(first, second, third = nil, fourth = nil); end
 
@@ -319,10 +315,10 @@ describe Flame::Application do
 				File.file?(file) && file.match?(%r{lib/\w+/spec/})
 			end
 
-			allow(Kernel).to receive(:require) do |file|
+			allow(app_class).to receive(:require) do |file|
 				expect(wanted_files).to include file
-				expect(executable_files).to include file
-				expect(ignored_files).to include file
+				expect(executable_files).not_to include file
+				expect(ignored_files).not_to include file
 			end
 
 			app_class.require_dirs(

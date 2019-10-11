@@ -8,7 +8,7 @@ describe Flame::Application::Config do
 			foo: 1,
 			bar: 2,
 			baz: proc { 3 },
-			another_baz: proc { |a| a * 2 }
+			another_baz: proc { |x| }
 		}
 	end
 

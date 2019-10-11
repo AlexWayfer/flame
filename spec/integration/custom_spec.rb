@@ -4,9 +4,7 @@ require_relative 'app'
 
 ## Example of custom controller
 class CustomController < Flame::Controller
-	def index
-		'This is index for nearest routes'
-	end
+	def index; end
 
 	def foo
 		'This is foo'

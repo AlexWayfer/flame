@@ -41,10 +41,8 @@ describe Flame::Dispatcher::Request do
 		end
 
 		describe 'cache computed value' do
-			subject { Flame::Dispatcher::Request }
-
 			before do
-				is_expected.to receive(:params).once
+				expect(request).to receive(:params).and_call_original.once
 			end
 
 			it { 3.times { http_method } }

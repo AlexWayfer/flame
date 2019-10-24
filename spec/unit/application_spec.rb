@@ -243,17 +243,7 @@ describe Flame::Application do
 	describe '.config' do
 		subject { app_class.config }
 
-		it { is_expected.to be_kind_of Flame::Application::Config }
-	end
-
-	describe '.config=' do
-		before { app_class.config = config }
-
-		subject { app_class.config }
-
-		let(:config) { Flame::Application::Config.new(app_class) }
-
-		it { is_expected.to be config }
+		it { is_expected.to be_kind_of Flame::Config }
 	end
 
 	describe '.router' do
@@ -333,7 +323,7 @@ describe Flame::Application do
 		describe 'default config' do
 			subject { app_class.config }
 
-			it { is_expected.to be_kind_of Flame::Application::Config }
+			it { is_expected.to be_kind_of Flame::Config }
 
 			describe 'values' do
 				subject { super()[key] }

@@ -1,21 +1,23 @@
 # frozen_string_literal: true
 
-class RenderController < Flame::Controller
-end
+module RenderTest
+	class OneController < Flame::Controller
+	end
 
-class AnotherRenderController < Flame::Controller
-end
+	class AnotherOneController < Flame::Controller
+	end
 
-class RenderApp < Flame::Application
-	mount RenderController
-	mount AnotherRenderController
+	class Application < Flame::Application
+		mount OneController
+		mount AnotherOneController
+	end
 end
 
 describe Flame::Render do
-	let(:controller_class) { RenderController }
+	let(:controller_class) { RenderTest::OneController }
 
 	let(:controller) do
-		controller_class.new(Flame::Dispatcher.new(RenderApp, {}))
+		controller_class.new(Flame::Dispatcher.new(RenderTest::Application, {}))
 	end
 
 	def render_init(*args)
@@ -150,7 +152,7 @@ describe Flame::Render do
 		let(:block) { nil }
 
 		describe 'priority by controller name' do
-			let(:controller_class) { AnotherRenderController }
+			let(:controller_class) { RenderTest::AnotherOneController }
 
 			let(:args) { :view }
 
@@ -207,7 +209,7 @@ describe Flame::Render do
 			it do
 				expect { subject }.to raise_error(
 					Flame::Errors::TemplateNotFoundError,
-					"Template 'nonexistent' not found for 'RenderController'"
+					"Template 'nonexistent' not found for 'RenderTest::OneController'"
 				)
 			end
 		end

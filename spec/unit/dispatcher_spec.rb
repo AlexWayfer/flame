@@ -1,41 +1,43 @@
 # frozen_string_literal: true
 
-## Test controller for Dispatcher
-class DispatcherController < Flame::Controller
-	def index; end
+module DispatcherTest
+	## Test controller for Dispatcher
+	class IndexController < Flame::Controller
+		def index; end
 
-	def foo; end
+		def foo; end
 
-	def create; end
+		def create; end
 
-	def hello(name)
-		"Hello, #{name}!"
+		def hello(name)
+			"Hello, #{name}!"
+		end
+
+		def baz(var = nil); end
+
+		def test; end
+
+		def action_with_after_hook
+			'Body of action'
+		end
+
+		def redirect_from_before; end
+
+		protected
+
+		def execute(action)
+			request.env[:execute_before_called] ||= 0
+			request.env[:execute_before_called] += 1
+			halt redirect :foo if action == :redirect_from_before
+			super
+			nil if action == :action_with_after_hook
+		end
 	end
 
-	def baz(var = nil); end
-
-	def test; end
-
-	def action_with_after_hook
-		'Body of action'
+	## Test application for Dispatcher
+	class Application < Flame::Application
+		mount IndexController, '/'
 	end
-
-	def redirect_from_before; end
-
-	protected
-
-	def execute(action)
-		request.env[:execute_before_called] ||= 0
-		request.env[:execute_before_called] += 1
-		halt redirect :foo if action == :redirect_from_before
-		super
-		nil if action == :action_with_after_hook
-	end
-end
-
-## Test application for Dispatcher
-class DispatcherApplication < Flame::Application
-	mount DispatcherController, '/'
 end
 
 describe Flame::Dispatcher do
@@ -53,7 +55,7 @@ describe Flame::Dispatcher do
 		}
 	end
 
-	let(:dispatcher) { Flame::Dispatcher.new(DispatcherApplication, env) }
+	let(:dispatcher) { Flame::Dispatcher.new(DispatcherTest::Application, env) }
 
 	describe 'attrs' do
 		describe 'request reader' do
@@ -76,7 +78,7 @@ describe Flame::Dispatcher do
 			describe '@app_class' do
 				let(:instance_variable) { :@app_class }
 
-				it { is_expected.to eq DispatcherApplication }
+				it { is_expected.to eq DispatcherTest::Application }
 			end
 
 			describe '@env' do
@@ -399,7 +401,7 @@ describe Flame::Dispatcher do
 		end
 
 		context 'receiving result of `Controller#redirect`' do
-			let(:controller) { DispatcherController.new(dispatcher) }
+			let(:controller) { DispatcherTest::IndexController.new(dispatcher) }
 			let(:args) { [controller.redirect('http://example.com', 301)] }
 
 			describe 'status' do

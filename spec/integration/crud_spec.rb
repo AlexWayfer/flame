@@ -1,44 +1,50 @@
 # frozen_string_literal: true
 
-require_relative 'app'
+require_relative 'spec_helper'
 
-## Example of CRUD controller
-class CRUDController < Flame::Controller
-	def index
-		'List of items'
+module CRUDTest
+	## Example of CRUD controller
+	class CRUDController < Flame::Controller
+		def index
+			'List of items'
+		end
+
+		def create
+			'Create item'
+		end
+
+		def show(id)
+			"Show item #{id}"
+		end
+
+		def update(id)
+			"Edit item #{id}"
+		end
+
+		def delete(id)
+			"Delete item #{id}"
+		end
 	end
 
-	def create
-		'Create item'
+	class NestedCRUDController < Flame::Controller
+		def create
+			'Create nested item'
+		end
 	end
 
-	def show(id)
-		"Show item #{id}"
-	end
-
-	def update(id)
-		"Edit item #{id}"
-	end
-
-	def delete(id)
-		"Delete item #{id}"
+	## Mount example controller to app
+	class Application < Flame::Application
+		mount :CRUD, '/crud'
+		mount NestedCRUDController, '/crud/:item_id/nested'
 	end
 end
 
-class NestedCRUDController < Flame::Controller
-	def create
-		'Create nested item'
-	end
-end
-
-## Mount example controller to app
-class IntegrationApp
-	mount :CRUD, '/crud'
-	mount NestedCRUDController, '/crud/:item_id/nested'
-end
-
-describe 'CRUD Controller' do
+describe CRUDTest do
 	include Rack::Test::Methods
+
+	let(:app) do
+		CRUDTest::Application.new
+	end
 
 	describe 'list of items' do
 		before { get '/crud' }

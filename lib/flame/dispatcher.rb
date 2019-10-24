@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'gorilla_patch/symbolize'
+require 'rack'
 
 require_relative 'dispatcher/request'
 require_relative 'dispatcher/response'

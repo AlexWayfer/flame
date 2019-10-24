@@ -1,10 +1,12 @@
 # frozen_string_literal: true
 
-class StaticApp < Flame::Application
+module StaticTest
+	class Application < Flame::Application
+	end
 end
 
 describe Flame::Dispatcher::Static do
-	let(:app) { StaticApp }
+	let(:app) { StaticTest::Application }
 
 	let(:file) { 'test.txt' }
 

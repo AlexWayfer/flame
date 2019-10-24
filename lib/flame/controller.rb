@@ -3,6 +3,8 @@
 require 'forwardable'
 require 'gorilla_patch/namespace'
 
+require_relative 'router'
+
 require_relative 'controller/actions'
 require_relative 'controller/cookies'
 require_relative 'controller/path_to'

@@ -1,21 +1,27 @@
 # frozen_string_literal: true
 
-require_relative 'app'
+require_relative 'spec_helper'
 
-## Example of index controller
-class IndexController < Flame::Controller
-	def index
-		'This is index'
+module IndexTest
+	## Example of index controller
+	class IndexController < Flame::Controller
+		def index
+			'This is index'
+		end
+	end
+
+	## Mount example controller to app
+	class Application < Flame::Application
+		mount :index, '/'
 	end
 end
 
-## Mount example controller to app
-class IntegrationApp
-	mount :index, '/'
-end
-
-describe IndexController do
+describe IndexTest do
 	include Rack::Test::Methods
+
+	let(:app) do
+		IndexTest::Application.new
+	end
 
 	describe 'index' do
 		before { get '/' }

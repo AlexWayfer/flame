@@ -80,7 +80,10 @@ module Flame
 					get action unless find_reverse_route(action)
 				end
 
-				mount_nested_controllers if @mount_nested
+				mount_nested_controllers if @mount_nested && (
+					@controller.demodulize == 'IndexController' &&
+					!@namespace_name.empty?
+				)
 			end
 
 			## Assign methods of the controller to REST architecture

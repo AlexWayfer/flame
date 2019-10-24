@@ -1,72 +1,78 @@
 # frozen_string_literal: true
 
-require_relative 'app'
+require_relative 'spec_helper'
 
-## Example of custom controller
-class CustomController < Flame::Controller
-	def index; end
+module CustomTest
+	## Example of custom controller
+	class CustomController < Flame::Controller
+		def index; end
 
-	def foo
-		'This is foo'
+		def foo
+			'This is foo'
+		end
+
+		def hello(name = 'world')
+			"Hello, #{name}!"
+		end
+
+		# def page(*path_parts)
+		# 	path_parts.join '/'
+		# end
+
+		def error
+			raise 'Test'
+		end
+
+		def syntax_error
+			ERB.new('<% % %>').result(binding)
+		end
+
+		def merge_query_parameter(_id)
+			path_to :merge_query_parameter, params.merge(lang: 'ru')
+		end
+
+		private
+
+		def execute(action)
+			@action = action
+
+			return halt redirect :foo if request.path.include? '/old_foo'
+
+			super
+
+			{ a: 1 }
+		end
+
+		def not_found
+			response.header['Custom-Header'] = 'Hello from not_found'
+			halt redirect :foo if request.path.include? 'redirecting'
+			super
+		end
+
+		def default_body
+			result = "Some page about #{status} code"
+			result += "; exception is #{@exception.class}" if status == 500
+			result
+		end
+
+		def server_error(exception)
+			@exception = exception
+			super
+		end
 	end
 
-	def hello(name = 'world')
-		"Hello, #{name}!"
-	end
-
-	# def page(*path_parts)
-	# 	path_parts.join '/'
-	# end
-
-	def error
-		raise 'Test'
-	end
-
-	def syntax_error
-		ERB.new('<% % %>').result(binding)
-	end
-
-	def merge_query_parameter(_id)
-		path_to :merge_query_parameter, params.merge(lang: 'ru')
-	end
-
-	private
-
-	def execute(action)
-		@action = action
-
-		return halt redirect :foo if request.path.include? '/old_foo'
-
-		super
-
-		{ a: 1 }
-	end
-
-	def not_found
-		response.header['Custom-Header'] = 'Hello from not_found'
-		halt redirect :foo if request.path.include? 'redirecting'
-		super
-	end
-
-	def default_body
-		result = "Some page about #{status} code"
-		result += "; exception is #{@exception.class}" if status == 500
-		result
-	end
-
-	def server_error(exception)
-		@exception = exception
-		super
+	## Mount example controller to app
+	class Application < Flame::Application
+		mount :custom
 	end
 end
 
-## Mount example controller to app
-class IntegrationApp
-	mount :custom
-end
-
-describe CustomController do
+describe CustomTest do
 	include Rack::Test::Methods
+
+	let(:app) do
+		CustomTest::Application.new
+	end
 
 	subject { last_response }
 

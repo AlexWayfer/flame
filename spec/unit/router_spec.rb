@@ -1,22 +1,24 @@
 # frozen_string_literal: true
 
-## Test controller for Router
-class RouterController < Flame::Controller
-	def index; end
+module RouterTest
+	## Test controller for Router
+	class OneController < Flame::Controller
+		def index; end
 
-	def foo(first, second, third = nil, fourth = nil); end
-end
+		def foo(first, second, third = nil, fourth = nil); end
+	end
 
-## Another test controller for Router
-class RouterAnotherController < Flame::Controller
-	def index; end
-end
+	## Another test controller for Router
+	class AnotherOneController < Flame::Controller
+		def index; end
+	end
 
-class RouterApplication < Flame::Application
+	class Application < Flame::Application
+	end
 end
 
 describe Flame::Router do
-	subject(:router) { Class.new(RouterApplication).router }
+	subject(:router) { Class.new(RouterTest::Application).router }
 
 	describe '#app' do
 		subject { super().app }
@@ -58,31 +60,37 @@ describe Flame::Router do
 		context 'one mounted controller' do
 			before do
 				router.app.class_exec do
-					mount :router
+					mount :one
 				end
 			end
 
 			context 'existing controller and action' do
-				let(:path) { Flame::Path.new('/router/foo/bar/baz/qux') }
+				let(:path) { Flame::Path.new('/one/foo/bar/baz/qux') }
 
 				it do
-					is_expected.to eq Flame::Router::Route.new(RouterController, :foo)
+					is_expected.to eq Flame::Router::Route.new(
+						RouterTest::OneController, :foo
+					)
 				end
 			end
 
 			context 'nonexistent action' do
-				let(:path) { Flame::Path.new('/router/not_exist') }
+				let(:path) { Flame::Path.new('/one/not_exist') }
 
 				it do
-					is_expected.to eq Flame::Router::Route.new(RouterController, :index)
+					is_expected.to eq Flame::Router::Route.new(
+						RouterTest::OneController, :index
+					)
 				end
 			end
 
 			context 'path without optional argument' do
-				let(:path) { Flame::Path.new('/router/foo/bar/baz') }
+				let(:path) { Flame::Path.new('/one/foo/bar/baz') }
 
 				it do
-					is_expected.to eq Flame::Router::Route.new(RouterController, :foo)
+					is_expected.to eq Flame::Router::Route.new(
+						RouterTest::OneController, :foo
+					)
 				end
 			end
 
@@ -95,27 +103,31 @@ describe Flame::Router do
 			end
 
 			context 'path without required argument' do
-				let(:path) { Flame::Path.new('/router/foo/bar') }
+				let(:path) { Flame::Path.new('/one/foo/bar') }
 
 				it do
-					is_expected.not_to eq Flame::Router::Route.new(RouterController, :foo)
+					is_expected.not_to eq Flame::Router::Route.new(
+						RouterTest::OneController, :foo
+					)
 				end
 			end
 		end
 
 		context 'controller with nested controller' do
-			let(:path) { Flame::Path.new('/router/foo') }
+			let(:path) { Flame::Path.new('/one/foo') }
 
 			before do
 				router.app.class_exec do
-					mount :router do
-						mount :router_another
+					mount :one do
+						mount :another_one
 					end
 				end
 			end
 
 			it do
-				is_expected.to eq Flame::Router::Route.new(RouterController, :index)
+				is_expected.to eq Flame::Router::Route.new(
+					RouterTest::OneController, :index
+				)
 			end
 		end
 	end
@@ -125,30 +137,32 @@ describe Flame::Router do
 
 		before do
 			router.app.class_exec do
-				mount :router
+				mount :one
 			end
 		end
 
 		context 'existing route' do
 			shared_examples 'route found' do
-				it { is_expected.to eq '/router/foo/:first/:second/:?third/:?fourth' }
+				it { is_expected.to eq '/one/foo/:first/:second/:?third/:?fourth' }
 			end
 
 			context 'by route' do
-				let(:args) { Flame::Router::Route.new(RouterController, :foo) }
+				let(:args) { Flame::Router::Route.new(RouterTest::OneController, :foo) }
 
 				it_behaves_like 'route found'
 			end
 
 			context 'by controller and action' do
-				let(:args) { [RouterController, :foo] }
+				let(:args) { [RouterTest::OneController, :foo] }
 
 				it_behaves_like 'route found'
 			end
 		end
 
 		context 'nonexistent route' do
-			let(:args) { Flame::Router::Route.new(RouterAnotherController, :index) }
+			let(:args) do
+				Flame::Router::Route.new(RouterTest::AnotherOneController, :index)
+			end
 
 			it { is_expected.to be_nil }
 		end

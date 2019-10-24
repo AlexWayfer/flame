@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
-require_relative 'application/config'
+require 'addressable'
+
 require_relative 'router'
 require_relative 'dispatcher'
 
@@ -8,7 +9,14 @@ module Flame
 	## Core class, like Framework::Application
 	class Application
 		class << self
-			attr_accessor :config
+			## Remember root directory when inherited
+			def inherited(app)
+				app.root_dir = File.dirname caller(2..2).first.split(':')[0]
+			end
+
+			def config
+				@config ||= Flame::Config.new root_dir
+			end
 
 			## Router for routing
 			def router
@@ -26,22 +34,9 @@ module Flame
 			##     %w[config lib models helpers mailers services controllers]
 			##	 )
 			def require_dirs(dirs, ignore: [])
-				caller_dir = File.dirname caller_file
 				dirs.each do |dir|
-					require_dir File.join(caller_dir, dir), ignore: ignore
+					require_dir File.join(root_dir, dir), ignore: ignore
 				end
-			end
-
-			## Generating application config when inherited
-			def inherited(app)
-				app.config = Config.new(
-					app,
-					default_config_dirs(
-						root_dir: File.dirname(caller_file)
-					).merge(
-						environment: ENV['RACK_ENV'] || 'development'
-					)
-				)
 			end
 
 			## Make available `run Application` without `.new` for `rackup`
@@ -75,13 +70,11 @@ module Flame
 				Addressable::URI.new(path: path, query: query).to_s
 			end
 
-			private
+			protected
 
-			## Get filename from caller of method
-			## @return [String] filename of caller
-			def caller_file
-				caller(2..2).first.split(':')[0]
-			end
+			attr_accessor :root_dir
+
+			private
 
 			def require_dir(dir, ignore: [])
 				files =
@@ -118,28 +111,18 @@ module Flame
 			def mount(controller, path = nil, nested: true, &block)
 				## Add routes from controller to glob array
 				router.add Router::RoutesRefine.new(
-					namespace, controller, path, nested: nested, &block
+					namespace_name, controller, path, nested: nested, &block
 				)
 			end
 
 			using GorillaPatch::Namespace
 
-			def namespace
+			def namespace_name
 				namespace = self
 				while namespace.name.nil? && namespace.superclass != Flame::Application
 					namespace = superclass
 				end
 				namespace.deconstantize
-			end
-
-			## Initialize default for config directories
-			def default_config_dirs(root_dir:)
-				result = { root_dir: File.realpath(root_dir) }
-				%i[public views config tmp].each do |key|
-					result[:"#{key}_dir"] =
-						proc { File.join(config[:root_dir], key.to_s) }
-				end
-				result
 			end
 		end
 

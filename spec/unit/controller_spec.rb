@@ -1,126 +1,128 @@
 # frozen_string_literal: true
 
-## Controller for Controller tests
-class ControllerController < Flame::Controller
-	def foo(first, second = nil); end
+module ControllerTest
+	## Controller for Controller tests
+	class OneController < Flame::Controller
+		def foo(first, second = nil); end
 
-	def bar
-		view
+		def bar
+			view
+		end
+
+		def baz
+			reroute AnotherOneController, :baz
+		end
+
+		def object_hash
+			hash
+		end
+
+		def respond_for_reroute
+			'Hello from reroute'
+		end
+
+		def current_reroute
+			reroute :respond_for_reroute
+		end
+
+		def hash_reroute
+			reroute :object_hash
+		end
+
+		def index_reroute
+			reroute AnotherOneController
+		end
+
+		def execute_reroute
+			reroute AnotherOneController, :bar
+		end
+
+		def hooks_reroute
+			reroute AnotherOneController, :hooked
+		end
+
+		post '/refinement_path_for_create',
+			def create; end
 	end
 
-	def baz
-		reroute AnotherControllerController, :baz
-	end
+	## Another controller for Controller tests
+	class AnotherOneController < Flame::Controller
+		def index
+			'Another index'
+		end
 
-	def object_hash
-		hash
-	end
+		def hello(name = 'world'); end
 
-	def respond_for_reroute
-		'Hello from reroute'
-	end
+		def bar; end
 
-	def current_reroute
-		reroute :respond_for_reroute
-	end
+		def baz
+			'Another baz'
+		end
 
-	def hash_reroute
-		reroute :object_hash
-	end
+		def hooked
+			'Another hooked'
+		end
 
-	def index_reroute
-		reroute AnotherControllerController
-	end
-
-	def execute_reroute
-		reroute AnotherControllerController, :bar
-	end
-
-	def hooks_reroute
-		reroute AnotherControllerController, :hooked
-	end
-
-	post '/refinement_path_for_create',
-		def create; end
-end
-
-## Another controller for Controller tests
-class AnotherControllerController < Flame::Controller
-	def index
-		'Another index'
-	end
-
-	def hello(name = 'world'); end
-
-	def bar; end
-
-	def baz
-		'Another baz'
-	end
-
-	def hooked
-		'Another hooked'
-	end
-
-	def back
-		path_to_back
-	end
-
-	protected
-
-	def execute(method)
-		return body 'Another execute' if method == :bar
-
-		super
-
-		'after-hook' if method == :hooked
-	end
-end
-
-class RefinedPathController < Flame::Controller
-	PATH = '/that_path_is_refined'
-end
-
-module Nested
-	class IndexController < Flame::Controller
-		def index; end
-	end
-
-	class NestedController < Flame::Controller
 		def back
 			path_to_back
 		end
+
+		protected
+
+		def execute(method)
+			return body 'Another execute' if method == :bar
+
+			super
+
+			'after-hook' if method == :hooked
+		end
 	end
-end
 
-module ForeignPublicMethods
-	def cache; end
-end
+	class RefinedPathController < Flame::Controller
+		PATH = '/that_path_is_refined'
+	end
 
-## Module for Controller tests
-module SomeActions
-	include ForeignPublicMethods
-	extend Flame::Controller::Actions
+	module Nested
+		class IndexController < Flame::Controller
+			def index; end
+		end
 
-	def included_action; end
+		class NestedController < Flame::Controller
+			def back
+				path_to_back
+			end
+		end
+	end
 
-	def another_included_action; end
+	module ForeignPublicMethods
+		def cache; end
+	end
 
-	post '/refined_path',
-		def refined_action; end
+	## Module for Controller tests
+	module SomeActions
+		include ForeignPublicMethods
+		extend Flame::Controller::Actions
 
-	private
+		def included_action; end
 
-	def private_included_method; end
-end
+		def another_included_action; end
 
-## Application for Controller tests
-class ControllerApplication < Flame::Application
-	mount ControllerController, '/'
-	mount AnotherControllerController, '/another'
+		post '/refined_path',
+			def refined_action; end
 
-	mount Nested::IndexController do
-		mount Nested::NestedController
+		private
+
+		def private_included_method; end
+	end
+
+	## Application for Controller tests
+	class Application < Flame::Application
+		mount OneController, '/'
+		mount AnotherOneController, '/another'
+
+		mount Nested::IndexController do
+			mount Nested::NestedController
+		end
 	end
 end
 
@@ -134,16 +136,20 @@ describe Flame::Controller do
 		}
 	end
 
-	let(:dispatcher) { Flame::Dispatcher.new(ControllerApplication, env) }
+	let(:dispatcher) { Flame::Dispatcher.new(ControllerTest::Application, env) }
 
-	let(:controller_class) { ControllerController }
+	let(:controller_class) { ControllerTest::OneController }
 
 	let(:controller) { controller_class.new(dispatcher) }
 
 	describe '.actions' do
 		subject { controller_class.actions }
 
-		it { is_expected.to eq ControllerController.public_instance_methods(false) }
+		it do
+			is_expected.to eq(
+				ControllerTest::OneController.public_instance_methods(false)
+			)
+		end
 	end
 
 	describe '.path' do
@@ -151,26 +157,26 @@ describe Flame::Controller do
 
 		context 'without PATH constant (default)' do
 			context 'one-word named controller' do
-				let(:controller_class) { ControllerController }
+				let(:controller_class) { ControllerTest::OneController }
 
-				it { is_expected.to eq '/controller' }
+				it { is_expected.to eq '/one' }
 			end
 
 			context 'two-word named controller' do
-				let(:controller_class) { AnotherControllerController }
+				let(:controller_class) { ControllerTest::AnotherOneController }
 
-				it { is_expected.to eq '/another_controller' }
+				it { is_expected.to eq '/another_one' }
 			end
 
 			context 'nested in module index controller' do
-				let(:controller_class) { Nested::IndexController }
+				let(:controller_class) { ControllerTest::Nested::IndexController }
 
 				it { is_expected.to eq '/nested' }
 			end
 		end
 
 		context 'with PATH constant (refined)' do
-			let(:controller_class) { RefinedPathController }
+			let(:controller_class) { ControllerTest::RefinedPathController }
 
 			it { is_expected.to eq '/that_path_is_refined' }
 		end
@@ -209,13 +215,13 @@ describe Flame::Controller do
 		subject { controller.path_to(*args) }
 
 		context 'another controller and action' do
-			let(:args) { [AnotherControllerController, :baz] }
+			let(:args) { [ControllerTest::AnotherOneController, :baz] }
 
 			it { is_expected.to eq '/another/baz' }
 		end
 
 		context 'another controller without action' do
-			let(:args) { [AnotherControllerController] }
+			let(:args) { [ControllerTest::AnotherOneController] }
 
 			it { is_expected.to eq '/another' }
 		end
@@ -243,7 +249,7 @@ describe Flame::Controller do
 		end
 
 		context 'controller and action' do
-			let(:args) { [AnotherControllerController, :baz] }
+			let(:args) { [ControllerTest::AnotherOneController, :baz] }
 
 			it { is_expected.to eq 'http://localhost:3000/another/baz' }
 		end
@@ -303,7 +309,7 @@ describe Flame::Controller do
 	end
 
 	describe '#path_to_back' do
-		let(:controller_class) { AnotherControllerController }
+		let(:controller_class) { ControllerTest::AnotherOneController }
 		subject { controller.back } ## it's action with `path_to_back`
 
 		context 'referer URL exists' do
@@ -331,7 +337,7 @@ describe Flame::Controller do
 
 		context 'without referer and index action' do
 			let(:env) { super().merge(Rack::PATH_INFO => '/nested/nested/back') }
-			let(:controller_class) { Nested::NestedController }
+			let(:controller_class) { ControllerTest::Nested::NestedController }
 
 			it { is_expected.to eq '/' }
 		end
@@ -391,7 +397,7 @@ describe Flame::Controller do
 		end
 
 		describe 'by controller and action' do
-			let(:controller_class) { AnotherControllerController }
+			let(:controller_class) { ControllerTest::AnotherOneController }
 
 			context 'without status' do
 				let(:args) { [controller_class, :hello, name: 'Alex'] }
@@ -618,7 +624,7 @@ describe Flame::Controller do
 			it do
 				expect { subject }.to raise_error(
 					Flame::Errors::TemplateNotFoundError,
-					"Template 'nonexistent' not found for 'ControllerController'"
+					"Template 'nonexistent' not found for 'ControllerTest::OneController'"
 				)
 			end
 		end
@@ -631,7 +637,7 @@ describe Flame::Controller do
 		end
 
 		describe 'cache' do
-			subject(:cached_tilts) { ControllerApplication.cached_tilts }
+			subject(:cached_tilts) { ControllerTest::Application.cached_tilts }
 
 			before do
 				cached_tilts.clear
@@ -676,7 +682,7 @@ describe Flame::Controller do
 			it do
 				is_expected.to eq <<~CONTENT
 					<body>
-						This is view for bar method of ControllerController\n
+						This is view for bar method of ControllerTest::OneController\n
 					</body>
 				CONTENT
 			end
@@ -730,23 +736,27 @@ describe Flame::Controller do
 			let(:inherited_controller) do
 				arguments = args
 				Class.new(controller_class) do
-					include with_actions SomeActions, *arguments
+					include with_actions ControllerTest::SomeActions, *arguments
 				end
 			end
 
 			context 'without arguments' do
 				let(:args) { [] }
 
-				it { is_expected.to eq SomeActions.public_instance_methods(false).sort }
+				it do
+					is_expected.to eq(
+						ControllerTest::SomeActions.public_instance_methods(false).sort
+					)
+				end
 
 				it 'saves refinements' do
 					expect(inherited_controller.refined_http_methods)
-						.to eq(SomeActions.refined_http_methods)
+						.to eq(ControllerTest::SomeActions.refined_http_methods)
 				end
 
 				it 'saves private methods' do
 					expect(inherited_controller.private_instance_methods)
-						.to include(*SomeActions.private_instance_methods)
+						.to include(*ControllerTest::SomeActions.private_instance_methods)
 				end
 			end
 
@@ -756,7 +766,8 @@ describe Flame::Controller do
 				it do
 					is_expected.to eq(
 						(
-							SomeActions.public_instance_methods(false) - %i[included_action]
+							ControllerTest::SomeActions.public_instance_methods(false) -
+								%i[included_action]
 						).sort
 					)
 				end
@@ -768,7 +779,8 @@ describe Flame::Controller do
 				it do
 					is_expected.to eq(
 						(
-							SomeActions.public_instance_methods(false) & %i[included_action]
+							ControllerTest::SomeActions.public_instance_methods(false) &
+								%i[included_action]
 						).sort
 					)
 				end
@@ -782,15 +794,15 @@ describe Flame::Controller do
 				let(:inherited_controller) do
 					Class.new(controller_class) do
 						inherit_actions
-						include with_actions SomeActions
+						include with_actions ControllerTest::SomeActions
 					end
 				end
 
 				it do
 					is_expected.to eq(
 						(
-							ControllerController.actions +
-								SomeActions.public_instance_methods(false)
+							ControllerTest::OneController.actions +
+								ControllerTest::SomeActions.public_instance_methods(false)
 						).sort
 					)
 				end

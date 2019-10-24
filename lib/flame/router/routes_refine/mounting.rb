@@ -31,15 +31,13 @@ module Flame
 				using GorillaPatch::Namespace
 
 				def mount_nested_controllers
-					return if (
-						@controller.demodulize != 'IndexController' ||
-						@namespace_name.empty?
-					)
-
 					namespace = Object.const_get(@namespace_name)
 
-					namespace.constants.each do |controller_name|
-						mount_nested_controller namespace.const_get(controller_name)
+					namespace.constants.each do |constant_name|
+						constant = namespace.const_get(constant_name)
+						if constant < Flame::Controller || constant.instance_of?(Module)
+							mount_nested_controller constant
+						end
 					end
 				end
 

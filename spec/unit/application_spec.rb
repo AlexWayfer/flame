@@ -914,6 +914,20 @@ describe Flame::Application do
 			it { expect { subject }.not_to raise_error }
 		end
 
+		context 'anonymous controller' do
+			let(:controller) { Class.new(Flame::Controller) }
+
+			subject do
+				controller = self.controller
+
+				app_class.class_exec do
+					mount controller, '/'
+				end
+			end
+
+			it { expect { subject }.not_to raise_error }
+		end
+
 		context 'controller with refined HTTP-methods inside' do
 			before do
 				app_class.class_exec do

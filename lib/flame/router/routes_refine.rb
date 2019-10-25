@@ -22,9 +22,10 @@ module Flame
 			using GorillaPatch::Namespace
 
 			def initialize(
-				namespace_name, controller_name, path, nested: true, &block
+				namespace_name, controller_or_name, path, nested: true, &block
 			)
-				@controller = ControllerFinder.new(namespace_name, controller_name).find
+				@controller =
+					ControllerFinder.new(namespace_name, controller_or_name).controller
 				@namespace_name = @controller.deconstantize
 				@path = Flame::Path.new(path || @controller.path)
 				@routes, @endpoint = @path.to_routes_with_endpoint

@@ -5,16 +5,27 @@ module Flame
 	class Router
 		## Class for controller constant finding in namespace by names
 		class ControllerFinder
-			def initialize(namespace_name, controller_name)
+			attr_reader :controller
+
+			def initialize(namespace_name, controller_or_name)
 				@namespace =
 					namespace_name.empty? ? Object : Object.const_get(namespace_name)
-				@controller_name = controller_name
+
+				if controller_or_name.is_a?(Class)
+					@controller = controller_or_name
+					@controller_name = controller_or_name.name
+				else
+					@controller_name = controller_or_name
+					@controller = find
+				end
 			end
 
+			private
+
 			def find
-				found_controller_name =
-					controller_name_variations
-						.find { |variation| @namespace.const_defined?(variation) }
+				found_controller_name = controller_name_variations.find do |variation|
+					@namespace.const_defined?(variation) unless variation.empty?
+				end
 
 				raise_controller_not_found_error unless found_controller_name
 
@@ -23,8 +34,6 @@ module Flame
 
 				controller::IndexController
 			end
-
-			private
 
 			using GorillaPatch::Inflections
 

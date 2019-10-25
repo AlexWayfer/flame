@@ -37,6 +37,7 @@ All notable changes to this project will be documented in this file.
     puts MyApplication.router.routes
     ```
 *   Add `Request#headers` method (with Camel-Cased Hash)
+*   Allow to mount anonymous controllers
 
 
 ### Changed

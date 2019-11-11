@@ -28,13 +28,13 @@ module Flame
 					router.path_of(route).extract_arguments(request.path)
 				)
 				# route.execute(self)
-				controller = route.controller.new(self)
-				controller.send(:execute, action)
+				@current_controller = route.controller.new(self)
+				@current_controller.send(:execute, action)
 			rescue StandardError, SyntaxError => e
 				# p 'rescue from dispatcher'
 				dump_error(e)
 				status 500
-				controller&.send(:server_error, e)
+				@current_controller&.send(:server_error, e)
 				# p 're raise error from dispatcher'
 				# raise e
 			end
@@ -49,13 +49,16 @@ module Flame
 				## Return standard `default_body` if the route not found
 				return default_body unless route
 
-				if response.not_found?
-					## Execute `not_found` method as action for the founded route
-					execute_route(route, :not_found)
-					body
-				else
-					route.controller.new(self).send(:default_body)
-				end
+				return not_found_body(route) if response.not_found?
+
+				controller = @current_controller || route.controller.new(self)
+				controller.send :default_body
+			end
+
+			def not_found_body(route)
+				## Execute `not_found` method as action for the founded route
+				execute_route(route, :not_found)
+				body
 			end
 		end
 	end

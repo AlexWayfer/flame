@@ -246,6 +246,45 @@ describe Flame::Controller do
 			let(:args) { ['/some/path?with=args'] }
 
 			it { is_expected.to eq 'http://localhost:3000/some/path?with=args' }
+
+			context 'default port for scheme' do
+				let(:env) do
+					{
+						Rack::RACK_URL_SCHEME => 'http',
+						Rack::SERVER_NAME => 'example.domain',
+						Rack::SERVER_PORT => 80,
+						Rack::RACK_INPUT => StringIO.new
+					}
+				end
+
+				it { is_expected.to eq 'http://example.domain/some/path?with=args' }
+			end
+
+			context 'HTTP host' do
+				context 'with port' do
+					let(:env) do
+						{
+							Rack::RACK_URL_SCHEME => 'http',
+							Rack::HTTP_HOST => 'localhost:3000',
+							Rack::RACK_INPUT => StringIO.new
+						}
+					end
+
+					it { is_expected.to eq 'http://localhost:3000/some/path?with=args' }
+				end
+
+				context 'without port' do
+					let(:env) do
+						{
+							Rack::RACK_URL_SCHEME => 'http',
+							Rack::HTTP_HOST => 'example.domain',
+							Rack::RACK_INPUT => StringIO.new
+						}
+					end
+
+					it { is_expected.to eq 'http://example.domain/some/path?with=args' }
+				end
+			end
 		end
 
 		context 'controller and action' do

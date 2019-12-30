@@ -17,9 +17,7 @@ module Flame
 			## Build a URI to the given controller and action, or path
 			def url_to(*args, **options)
 				path = build_path_for_url(*args, **options)
-				Addressable::URI.new(
-					scheme: request.scheme, host: request.host_with_port, path: path
-				).to_s
+				Addressable::URI.join(request.base_url, path).to_s
 			end
 
 			using GorillaPatch::Namespace

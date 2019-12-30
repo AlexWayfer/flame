@@ -2,7 +2,7 @@
 
 require_relative '../lib/flame'
 
-Dir[File.join(__dir__, 'controllers/*.rb')].each { |file| require file }
+Dir[File.join(__dir__, 'controllers/*.rb')].sort.each { |file| require file }
 
 require_relative './app'
 

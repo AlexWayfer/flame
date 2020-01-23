@@ -448,7 +448,7 @@ describe Flame::Application do
 
 			it { is_expected.to be_kind_of Array }
 			it { expect(subject.first).to eq 200 }
-			it { expect(subject.last.body).to eq ['Hello from foo!'] }
+			it { expect(subject.last).to eq ['Hello from foo!'] }
 		end
 
 		context 'initialized with another app' do

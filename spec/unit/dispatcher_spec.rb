@@ -102,13 +102,16 @@ describe Flame::Dispatcher do
 	end
 
 	describe '#run!' do
-		subject(:response) { dispatcher.run!.last }
+		let(:response) { dispatcher.run! }
+		let(:status) { response[0] }
+		let(:headers) { response[1] }
+		let(:body) { response[2] }
 
-		subject { response.body }
+		subject { body }
 
 		context 'existing route' do
 			after do
-				expect(response.status).to eq 200
+				expect(status).to eq 200
 			end
 
 			it { is_expected.to eq ['Hello, world!'] }
@@ -156,7 +159,7 @@ describe Flame::Dispatcher do
 
 		context 'not existing route' do
 			after do
-				expect(response.status).to eq 404
+				expect(status).to eq 404
 			end
 
 			context 'neither route nor static file was found' do
@@ -174,12 +177,12 @@ describe Flame::Dispatcher do
 
 		context 'not allowed HTTP-method' do
 			after do
-				expect(response.status).to eq 405
+				expect(status).to eq 405
 			end
 
 			let(:method) { 'POST' }
 
-			subject { response.headers['Allow'] }
+			subject { headers['Allow'] }
 
 			it { is_expected.to eq 'GET, OPTIONS' }
 		end
@@ -188,7 +191,7 @@ describe Flame::Dispatcher do
 			let(:method) { 'OPTIONS' }
 
 			describe 'status' do
-				subject { response.status }
+				subject { status }
 
 				context 'existing route' do
 					it { is_expected.to eq 200 }
@@ -202,13 +205,13 @@ describe Flame::Dispatcher do
 			end
 
 			describe 'body' do
-				subject { response.body }
+				subject { body }
 
 				it { is_expected.to eq [''] }
 			end
 
 			describe '`Allow` header' do
-				subject { response.headers['Allow'] }
+				subject { headers['Allow'] }
 
 				context 'existing route' do
 					let(:path) { '/' }
@@ -219,7 +222,7 @@ describe Flame::Dispatcher do
 				context 'not existing route' do
 					let(:path) { '/hello' }
 
-					subject { response.headers.key?('Allow') }
+					subject { headers.key?('Allow') }
 
 					it { is_expected.to be false }
 				end

@@ -11,6 +11,7 @@ module Flame
 			## Look documentation at {Flame::Dispatcher#path_to}
 			def path_to(*args)
 				add_controller_class(args)
+				add_controller_arguments(args)
 				@dispatcher.path_to(*args)
 			end
 
@@ -34,6 +35,19 @@ module Flame
 			end
 
 			private
+
+			def add_controller_class(args)
+				args.unshift(self.class) if args[0].is_a?(Symbol)
+				args.insert(1, :index) if args[0].is_a?(Class) && !args[1].is_a?(Symbol)
+			end
+
+			def add_controller_arguments(args)
+				if args[-1].is_a?(Hash)
+					args[-1] = controller_arguments.merge args[-1]
+				else
+					args.push(controller_arguments)
+				end
+			end
 
 			def build_path_for_url(*args, **options)
 				first_arg = args.first

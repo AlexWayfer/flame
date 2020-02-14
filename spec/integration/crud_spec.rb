@@ -30,6 +30,20 @@ module CRUDTest
 		def create
 			'Create nested item'
 		end
+
+		def show(id)
+			path_to :edit, id: id
+		end
+
+		def edit(id); end
+
+		# protected
+		#
+		# def server_error(error)
+		# 	puts error
+		# 	puts error.backtrace
+		# 	super
+		# end
 	end
 
 	## Mount example controller to app
@@ -138,6 +152,22 @@ describe CRUDTest do
 				subject { super().body }
 
 				it { is_expected.to eq 'Create nested item' }
+			end
+		end
+	end
+
+	describe '`path_to` in controller with argument in path' do
+		before { get '/crud/2/nested/3' }
+
+		describe 'last_response' do
+			subject { last_response }
+
+			it { is_expected.to be_ok }
+
+			describe 'body' do
+				subject { super().body }
+
+				it { is_expected.to eq '/crud/2/nested/edit/3' }
 			end
 		end
 	end

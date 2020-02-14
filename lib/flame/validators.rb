@@ -52,7 +52,7 @@ module Flame
 						next unless part.arg?
 
 						## Memorize arguments
-						hash[part.opt_arg? ? :opt : :req] << part.clean.to_sym
+						hash[part.opt_arg? ? :opt : :req] << part.to_sym
 					end
 			end
 

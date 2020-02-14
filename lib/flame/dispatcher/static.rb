@@ -18,8 +18,8 @@ module Flame
 			private
 
 			## Find static files and try return it
-			def try_static(*args)
-				file = find_static(*args)
+			def try_static(*args, **kwargs)
+				file = find_static(*args, **kwargs)
 				return nil unless file.exist?
 
 				halt 400 unless file.within_directory

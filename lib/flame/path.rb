@@ -155,7 +155,7 @@ module Flame
 
 					break if part.opt_arg? && @other_parts.count <= @other_index
 
-					@args[part.clean.to_sym] = extract
+					@args[part.to_sym] = extract
 					@index += 1
 				end
 
@@ -236,10 +236,10 @@ module Flame
 			# 	arg? && !opt_arg?
 			# end
 
-			## Path part as a String without arguments characters
-			## @return [String] clean String
-			def clean
-				@part.delete ARG_CHAR + ARG_CHAR_OPT
+			## Path part as a Symbol without arguments characters
+			## @return [Symbol] clean Symbol
+			def to_sym
+				@part.delete(ARG_CHAR + ARG_CHAR_OPT).to_sym
 			end
 		end
 	end

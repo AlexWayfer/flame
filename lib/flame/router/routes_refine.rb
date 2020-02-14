@@ -28,6 +28,7 @@ module Flame
 					ControllerFinder.new(namespace_name, controller_or_name).controller
 				@namespace_name = @controller.deconstantize
 				@path = Flame::Path.new(path || @controller.path)
+				@controller.path_arguments = @path.parts.select(&:arg?).map(&:to_sym)
 				@routes, @endpoint = @path.to_routes_with_endpoint
 				@reverse_routes = {}
 				@mount_nested = nested

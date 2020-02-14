@@ -19,6 +19,8 @@ module Flame
 		extend Actions
 
 		class << self
+			attr_accessor :path_arguments
+
 			def path
 				return self::PATH if const_defined?(:PATH)
 
@@ -170,6 +172,12 @@ module Flame
 			body
 		end
 
+		using GorillaPatch::Slice
+
+		def controller_arguments
+			params.slice(*self.class.path_arguments)
+		end
+
 		def extract_params_for(action)
 			## Take parameters from action method
 			parameters = method(action).parameters
@@ -183,11 +191,6 @@ module Flame
 			opt_values.pop while opt_values.last.nil? && !opt_values.empty?
 			## Concat values
 			req_values + opt_values
-		end
-
-		def add_controller_class(args)
-			args.unshift(self.class) if args[0].is_a?(Symbol)
-			args.insert(1, :index) if args[0].is_a?(Class) && !args[1].is_a?(Symbol)
 		end
 	end
 end

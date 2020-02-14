@@ -240,10 +240,11 @@ describe Flame::Controller do
 	end
 
 	describe '#url_to' do
-		subject { controller.url_to(*args) }
+		subject { controller.url_to(*args, **kwargs) }
 
 		context 'String path' do
 			let(:args) { ['/some/path?with=args'] }
+			let(:kwargs) { {} }
 
 			it { is_expected.to eq 'http://localhost:3000/some/path?with=args' }
 
@@ -289,18 +290,21 @@ describe Flame::Controller do
 
 		context 'controller and action' do
 			let(:args) { [ControllerTest::AnotherOneController, :baz] }
+			let(:kwargs) { {} }
 
 			it { is_expected.to eq 'http://localhost:3000/another/baz' }
 		end
 
 		context 'action and argument' do
-			let(:args) { [:foo, first: 'Alex'] }
+			let(:args) { [:foo] }
+			let(:kwargs) { { first: 'Alex' } }
 
 			it { is_expected.to eq 'http://localhost:3000/foo/Alex' }
 		end
 
 		context 'Flame::Path object' do
 			let(:args) { [Flame::Path.new('/some/path?with=args')] }
+			let(:kwargs) { {} }
 
 			it { is_expected.to eq 'http://localhost:3000/some/path?with=args' }
 		end
@@ -740,11 +744,15 @@ describe Flame::Controller do
 		describe '.inherit_actions' do
 			let(:inherited_controller) do
 				arguments = args
-				Class.new(controller_class) { inherit_actions(*arguments) }
+				kwarguments = kwargs
+				Class.new(controller_class) do
+					inherit_actions(*arguments, **kwarguments)
+				end
 			end
 
 			context 'without arguments' do
 				let(:args) { [] }
+				let(:kwargs) { {} }
 
 				it { is_expected.to eq controller_class.actions.sort }
 
@@ -756,6 +764,7 @@ describe Flame::Controller do
 
 			context 'specific actions' do
 				let(:args) { [%i[foo bar baz]] }
+				let(:kwargs) { {} }
 
 				it { is_expected.to eq %i[foo bar baz].sort }
 
@@ -765,7 +774,8 @@ describe Flame::Controller do
 			end
 
 			context 'excluded actions' do
-				let(:args) { [{ exclude: %i[foo bar] }] }
+				let(:args) { [] }
+				let(:kwargs) { { exclude: %i[foo bar] } }
 
 				it { is_expected.to eq((controller_class.actions - %i[foo bar]).sort) }
 			end
@@ -774,13 +784,16 @@ describe Flame::Controller do
 		describe '.with_actions' do
 			let(:inherited_controller) do
 				arguments = args
+				kwarguments = kwargs
 				Class.new(controller_class) do
-					include with_actions ControllerTest::SomeActions, *arguments
+					include with_actions ControllerTest::SomeActions,
+						*arguments, **kwarguments
 				end
 			end
 
 			context 'without arguments' do
 				let(:args) { [] }
+				let(:kwargs) { {} }
 
 				it do
 					is_expected.to eq(
@@ -800,7 +813,8 @@ describe Flame::Controller do
 			end
 
 			context 'excluded actions' do
-				let(:args) { [{ exclude: %i[included_action] }] }
+				let(:args) { [] }
+				let(:kwargs) { { exclude: %i[included_action] } }
 
 				it do
 					is_expected.to eq(
@@ -813,7 +827,8 @@ describe Flame::Controller do
 			end
 
 			context 'only actions' do
-				let(:args) { [{ only: %i[included_action] }] }
+				let(:args) { [] }
+				let(:kwargs) { { only: %i[included_action] } }
 
 				it do
 					is_expected.to eq(

@@ -2,7 +2,7 @@ bundle_cache: &bundle_cache
   bundle_cache:
     folder: /usr/local/bundle
     fingerprint_script:
-      - echo $CIRRUS_TASK_NAME:$CIRRUS_OS
+      - echo $CIRRUS_OS
       - ruby -v
       - cat Gemfile
       - cat *.gemspec
@@ -10,6 +10,8 @@ bundle_cache: &bundle_cache
 
 
 test_task:
+  depends_on:
+    - rubocop
   container:
     matrix:
       image: ruby:2.5
@@ -19,9 +21,18 @@ test_task:
   environment:
     CODECOV_TOKEN: ENCRYPTED[fc3cdd6692dedbd2133ce8100d2cf236617d6acddc313b5f90f1994d3f62400fcc17fa2af079e8568fb3e85ee5803735]
   test_script: bundle exec rake
+  only_if: ($CIRRUS_BRANCH == 'master') ||
+    changesInclude(
+      '.cirrus.yml', 'Gemfile', 'Rakefile', '.rspec', 'lib/**/*', 'spec/**/*'
+    )
 
 rubocop_task:
   container:
-    image: ruby:2.7
+    image: ruby
   <<: *bundle_cache
   rubocop_script: bundle exec rubocop
+  only_if: ($CIRRUS_BRANCH == 'master') ||
+    changesInclude(
+      '.cirrus.yml', 'Gemfile', 'Rakefile', '.rubocop.yml', '*.gemspec',
+      '**/*.rb', '**/*.ru'
+    )

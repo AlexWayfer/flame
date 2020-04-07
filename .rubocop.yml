@@ -24,8 +24,19 @@ Layout/FirstMethodArgumentLineBreak:
 Layout/FirstMethodParameterLineBreak:
   Enabled: true
 
+Lint/RaiseException:
+  Enabled: true
+Lint/StructNewOverride:
+  Enabled: true
+
 Style/ParenthesesAroundCondition:
   AllowInMultilineConditions: true
+Style/HashEachMethods:
+  Enabled: true
+Style/HashTransformKeys:
+  Enabled: true
+Style/HashTransformValues:
+  Enabled: true
 
 AllCops:
   TargetRubyVersion: 2.4

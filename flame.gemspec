@@ -12,17 +12,18 @@ Gem::Specification.new do |s|
 
 	s.authors     = ['Alexander Popov']
 	s.email       = ['alex.wayfer@gmail.com']
-	s.homepage    = 'https://github.com/AlexWayfer/flame'
 	s.license     = 'MIT'
 
 	s.metadata = {
 		'bug_tracker_uri' => 'https://github.com/AlexWayfer/flame/issues',
 		'documentation_uri' =>
 			"http://www.rubydoc.info/gems/flame/#{Flame::VERSION}",
-		'homepage_uri' => 'https://github.com/AlexWayfer/flame',
 		'source_code_uri' => 'https://github.com/AlexWayfer/flame',
 		'wiki_uri' => 'https://github.com/AlexWayfer/flame/wiki'
 	}
+
+	s.metadata['homepage_uri'] = s.metadata['source_code_uri']
+	s.homepage = s.metadata['homepage_uri']
 
 	s.required_ruby_version = '>= 2.5'
 

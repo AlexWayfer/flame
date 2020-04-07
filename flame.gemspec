@@ -24,7 +24,7 @@ Gem::Specification.new do |s|
 		'wiki_uri' => 'https://github.com/AlexWayfer/flame/wiki'
 	}
 
-	s.required_ruby_version = '>= 2.4.0'
+	s.required_ruby_version = '>= 2.5'
 
 	s.add_runtime_dependency 'addressable', '~> 2.5'
 	s.add_runtime_dependency 'gorilla_patch', '~> 3.0'

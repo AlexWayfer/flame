@@ -291,24 +291,12 @@ describe Flame::Application do
 
 	describe '.require_dirs' do
 		it do
-			all_files = Dir[File.join(__dir__, 'require_dirs/**/*')]
-
-			wanted_files = all_files.reject do |file|
-				File.executable?(file) || file.match?(%r{lib/\w+/spec/})
-			end
-
-			executable_files = all_files.select do |file|
-				File.file?(file) && File.executable?(file)
-			end
-
-			ignored_files = all_files.select do |file|
-				File.file?(file) && file.match?(%r{lib/\w+/spec/})
-			end
+			required_files = []
 
 			allow(app_class).to receive(:require) do |file|
-				expect(wanted_files).to include file
-				expect(executable_files).not_to include file
-				expect(ignored_files).not_to include file
+				required_files.push(
+					file.sub("#{__dir__}/require_dirs/", '').delete_suffix('.rb')
+				)
 			end
 
 			app_class.require_dirs(
@@ -316,6 +304,37 @@ describe Flame::Application do
 					.map! { |dir| File.join 'require_dirs', dir },
 				ignore: [%r{lib/\w+/spec}]
 			)
+
+			# puts required_files
+
+			expect(required_files).to eq %w[
+				config/config
+
+				lib/some_lib/lib/some_lib
+
+				models/_some_model_module
+				models/some_model
+
+				helpers/some_helper
+
+				mailers/_base
+				mailers/some_mailer
+
+				services/_base
+				services/_common/_base
+				services/regular/_base
+				services/_common/create
+				services/_common/find
+				services/another/find
+				services/another_service
+				services/regular/all
+				services/regular/create
+				services/something_service
+
+				controllers/_base_controller
+				controllers/site/_controller
+				controllers/site/index_controller
+			]
 		end
 	end
 

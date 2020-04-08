@@ -7,6 +7,8 @@ module Flame
 	module Validators
 		## Compare arguments from path and from controller's action
 		class RouteArgumentsValidator
+			include Memery
+
 			## Create a new instance of validator
 			## @param ctrl [Flame::Controller] controller of route
 			## @param path [Flame::Path, String] path of route
@@ -45,22 +47,21 @@ module Flame
 			end
 
 			## Split path to args array
-			def path_arguments
-				@path_arguments ||= @path.parts
-					.each_with_object(req: [], opt: []) do |part, hash|
-						## Take only argument parts
-						next unless part.arg?
+			memoize def path_arguments
+				@path.parts.each_with_object(req: [], opt: []) do |part, hash|
+					## Take only argument parts
+					next unless part.arg?
 
-						## Memorize arguments
-						hash[part.opt_arg? ? :opt : :req] << part.to_sym
-					end
+					## Memorize arguments
+					hash[part.opt_arg? ? :opt : :req] << part.to_sym
+				end
 			end
 
 			## Take args from controller's action
-			def action_arguments
+			memoize def action_arguments
 				## Get all parameters (arguments) from method
 				## Than collect and sort parameters into hash
-				@action_arguments ||= @ctrl.instance_method(@action).parameters
+				@ctrl.instance_method(@action).parameters
 					.each_with_object(req: [], opt: []) do |param, hash|
 						## Only required parameters must be in `:req`
 						hash[param[0]] << param[1]

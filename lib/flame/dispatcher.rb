@@ -14,6 +14,8 @@ require_relative 'errors/route_not_found_error'
 module Flame
 	## Helpers for dispatch Flame::Application#call
 	class Dispatcher
+		include Memery
+
 		GEM_STATIC_FILES = File.join(__dir__, '../../public').freeze
 
 		extend Forwardable
@@ -73,15 +75,13 @@ module Flame
 
 		## Parameters of the request
 		def params
-			@params ||=
-				begin
-					request.params.symbolize_keys(deep: true)
-				rescue ArgumentError => e
-					raise unless e.message.include?('invalid %-encoding')
+			request.params.symbolize_keys(deep: true)
+		rescue ArgumentError => e
+			raise unless e.message.include?('invalid %-encoding')
 
-					{}
-				end
+			{}
 		end
+		memoize :params
 
 		## Session object as Hash
 		def session
@@ -94,10 +94,8 @@ module Flame
 		end
 
 		## Available routes endpoint
-		def available_endpoint
-			return @available_endpoint if defined? @available_endpoint
-
-			@available_endpoint = router.navigate(*request.path.parts)
+		memoize def available_endpoint
+			router.navigate(*request.path.parts)
 		end
 
 		## Interrupt the execution of route, and set new optional data

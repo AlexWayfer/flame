@@ -17,6 +17,7 @@ module Flame
 	## For new request and response
 	class Controller
 		extend Actions
+		include Memery
 
 		class << self
 			attr_accessor :path_arguments
@@ -57,8 +58,8 @@ module Flame
 		end
 
 		## Cookies object as Hash
-		def cookies
-			@cookies ||= Cookies.new(request.cookies, response)
+		memoize def cookies
+			Cookies.new(request.cookies, response)
 		end
 
 		include Flame::Controller::PathTo

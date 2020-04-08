@@ -9,22 +9,24 @@ module Flame
 	## Core class, like Framework::Application
 	class Application
 		class << self
+			include Memery
+
 			## Remember root directory when inherited
 			def inherited(app)
 				app.root_dir = File.dirname caller(2..2).first.split(':')[0]
 			end
 
-			def config
-				@config ||= Flame::Config.new root_dir
+			memoize def config
+				Flame::Config.new root_dir
 			end
 
 			## Router for routing
-			def router
-				@router ||= Flame::Router.new(self)
+			memoize def router
+				Flame::Router.new(self)
 			end
 
-			def cached_tilts
-				@cached_tilts ||= {}
+			memoize def cached_tilts
+				{}
 			end
 
 			## Require project directories, exclude executable files

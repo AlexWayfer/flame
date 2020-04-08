@@ -4,15 +4,15 @@ module Flame
 	class Dispatcher
 		## Class for requests
 		class Request < Rack::Request
+			include Memery
+
 			## Initialize Flame::Path
-			def path
-				@path ||= Flame::Path.new path_info
+			memoize def path
+				Flame::Path.new path_info
 			end
 
 			## Override HTTP-method of the request if the param '_method' found
-			def http_method
-				return @http_method if defined?(@http_method)
-
+			memoize def http_method
 				method_from_method =
 					begin
 						params['_method']
@@ -21,7 +21,7 @@ module Flame
 						raise unless e.message.include?('invalid %-encoding')
 					end
 
-				@http_method = (method_from_method || request_method).upcase.to_sym
+				(method_from_method || request_method).upcase.to_sym
 			end
 
 			using GorillaPatch::Inflections
@@ -29,8 +29,8 @@ module Flame
 			HEADER_PREFIX = 'HTTP_'
 
 			## Helper method for comfortable Camel-Cased Hash of headers
-			def headers
-				@headers ||= env.each_with_object({}) do |(key, value), result|
+			memoize def headers
+				env.each_with_object({}) do |(key, value), result|
 					next unless key.start_with?(HEADER_PREFIX)
 
 					## TODO: Replace `String#[]` with `#delete_prefix`

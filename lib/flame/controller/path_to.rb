@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'memery'
-
 module Flame
 	class Controller
 		## Module with methods for path or URL building

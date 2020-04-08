@@ -1,12 +1,15 @@
 # frozen_string_literal: true
 
 require 'forwardable'
+require 'memery'
 
 require_relative 'errors/argument_not_assigned_error'
 
 module Flame
 	## Class for working with paths
 	class Path
+		include Memery
+
 		extend Forwardable
 		def_delegators :to_s, :include?
 
@@ -27,8 +30,8 @@ module Flame
 
 		## Return parts of path, splitted by slash (`/`)
 		## @return [Array<Flame::Path::Part>] array of path parts
-		def parts
-			@parts ||= @path.to_s.split('/').reject(&:empty?)
+		memoize def parts
+			@path.to_s.split('/').reject(&:empty?)
 				.map! { |part| self.class::Part.new(part) }
 		end
 

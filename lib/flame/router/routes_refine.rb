@@ -8,15 +8,19 @@ module Flame
 		class RoutesRefine
 			attr_reader :routes, :reverse_routes
 
-			## Defaults REST routes (methods, pathes, controllers actions)
-			def self.rest_routes
-				@rest_routes ||= [
-					{ method: :GET,     path: '/',  action: :index  },
-					{ method: :POST,    path: '/',  action: :create },
-					{ method: :GET,     path: '/',  action: :show   },
-					{ method: :PUT,     path: '/',  action: :update },
-					{ method: :DELETE,  path: '/',  action: :delete }
-				]
+			class << self
+				include Memery
+
+				## Defaults REST routes (methods, pathes, controllers actions)
+				def rest_routes
+					[
+						{ method: :GET,     path: '/',  action: :index  },
+						{ method: :POST,    path: '/',  action: :create },
+						{ method: :GET,     path: '/',  action: :show   },
+						{ method: :PUT,     path: '/',  action: :update },
+						{ method: :DELETE,  path: '/',  action: :delete }
+					]
+				end
 			end
 
 			using GorillaPatch::Namespace

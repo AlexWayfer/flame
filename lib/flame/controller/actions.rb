@@ -6,6 +6,7 @@ module Flame
 	class Controller
 		## Module for work with actions
 		module Actions
+			include Memery
 			using GorillaPatch::Slice
 
 			## Shortcut for not-inherited public methods: actions
@@ -83,8 +84,8 @@ module Flame
 				end
 			end
 
-			def refined_http_methods
-				@refined_http_methods ||= {}
+			memoize def refined_http_methods
+				{}
 			end
 
 			private

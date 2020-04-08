@@ -14,20 +14,20 @@ module RenderTest
 end
 
 describe Flame::Render do
-	let(:controller_class) { RenderTest::OneController }
-
-	let(:controller) do
-		controller_class.new(Flame::Dispatcher.new(RenderTest::Application, {}))
-	end
-
 	def render_init(*args)
 		Flame::Render.new(controller, *args)
 	end
 
 	subject(:render) { render_init(*args) }
 
+	let(:controller_class) { RenderTest::OneController }
+
+	let(:controller) do
+		controller_class.new(Flame::Dispatcher.new(RenderTest::Application, {}))
+	end
+
 	describe '#initialize' do
-		context 'only view name' do
+		context 'with only view name' do
 			let(:args) { :view }
 
 			describe '@scope' do
@@ -109,12 +109,12 @@ describe Flame::Render do
 			end
 
 			describe '#compile_file' do
+				subject { super().send(:compile_file) }
+
 				before do
 					## warning: instance variable @cache not initialized
 					render.instance_variable_set(:@cache, false)
 				end
-
-				subject { super().send(:compile_file) }
 
 				## https://github.com/rtomayko/tilt/blob/752a852/lib/tilt/erb.rb#L20
 				describe '@outvar' do
@@ -125,7 +125,7 @@ describe Flame::Render do
 			end
 		end
 
-		context 'partial' do
+		context 'with partial' do
 			let(:args) { '_partial' }
 
 			describe '@layout' do
@@ -147,7 +147,7 @@ describe Flame::Render do
 	end
 
 	describe '#render' do
-		subject { super().render(&block) }
+		subject(:result) { render.render(&block) }
 
 		let(:block) { nil }
 
@@ -156,25 +156,29 @@ describe Flame::Render do
 
 			let(:args) { :view }
 
-			it do
-				is_expected.to eq <<~CONTENT
+			let(:expected_result) do
+				<<~CONTENT
 					<body>
 						<h1>I am from controller name!</h1>\n
 					</body>
 				CONTENT
 			end
+
+			it { is_expected.to eq expected_result }
 		end
 
 		describe 'view with layout by default' do
 			let(:args) { :view }
 
-			it do
-				is_expected.to eq <<~CONTENT
+			let(:expected_result) do
+				<<~CONTENT
 					<body>
 						<h1>Hello, world!</h1>\n
 					</body>
 				CONTENT
 			end
+
+			it { is_expected.to eq expected_result }
 		end
 
 		describe 'without layout by false option' do
@@ -192,8 +196,8 @@ describe Flame::Render do
 		describe 'with nested layouts' do
 			let(:args) { 'namespace/nested' }
 
-			it do
-				is_expected.to eq <<~CONTENT
+			let(:expected_result) do
+				<<~CONTENT
 					<body>
 						<div>
 						<p>Double layout!</p>\n
@@ -201,13 +205,15 @@ describe Flame::Render do
 					</body>
 				CONTENT
 			end
+
+			it { is_expected.to eq expected_result }
 		end
 
 		describe 'error if file not found' do
 			let(:args) { :nonexistent }
 
 			it do
-				expect { subject }.to raise_error(
+				expect { result }.to raise_error(
 					Flame::Errors::TemplateNotFoundError,
 					"Template 'nonexistent' not found for 'RenderTest::OneController'"
 				)
@@ -225,21 +231,23 @@ describe Flame::Render do
 		describe 'by relative name' do
 			let(:args) { 'namespace/_will_render_nested' }
 
-			it do
-				is_expected.to eq <<~CONTENT
+			let(:expected_result) do
+				<<~CONTENT
 					Hello!
 					There is nested:
 					Deeply nested file.
 				CONTENT
 			end
+
+			it { is_expected.to eq expected_result }
 		end
 
 		describe 'cache' do
+			subject(:cached_tilts) { controller.cached_tilts }
+
 			before do
 				controller.cached_tilts.clear
 			end
-
-			subject { controller.cached_tilts }
 
 			context 'with false option' do
 				let(:args) { [:view, layout: false] }
@@ -249,7 +257,7 @@ describe Flame::Render do
 						render = render_init(*args)
 						render.render(cache: false)
 
-						is_expected.to be_empty
+						expect(cached_tilts).to be_empty
 					end
 				end
 			end
@@ -258,20 +266,20 @@ describe Flame::Render do
 				let(:args) { [:view, layout: false] }
 
 				describe 'cached_tilts.count' do
-					subject { super().count }
+					subject(:cached_tilts_count) { cached_tilts.count }
 
 					it do
 						2.times do
 							render = render_init(*args)
 							render.render(cache: true)
 
-							is_expected.to eq 1
+							expect(cached_tilts_count).to eq 1
 						end
 					end
 				end
 
 				describe 'cached_tilts.keys' do
-					subject { super().keys }
+					subject(:cached_tilts_keys) { cached_tilts.keys }
 
 					it do
 						2.times do
@@ -279,7 +287,7 @@ describe Flame::Render do
 							render.render(cache: true)
 						end
 
-						is_expected.to all include 'view'
+						expect(cached_tilts_keys).to all include 'view'
 					end
 				end
 			end
@@ -288,30 +296,38 @@ describe Flame::Render do
 				let(:args) { :view }
 
 				describe 'cached_tilts.count' do
-					subject { super().count }
+					subject(:cached_tilts_count) { cached_tilts.count }
 
 					it do
 						render = render_init(*args)
 						render.render(cache: true)
 
-						is_expected.to eq 2
+						expect(cached_tilts_count).to eq 2
 					end
 				end
 
 				describe 'cached_tilts.keys' do
-					subject { super().keys }
+					subject(:cached_tilts_keys) { cached_tilts.keys }
 
 					it do
 						render = render_init(*args)
 						render.render(cache: true)
 
-						is_expected.to include include 'layout'
+						expect(cached_tilts_keys).to include include 'layout'
 					end
 				end
 			end
 
 			describe 'plain template without multiple layouts' do
 				let(:args) { :plain }
+
+				let(:expected_result) do
+					<<~CONTENT
+						<body>
+							<span>text</span>\n
+						</body>
+					CONTENT
+				end
 
 				it do
 					result = nil
@@ -320,11 +336,7 @@ describe Flame::Render do
 						result = render.render(cache: true)
 					end
 
-					expect(result).to eq <<~CONTENT
-						<body>
-							<span>text</span>\n
-						</body>
-					CONTENT
+					expect(result).to eq expected_result
 				end
 			end
 		end

@@ -1,20 +1,20 @@
 # frozen_string_literal: true
 
 describe Flame::Router::Routes do
-	let(:path) { '/foo/bar/baz' }
+	subject(:routes) { described_class.new(path) }
 
-	subject(:routes) { Flame::Router::Routes.new(path) }
+	let(:path) { '/foo/bar/baz' }
 
 	describe '#initialize' do
 		it { is_expected.to be_kind_of Hash }
 
-		context 'path as Flame::Path' do
+		context 'with path as Flame::Path' do
 			let(:path) { Flame::Path.new('/foo/bar/baz') }
 
 			it { is_expected.to eq('foo' => { 'bar' => { 'baz' => {} } }) }
 		end
 
-		context 'path as String' do
+		context 'with path as String' do
 			let(:path) { '/foo/bar/baz' }
 
 			it { is_expected.to eq('foo' => { 'bar' => { 'baz' => {} } }) }
@@ -35,22 +35,22 @@ describe Flame::Router::Routes do
 	end
 
 	describe '#[]' do
-		context 'Path Part for key which is not argument' do
-			subject { super()[Flame::Path::Part.new('foo')] }
+		context 'with Path Part which is not argument' do
+			subject { routes[Flame::Path::Part.new('foo')] }
 
 			it { is_expected.to eq('bar' => { 'baz' => {} }) }
 		end
 
-		context 'String for key which is not argument ' do
-			subject { super()['foo'] }
+		context 'with String which is not argument ' do
+			subject { routes['foo'] }
 
 			it { is_expected.to eq('bar' => { 'baz' => {} }) }
 		end
 
-		context 'HTTP-methods as Symbol keys' do
+		context 'with HTTP-methods as Symbol keys' do
+			subject { routes['foo']['bar'][:GET] }
+
 			let(:path) { '/foo/bar' }
-
-			subject { super()['foo']['bar'][:GET] }
 
 			before do
 				routes['foo']['bar'][:GET] = 42
@@ -61,61 +61,61 @@ describe Flame::Router::Routes do
 	end
 
 	describe '#navigate' do
-		subject { super().navigate(*args) }
+		subject { routes.navigate(*args) }
 
-		context 'path without arguments' do
-			context 'Path Part argument' do
+		context 'when path without arguments' do
+			context 'with Path Part argument' do
 				let(:args) { Flame::Path.new('/foo/bar').parts }
 
 				it { is_expected.to eq('baz' => {}) }
 			end
 
-			context 'String argument' do
+			context 'with String argument' do
 				let(:args) { %w[foo bar] }
 
 				it { is_expected.to eq('baz' => {}) }
 			end
 		end
 
-		context 'path with arguments' do
+		context 'when path with arguments' do
 			let(:path) { '/:first/:second' }
 
-			context 'Path Part argument' do
+			context 'with Path Part argument' do
 				let(:args) { Flame::Path.new('/foo').parts }
 
 				it { is_expected.to eq(':second' => {}) }
 			end
 
-			context 'String argument' do
+			context 'with String argument' do
 				let(:args) { 'foo' }
 
 				it { is_expected.to eq(':second' => {}) }
 			end
 		end
 
-		context 'path with optional argument at beginning' do
+		context 'when path with optional argument at beginning' do
 			let(:path) { '/:?first/second/third' }
 
-			context 'Path Part argument' do
+			context 'with Path Part argument' do
 				let(:args) { Flame::Path.new('/second').parts }
 
 				it { is_expected.to eq('third' => {}) }
 			end
 
-			context 'String argument' do
+			context 'with String argument' do
 				let(:args) { 'second' }
 
 				it { is_expected.to eq('third' => {}) }
 			end
 		end
 
-		context 'root path' do
+		context 'with root path' do
 			let(:args) { '/' }
 
 			it { is_expected.to eq('foo' => { 'bar' => { 'baz' => {} } }) }
 		end
 
-		context 'nested routes from path' do
+		context 'with nested routes from path' do
 			let(:path) { '/foo/:?var/bar' }
 
 			describe 'level one' do
@@ -137,7 +137,7 @@ describe Flame::Router::Routes do
 			end
 		end
 
-		context 'nonexistent path' do
+		context 'with nonexistent path' do
 			let(:args) { '/foo/baz' }
 
 			it { is_expected.to be_nil }
@@ -147,7 +147,7 @@ describe Flame::Router::Routes do
 	describe '#allow' do
 		subject { super()['foo']['bar'].allow }
 
-		context 'multiple allow HTTP-methods' do
+		context 'when multiple HTTP-methods are allowed' do
 			let(:path) { '/foo/bar' }
 
 			before do
@@ -158,7 +158,7 @@ describe Flame::Router::Routes do
 			it { is_expected.to eq 'GET, POST, OPTIONS' }
 		end
 
-		context 'nonexistent path' do
+		context 'with nonexistent path' do
 			it { is_expected.to be_nil }
 		end
 	end
@@ -174,8 +174,8 @@ describe Flame::Router::Routes do
 			routes['foo']['bar']['baz'][:GET] = 62
 		end
 
-		it do
-			is_expected.to eq <<~OUTPUT
+		let(:expected_output) do
+			<<~OUTPUT
 				\e[1m   GET /foo/bar\e[22m
 				       \e[3m\e[36m42\e[0m\e[23m
 				\e[1m  POST /foo/bar/bar\e[22m
@@ -187,11 +187,13 @@ describe Flame::Router::Routes do
 			OUTPUT
 		end
 
+		it { is_expected.to eq expected_output }
+
 		describe 'output without color chars' do
 			subject { super().gsub(/\e\[(\d+)m/, '') }
 
-			it do
-				is_expected.to eq <<~OUTPUT
+			let(:expected_output) do
+				<<~OUTPUT
 					   GET /foo/bar
 					       42
 					  POST /foo/bar/bar
@@ -202,6 +204,8 @@ describe Flame::Router::Routes do
 					       84
 				OUTPUT
 			end
+
+			it { is_expected.to eq expected_output }
 		end
 	end
 end

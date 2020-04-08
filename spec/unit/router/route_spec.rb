@@ -30,7 +30,7 @@ describe Flame::Router::Route do
 
 	describe '#initialize' do
 		it 'receives controller and action' do
-			expect { subject }.not_to raise_error
+			expect { route }.not_to raise_error
 		end
 	end
 
@@ -40,21 +40,21 @@ describe Flame::Router::Route do
 		let(:left)  { route_intialize(*left_args) }
 		let(:right) { route_intialize(*right_args) }
 
-		context 'another object with the same attributes' do
+		context 'when another object with the same attributes' do
 			let(:left_args)  { args }
 			let(:right_args) { left_args }
 
 			it { is_expected.to be true }
 		end
 
-		context 'another object with another controller' do
+		context 'when another object with another controller' do
 			let(:left_args)  { [RouteController, :foo] }
 			let(:right_args) { [AnotherRouteController, :foo] }
 
 			it { is_expected.to be false }
 		end
 
-		context 'another object with another action' do
+		context 'when another object with another action' do
 			let(:left_args)  { [RouteController, :foo] }
 			let(:right_args) { [RouteController, :bar] }
 

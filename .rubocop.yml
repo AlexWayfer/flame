@@ -1,3 +1,7 @@
+require:
+  - rubocop-performance
+  - rubocop-rspec
+
 Layout/Tab:
   Enabled: false
   IndentationWidth: 2
@@ -45,3 +49,9 @@ Metrics/BlockLength:
   Exclude:
     - 'spec/**/*'
     - '*.gemspec'
+
+RSpec/NestedGroups:
+  Max: 5
+## https://github.com/rubocop-hq/rubocop-rspec/issues/895
+RSpec/FilePath:
+  Enabled: false

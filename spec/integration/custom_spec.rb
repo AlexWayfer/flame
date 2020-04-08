@@ -70,11 +70,11 @@ end
 describe CustomTest do
 	include Rack::Test::Methods
 
+	subject { last_response }
+
 	let(:app) do
 		CustomTest::Application.new
 	end
-
-	subject { last_response }
 
 	describe 'foo' do
 		before { get '/custom/foo' }
@@ -154,16 +154,16 @@ describe CustomTest do
 				describe 'body' do
 					subject { super().body }
 
-					it do
-						is_expected.to eq(
-							"Some page about 500 code; exception is #{exception}"
-						)
+					let(:expected_body) do
+						"Some page about 500 code; exception is #{exception}"
 					end
+
+					it { is_expected.to eq expected_body }
 				end
 			end
 		end
 
-		context 'regular error' do
+		context 'with regular error' do
 			before { get '/custom/error' }
 
 			let(:exception) { RuntimeError }
@@ -171,7 +171,7 @@ describe CustomTest do
 			it_behaves_like 'custom 500'
 		end
 
-		context 'syntax error' do
+		context 'with syntax error' do
 			before { get '/custom/syntax_error' }
 
 			let(:exception) { SyntaxError }
@@ -209,11 +209,11 @@ describe CustomTest do
 	end
 
 	describe 'merge query parameter' do
+		subject { super().body }
+
 		before { get path }
 
 		let(:path_without) { '/custom/merge_query_parameter/2?foo=bar' }
-
-		subject { super().body }
 
 		shared_examples 'correct path' do
 			it { is_expected.to eq "#{path_without}&lang=ru" }

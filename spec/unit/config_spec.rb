@@ -5,32 +5,32 @@ describe Flame::Config do
 
 	describe '#[]' do
 		describe 'regular values' do
+			subject { config[:foo] }
+
 			before do
 				config[:foo] = 1
 			end
-
-			subject { config[:foo] }
 
 			it { is_expected.to eq 1 }
 		end
 
 		describe 'proc values' do
-			context 'wihout parameters' do
+			context 'without parameters' do
+				subject { config[:baz] }
+
 				before do
 					config[:baz] = proc { 3 }
 				end
 
-				subject { config[:baz] }
-
 				it { is_expected.to eq 3 }
 			end
 
-			context 'wih parameters' do
+			context 'with parameters' do
+				subject { config[:another_baz] }
+
 				before do
 					config[:another_baz] = proc { |x| }
 				end
-
-				subject { config[:another_baz] }
 
 				it { is_expected.to be_kind_of Proc }
 			end
@@ -38,13 +38,13 @@ describe Flame::Config do
 	end
 
 	describe '#load_yaml' do
-		let(:yaml) { { foo: 1, bar: 'baz' } }
-
 		subject { config[key] }
+
+		let(:yaml) { { foo: 1, bar: 'baz' } }
 
 		let(:key) { :example }
 
-		context 'String filename' do
+		context 'with String filename' do
 			before do
 				config.load_yaml 'example.yml'
 			end
@@ -52,8 +52,8 @@ describe Flame::Config do
 			it { is_expected.to eq yaml }
 		end
 
-		context 'Symbol basename' do
-			context '`.yml` file' do
+		context 'with Symbol basename' do
+			context 'with `.yml` file' do
 				before do
 					config.load_yaml :example
 				end
@@ -61,7 +61,7 @@ describe Flame::Config do
 				it { is_expected.to eq yaml }
 			end
 
-			context '`.yaml` file' do
+			context 'with `.yaml` file' do
 				let(:key) { :example2 }
 
 				before do
@@ -72,7 +72,7 @@ describe Flame::Config do
 			end
 		end
 
-		context 'refined key' do
+		context 'with refined key' do
 			let(:key) { :another }
 
 			before do
@@ -82,22 +82,25 @@ describe Flame::Config do
 			it { is_expected.to eq yaml }
 		end
 
-		context ':set option is false' do
-			before do
-				@loaded = config.load_yaml :example, set: false
-			end
+		context 'when `:set` option is false' do
+			let(:result) { config.load_yaml :example, set: false }
 
-			it { expect(@loaded).to eq yaml }
+			before { result }
+
 			it { is_expected.to be_nil }
+
+			describe 'result' do
+				subject { result }
+
+				it { is_expected.to eq yaml }
+			end
 		end
 
-		context 'file does not exist' do
-			subject do
-				config.load_yaml :not_exist
-			end
+		context 'when file does not exist' do
+			subject(:result) { config.load_yaml :not_exist }
 
 			it do
-				expect { subject }.to raise_error(
+				expect { result }.to raise_error(
 					Flame::Errors::ConfigFileNotFoundError,
 					"Config file 'not_exist.y{a,}ml' not found in 'config/'"
 				)

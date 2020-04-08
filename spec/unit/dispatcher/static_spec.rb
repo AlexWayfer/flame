@@ -6,6 +6,8 @@ module StaticTest
 end
 
 describe Flame::Dispatcher::Static do
+	subject(:try_static) { dispatcher.send(:try_static) }
+
 	let(:app) { StaticTest::Application }
 
 	let(:file) { 'test.txt' }
@@ -23,20 +25,18 @@ describe Flame::Dispatcher::Static do
 
 	let(:dispatcher) { Flame::Dispatcher.new(app, env) }
 
-	subject(:try_static) { dispatcher.send(:try_static) }
-
-	context 'not cached' do
-		context 'static file' do
+	context 'when not cached' do
+		context 'with static file' do
 			it { is_expected.to eq "Test static\n" }
 		end
 
-		context 'symbolic link to file' do
+		context 'with symbolic link to file' do
 			let(:path) { '/symlink' }
 
 			it { is_expected.to eq "Test static\n" }
 		end
 
-		context 'URL-encoded request' do
+		context 'with URL-encoded request' do
 			let(:path) do
 				'/%D1%82%D0%B5%D1%81%D1%82%D0%BE%D0%B2%D1%8B%D0%B9%20' \
 				'%D1%84%D0%B0%D0%B9%D0%BB'
@@ -45,18 +45,18 @@ describe Flame::Dispatcher::Static do
 			it { is_expected.to eq "Тестовый файл\n" }
 		end
 
-		context 'request with `+` instead of spaces' do
+		context 'when request with `+` instead of spaces' do
 			let(:path) { '/тестовый+файл' }
 
 			it { is_expected.to eq "Тестовый файл\n" }
 		end
 
 		describe 'headers' do
+			subject { dispatcher.response[header] }
+
 			before do
 				try_static
 			end
-
-			subject { dispatcher.response[header] }
 
 			describe '`Last-Modified`' do
 				let(:header) { 'Last-Modified' }
@@ -72,25 +72,23 @@ describe Flame::Dispatcher::Static do
 		end
 	end
 
-	context 'cached' do
+	context 'when cached' do
 		let(:env) { super().merge('HTTP_IF_MODIFIED_SINCE' => file_mtime.httpdate) }
 
 		before do
-			expect { try_static }.to throw_symbol(:halt)
+			catch(:halt) { try_static }
 		end
 
-		context 'cached file' do
-			describe 'status' do
-				subject { dispatcher.status }
+		describe 'status' do
+			subject { dispatcher.status }
 
-				it { is_expected.to eq 304 }
-			end
+			it { is_expected.to eq 304 }
+		end
 
-			describe 'body' do
-				subject { dispatcher.body }
+		describe 'body' do
+			subject { dispatcher.body }
 
-				it { is_expected.to be_empty }
-			end
+			it { is_expected.to be_empty }
 		end
 
 		describe '`Cache-Control` header' do
@@ -100,21 +98,21 @@ describe Flame::Dispatcher::Static do
 		end
 	end
 
-	context 'nonexistent file' do
+	context 'when file does not exist' do
 		let(:path) { '/nonexistent_file' }
 
 		it { is_expected.to be_nil }
 	end
 
-	context 'invalid encoding' do
+	context 'when encoding is invalid' do
 		let(:path) { '/%EF%BF%BD%8%EF%BF%BD' }
 
-		it { expect { subject }.not_to raise_error }
+		it { expect { try_static }.not_to raise_error }
 	end
 
-	context 'file outside public directory' do
+	context 'when file is outside of public directory' do
 		before do
-			expect { try_static }.to throw_symbol(:halt)
+			catch(:halt) { try_static }
 		end
 
 		let(:path) { '/%2E%2E/%2E%2E/config/example.yml' }

@@ -2,38 +2,36 @@
 
 require_relative '../../../lib/flame/errors/config_file_not_found_error'
 
-describe 'Flame::Errors' do
-	describe Flame::Errors::ConfigFileNotFoundError do
-		subject(:error) { described_class.new(file_name, directory) }
+describe Flame::Errors::ConfigFileNotFoundError do
+	subject(:error) { described_class.new(file_name, directory) }
 
-		let(:file_name) { 'foo.y{a,}ml' }
+	let(:file_name) { 'foo.y{a,}ml' }
 
-		let(:correct_message) do
-			"Config file 'foo.y{a,}ml' not found in 'config/'"
-		end
+	let(:correct_message) do
+		"Config file 'foo.y{a,}ml' not found in 'config/'"
+	end
 
-		context 'directory without slashes at start and at end' do
-			let(:directory) { 'config' }
+	context 'with directory without slashes at start and at end' do
+		let(:directory) { 'config' }
 
-			it_behaves_like 'error with correct output'
-		end
+		it_behaves_like 'error with correct output'
+	end
 
-		context 'directory without slash at start and with slash at end' do
-			let(:directory) { 'config/' }
+	context 'with irectory without slash at start and with slash at end' do
+		let(:directory) { 'config/' }
 
-			it_behaves_like 'error with correct output'
-		end
+		it_behaves_like 'error with correct output'
+	end
 
-		context 'directory with slash at start and without slash at end' do
-			let(:directory) { '/config' }
+	context 'with directory with slash at start and without slash at end' do
+		let(:directory) { '/config' }
 
-			it_behaves_like 'error with correct output'
-		end
+		it_behaves_like 'error with correct output'
+	end
 
-		context 'directory with slashes at start and at end' do
-			let(:directory) { '/config/' }
+	context 'with directory with slashes at start and at end' do
+		let(:directory) { '/config/' }
 
-			it_behaves_like 'error with correct output'
-		end
+		it_behaves_like 'error with correct output'
 	end
 end

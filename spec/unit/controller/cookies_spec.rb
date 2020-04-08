@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 describe Flame::Controller::Cookies do
+	subject(:cookies) { described_class.new(request.cookies, response) }
+
 	let(:env) do
 		{
 			'HTTP_COOKIE' => 'foo=bar; baz=bat'
@@ -10,24 +12,20 @@ describe Flame::Controller::Cookies do
 	let(:request) { Flame::Dispatcher::Request.new(env) }
 	let(:response) { Flame::Dispatcher::Response.new }
 
-	subject(:cookies) do
-		Flame::Controller::Cookies.new(request.cookies, response)
-	end
-
 	describe '#initialize' do
-		it { expect { subject }.not_to raise_error }
+		it { expect { cookies }.not_to raise_error }
 	end
 
 	describe '#[]' do
 		subject { cookies[key] }
 
-		context 'String key' do
+		context 'with String key' do
 			let(:key) { 'foo' }
 
 			it { is_expected.to eq 'bar' }
 		end
 
-		context 'Symbol key' do
+		context 'with Symbol key' do
 			let(:key) { :baz }
 
 			it { is_expected.to eq 'bat' }
@@ -35,11 +33,11 @@ describe Flame::Controller::Cookies do
 	end
 
 	describe '#[]=' do
+		subject { response[Rack::SET_COOKIE] }
+
 		before do
 			cookies[:abc] = cookie_value
 		end
-
-		subject { response[Rack::SET_COOKIE] }
 
 		describe 'setting cookie' do
 			let(:cookie_value) { 'xyz' }
@@ -52,7 +50,7 @@ describe Flame::Controller::Cookies do
 
 			before do
 				cookies[:abc] = 'xyz'
-				is_expected.to include 'abc=xyz;'
+				cookies[:abc] = nil
 			end
 
 			it { is_expected.to include 'abc=;' }

@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 describe Flame::Dispatcher::Request do
+	subject(:request) { described_class.new(env) }
+
 	let(:method) { :PATCH }
 	let(:query) { '' }
 
@@ -13,8 +15,6 @@ describe Flame::Dispatcher::Request do
 			Rack::RACK_REQUEST_FORM_HASH => { '_method' => method.to_s }
 		}
 	end
-
-	subject(:request) { Flame::Dispatcher::Request.new(env) }
 
 	it { is_expected.to be_kind_of Rack::Request }
 
@@ -34,28 +34,30 @@ describe Flame::Dispatcher::Request do
 
 		it { is_expected.to be_kind_of Symbol }
 
-		context 'downcased input' do
+		context 'when input is downcased' do
 			let(:method) { :put }
 
 			it { is_expected.to eq :PUT }
 		end
 
-		describe 'cache computed value' do
+		describe 'with cache of computed value' do
 			before do
-				expect(request).to receive(:params).and_call_original.once
+				allow(request).to receive(:params).and_call_original.once
 			end
 
 			it { 3.times { http_method } }
 		end
 
-		context 'invalid %-encoding query' do
+		context 'with invalid %-encoding query' do
 			let(:query) { 'bar=%%' }
 
-			it { expect { subject }.not_to raise_error }
+			it { expect { http_method }.not_to raise_error }
 		end
 	end
 
 	describe '#headers' do
+		subject(:headers) { request.headers }
+
 		let(:env) do
 			super().merge(
 				'HTTP_VERSION' => 'HTTP/1.1',
@@ -63,11 +65,10 @@ describe Flame::Dispatcher::Request do
 			)
 		end
 
-		subject { request.headers }
-
 		it { is_expected.to be_an_instance_of(Hash) }
+
 		it do
-			is_expected.to include(
+			expect(headers).to include(
 				'Version' => 'HTTP/1.1',
 				'Cache-Control' => 'max-age=0'
 			)

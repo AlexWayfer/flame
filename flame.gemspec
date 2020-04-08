@@ -39,6 +39,8 @@ Gem::Specification.new do |s|
 	s.add_development_dependency 'rake', '~> 13.0'
 	s.add_development_dependency 'rspec', '~> 3.7'
 	s.add_development_dependency 'rubocop', '~> 0.81.0'
+	s.add_development_dependency 'rubocop-performance', '~> 1.5'
+	s.add_development_dependency 'rubocop-rspec', '~> 1.38'
 	s.add_development_dependency 'simplecov', '~> 0.18.0'
 
 	s.files = Dir['{lib,public}/**/{*,.*}']

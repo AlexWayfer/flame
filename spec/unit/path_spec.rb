@@ -20,21 +20,21 @@ describe Flame::Path do
 	let(:path_args) { '/foo/:first/:second/:?third' }
 
 	describe '.merge' do
-		subject { Flame::Path.merge(*path_args) }
+		subject { described_class.merge(*path_args) }
 
-		context 'Array of Strings' do
+		context 'with Array of Strings' do
 			let(:path_args) { %w[foo bar baz] }
 
 			it { is_expected.to eq 'foo/bar/baz' }
 		end
 
-		context 'multiple parts as Strings' do
+		context 'with multiple parts as Strings' do
 			let(:path_args) { ['/foo/bar', '/baz/bat'] }
 
 			it { is_expected.to eq '/foo/bar/baz/bat' }
 		end
 
-		context 'multiple parts as Flame::Path' do
+		context 'with multiple parts as Flame::Path' do
 			let(:path_args) do
 				[path_initialize('/foo/bar'), path_initialize('/baz/bat')]
 			end
@@ -52,13 +52,13 @@ describe Flame::Path do
 	describe '#initialize' do
 		subject { super().to_s }
 
-		context 'String parameter' do
+		context 'with String parameter' do
 			let(:path_args) { '/foo/bar' }
 
 			it { is_expected.to eq path_args }
 		end
 
-		context 'many path parts' do
+		context 'with many path parts' do
 			let(:path_args) { ['/foo', '/bar', 'baz'] }
 
 			it { is_expected.to eq '/foo/bar/baz' }
@@ -76,9 +76,9 @@ describe Flame::Path do
 	end
 
 	describe '#parts' do
-		let(:path_args) { '/foo/bar/baz' }
-
 		subject { super().parts }
+
+		let(:path_args) { '/foo/bar/baz' }
 
 		it { is_expected.to eq %w[foo bar baz] }
 	end
@@ -99,29 +99,29 @@ describe Flame::Path do
 	end
 
 	describe '#+' do
-		subject { super() + part }
+		subject { path + part }
 
 		shared_examples 'correct addition' do
-			it do
-				is_expected.to eq(
-					Flame::Path.new('/foo/:first/:second/:?third/:?fourth')
-				)
+			let(:expected_result) do
+				described_class.new('/foo/:first/:second/:?third/:?fourth')
 			end
 
-			it { is_expected.to be_kind_of Flame::Path }
+			it { is_expected.to eq expected_result }
+
+			it { is_expected.to be_kind_of described_class }
 
 			it { is_expected.not_to be path }
 
 			it { is_expected.not_to be part }
 		end
 
-		context 'Flame::Path argument' do
+		context 'with Flame::Path argument' do
 			let(:part) { path_initialize('/:?fourth') }
 
 			it_behaves_like 'correct addition'
 		end
 
-		context 'String argument' do
+		context 'with String argument' do
 			let(:part) { '/:?fourth' }
 
 			it_behaves_like 'correct addition'
@@ -131,25 +131,25 @@ describe Flame::Path do
 	describe '#<=>' do
 		subject { super() <=> other }
 
-		context 'other with less count of path parts' do
+		context 'when other with less count of path parts' do
 			let(:other_args) { '/bar/:first/:second' }
 
 			it { is_expected.to eq(1) }
 		end
 
-		context 'other with greater count of path parts' do
+		context 'when other with greater count of path parts' do
 			let(:other_args) { '/bar/:first/:second/:?third/:?fourth' }
 
 			it { is_expected.to eq(-1) }
 		end
 
-		context 'other with equal count of path parts' do
+		context 'when other with equal count of path parts' do
 			let(:other_args) { '/bar/:first/:second/:?third' }
 
 			it { is_expected.to eq(0) }
 		end
 
-		context 'other route with arguments' do
+		context 'when other route with arguments' do
 			let(:path_args)  { '/route/export_cards' }
 			let(:other_args) { '/route/:id' }
 
@@ -160,28 +160,28 @@ describe Flame::Path do
 	describe '#==' do
 		subject { super() == other }
 
-		context 'other is Path' do
-			context 'equal' do
+		context 'when other is Path' do
+			context 'when equal' do
 				let(:other) { path_initialize('/foo/:first/:second/:?third') }
 
 				it { is_expected.to be true }
 			end
 
-			context 'inequal' do
+			context 'when inequal' do
 				let(:other) { path_initialize('/foo/:first/:second') }
 
 				it { is_expected.to be false }
 			end
 		end
 
-		context 'other is String' do
-			context 'equal' do
+		context 'when other is String' do
+			context 'when equal' do
 				let(:other) { '/foo/:first/:second/:?third' }
 
 				it { is_expected.to be true }
 			end
 
-			context 'inequal' do
+			context 'when inequal' do
 				let(:other) { '/foo/:first/:second' }
 
 				it { is_expected.to be false }
@@ -190,37 +190,37 @@ describe Flame::Path do
 	end
 
 	describe '#adapt' do
-		subject { Flame::Path.new(path).adapt(PathController, action).to_s }
+		subject { described_class.new(path).adapt(PathController, action).to_s }
 
-		context 'path without action name and parameters' do
+		context 'with path without action name and parameters' do
 			let(:path) { nil }
 			let(:action) { :baz }
 
 			it { is_expected.to eq '/baz/:first/:second/:?third' }
 		end
 
-		context 'path without parameters' do
+		context 'with path without parameters' do
 			let(:path) { '/foo' }
 			let(:action) { :baz }
 
 			it { is_expected.to eq '/foo/:first/:second/:?third' }
 		end
 
-		context 'path without some parameters' do
+		context 'with path without some parameters' do
 			let(:path) { '/foo/:second' }
 			let(:action) { :baz }
 
 			it { is_expected.to eq '/foo/:second/:first/:?third' }
 		end
 
-		context 'action without parameters' do
+		context 'with action without parameters' do
 			let(:path) { nil }
 			let(:action) { :foo }
 
 			it { is_expected.to eq '/foo' }
 		end
 
-		context 'path with all parameters' do
+		context 'with path with all parameters' do
 			let(:path) { '/baz/:first/:second/:?third' }
 			let(:action) { :baz }
 
@@ -231,46 +231,46 @@ describe Flame::Path do
 	describe '#extract_arguments' do
 		subject { super().extract_arguments(other) }
 
-		context 'regular arguments' do
+		context 'with regular arguments' do
 			let(:other_args) { '/foo/bar/baz' }
 
 			it { is_expected.to eq Hash[first: 'bar', second: 'baz'] }
 		end
 
-		context 'encoded arguments' do
+		context 'with encoded arguments' do
 			let(:other_args) { '/foo/another%20bar/baz' }
 
 			it { is_expected.to eq Hash[first: 'another bar', second: 'baz'] }
 		end
 
-		context 'arguments with spaces instead of `+`' do
+		context 'with arguments with spaces instead of `+`' do
 			let(:other_args) { '/foo/another+bar/baz' }
 
 			it { is_expected.to eq Hash[first: 'another bar', second: 'baz'] }
 		end
 
-		context 'missing optional argument before static part' do
+		context 'with missing optional argument before static part' do
 			let(:path_args)  { '/foo/:?bar/baz' }
 			let(:other_args) { '/foo/baz' }
 
 			it { is_expected.to eq Hash[bar: nil] }
 		end
 
-		context 'arguments after optional argument at start' do
+		context 'with arguments after optional argument at start' do
 			let(:path_args)  { '/:?foo/bar/:?baz/qux/:id' }
 			let(:other_args) { '/bar/baz/qux/2' }
 
 			it { is_expected.to eq Hash[foo: nil, baz: 'baz', id: '2'] }
 		end
 
-		context 'optional argument after missing optional argument' do
+		context 'with optional argument after missing optional argument' do
 			let(:path_args)  { '/:?foo/bar/:?baz' }
 			let(:other_args) { '/bar/baz' }
 
 			it { is_expected.to eq Hash[foo: nil, baz: 'baz'] }
 		end
 
-		context 'path with slash at the end' do
+		context 'with path with slash at the end' do
 			let(:other_args) { '/foo/bar/baz//' }
 
 			it { is_expected.to eq Hash[first: 'bar', second: 'baz'] }
@@ -278,19 +278,19 @@ describe Flame::Path do
 	end
 
 	describe '#assign_arguments' do
-		subject { super().assign_arguments(args) }
+		subject(:result) { path.assign_arguments(args) }
 
-		context 'all arguments correct' do
+		context 'when all arguments are correct' do
 			let(:args) { { first: 'bar', second: 'baz' } }
 
 			it { is_expected.to eq '/foo/bar/baz' }
 		end
 
-		context 'arguments without one required' do
+		context 'when arguments without one required' do
 			let(:args) { { first: 'bar' } }
 
 			it do
-				expect { subject }.to raise_error(
+				expect { result }.to raise_error(
 					Flame::Errors::ArgumentNotAssignedError,
 					%r{':second'[\w\s]+'/foo/:first/:second/:\?third'}
 				)
@@ -350,13 +350,13 @@ describe Flame::Path do
 
 		let(:path_args) { '/foo/bar/baz' }
 
-		context 'existing part' do
+		context 'with existing part' do
 			let(:args) { '/bar/baz' }
 
 			it { is_expected.to be true }
 		end
 
-		context 'nonexistent part' do
+		context 'with nonexistent part' do
 			let(:args) { '/barr' }
 
 			it { is_expected.to be false }

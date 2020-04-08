@@ -27,7 +27,7 @@ def transform_words_into_regexp(*words)
 end
 
 RSpec::Matchers.define :match_words do |*words|
-	regexp = transform_words_into_regexp(*words)
+	regexp = transform_words_into_regexp(*words.flatten)
 
 	match do |actual|
 		actual.match(/#{regexp}/m)

@@ -55,7 +55,7 @@ describe Flame::Dispatcher do
 		}
 	end
 
-	let(:dispatcher) { Flame::Dispatcher.new(DispatcherTest::Application, env) }
+	let(:dispatcher) { described_class.new(DispatcherTest::Application, env) }
 
 	describe 'attrs' do
 		describe 'request reader' do
@@ -102,102 +102,120 @@ describe Flame::Dispatcher do
 	end
 
 	describe '#run!' do
+		subject(:result) { body }
+
 		let(:response) { dispatcher.run! }
 		let(:status) { response[0] }
 		let(:headers) { response[1] }
 		let(:body) { response[2] }
 
-		subject { body }
+		shared_examples 'status is correct' do
+			describe 'status' do
+				subject { status }
 
-		context 'existing route' do
-			after do
-				expect(status).to eq 200
+				it { is_expected.to eq expected_status }
 			end
+		end
+
+		context 'when route exists' do
+			let(:expected_status) { 200 }
 
 			it { is_expected.to eq ['Hello, world!'] }
 
-			context 'nil in after-hook' do
+			include_examples 'status is correct'
+
+			context 'with nil in after-hook' do
 				let(:path) { 'action_with_after_hook' }
 
 				it { is_expected.to eq ['Body of action'] }
+
+				include_examples 'status is correct'
 			end
 
-			context 'empty body' do
+			context 'when body is empty' do
 				let(:path) { 'foo' }
 
 				it { is_expected.to eq [''] }
+
+				include_examples 'status is correct'
 			end
 
-			context 'static file' do
+			context 'with static file' do
 				let(:path) { 'test.txt' }
 
 				it { is_expected.to eq ["Test static\n"] }
+
+				include_examples 'status is correct'
 			end
 
-			context 'static file in gem' do
+			context 'with static file in gem' do
 				let(:path) { 'favicon.ico' }
+				let(:real_file_path) { "#{__dir__}/../../public/#{path}" }
 
-				it do
-					is_expected.to eq [
-						File.read(File.join(__dir__, '../../public/favicon.ico'))
-					]
-				end
+				it { is_expected.to eq [File.read(real_file_path)] }
+
+				include_examples 'status is correct'
 			end
 
-			context 'static file before route executing' do
+			context 'with static file before route executing' do
 				let(:path) { 'test' }
 
 				it { is_expected.to eq ["Static file\n"] }
+
+				include_examples 'status is correct'
 			end
 
-			context 'HEAD method' do
+			context 'with HEAD method' do
 				let(:method) { 'HEAD' }
 
 				it { is_expected.to eq [] }
+
+				include_examples 'status is correct'
 			end
 		end
 
-		context 'not existing route' do
-			after do
-				expect(status).to eq 404
-			end
+		context 'when route does not exist' do
+			let(:expected_status) { 404 }
 
-			context 'neither route nor static file was found' do
+			context 'when neither route nor static file was found' do
 				let(:path) { 'bar' }
 
 				it { is_expected.to eq ['Not Found'] }
+
+				include_examples 'status is correct'
 			end
 
-			context 'route with required argument and path without' do
+			context 'when route with required argument and without path' do
 				let(:path) { 'hello' }
 
 				it { is_expected.to eq ['Not Found'] }
+
+				include_examples 'status is correct'
 			end
 		end
 
-		context 'not allowed HTTP-method' do
-			after do
-				expect(status).to eq 405
-			end
-
-			let(:method) { 'POST' }
-
+		context 'when HTTP-method is not allowed' do
 			subject { headers['Allow'] }
 
+			let(:expected_status) { 405 }
+			let(:method) { 'POST' }
+
 			it { is_expected.to eq 'GET, OPTIONS' }
+
+			include_examples 'status is correct'
 		end
 
-		describe 'OPTIONS HTTP-method' do
+		context 'when HTTP-method is OPTIONS' do
 			let(:method) { 'OPTIONS' }
 
 			describe 'status' do
 				subject { status }
 
-				context 'existing route' do
+				context 'when route exists' do
 					it { is_expected.to eq 200 }
 				end
 
-				context 'not existing route' do
+				context 'when route does not exist' do
 					let(:path) { '/hello' }
 
 					it { is_expected.to eq 404 }
@@ -213,21 +231,21 @@ describe Flame::Dispatcher do
 			describe '`Allow` header' do
 				subject { headers['Allow'] }
 
-				context 'existing route' do
+				context 'when route exists' do
 					let(:path) { '/' }
 
 					it { is_expected.to eq 'GET, POST, OPTIONS' }
 				end
 
-				context 'not existing route' do
-					let(:path) { '/hello' }
-
+				context 'when route does not exist' do
 					subject { headers.key?('Allow') }
+
+					let(:path) { '/hello' }
 
 					it { is_expected.to be false }
 				end
 
-				context 'route with optional parameters' do
+				context 'when route with optional parameters' do
 					let(:path) { '/baz' }
 
 					it { is_expected.to eq 'GET, OPTIONS' }
@@ -258,11 +276,11 @@ describe Flame::Dispatcher do
 		end
 
 		describe 'X-Cascade header for 404 status' do
+			subject { dispatcher.response['X-Cascade'] }
+
 			before do
 				dispatcher.status 404
 			end
-
-			subject { dispatcher.response['X-Cascade'] }
 
 			it { is_expected.to eq 'pass' }
 		end
@@ -279,9 +297,9 @@ describe Flame::Dispatcher do
 	end
 
 	describe '#params' do
-		subject { dispatcher.params }
+		subject(:params) { dispatcher.params }
 
-		context 'request with Symbol keys' do
+		describe 'keys are Symbols' do
 			let(:path) { '/hello' }
 			let(:query) { 'name=world&when=now' }
 
@@ -290,11 +308,11 @@ describe Flame::Dispatcher do
 			it { is_expected.to be dispatcher.params }
 		end
 
-		context 'invalid %-encoding query' do
+		context 'with invalid %-encoding query' do
 			let(:path) { '/foo' }
 			let(:query) { 'bar=%%' }
 
-			it { expect { subject }.not_to raise_error }
+			it { expect { params }.not_to raise_error }
 		end
 	end
 
@@ -307,17 +325,19 @@ describe Flame::Dispatcher do
 	describe '#config' do
 		subject { dispatcher.config }
 
-		it do
-			is_expected.to be dispatcher.instance_variable_get(:@app_class).config
+		let(:expected_config) do
+			dispatcher.instance_variable_get(:@app_class).config
 		end
+
+		it { is_expected.to be expected_config }
 	end
 
 	describe '#halt' do
 		before do
-			expect { dispatcher.halt(*args) }.to throw_symbol(:halt)
+			catch(:halt) { dispatcher.halt(*args) }
 		end
 
-		context 'no arguments' do
+		context 'with no arguments' do
 			let(:args) { [] }
 
 			describe 'status' do
@@ -333,7 +353,7 @@ describe Flame::Dispatcher do
 			end
 		end
 
-		context 'new status' do
+		context 'with a new status' do
 			let(:args) { [500] }
 
 			describe 'status' do
@@ -349,7 +369,7 @@ describe Flame::Dispatcher do
 			end
 		end
 
-		context 'new status without entity body' do
+		context 'with a new status without entity body' do
 			let(:args) { [101] }
 
 			describe 'status' do
@@ -365,7 +385,7 @@ describe Flame::Dispatcher do
 			end
 		end
 
-		context 'new status and body' do
+		context 'with new status and body' do
 			let(:args) { [404, 'Nobody here'] }
 
 			describe 'status' do
@@ -381,7 +401,7 @@ describe Flame::Dispatcher do
 			end
 		end
 
-		context 'new status, body and headers' do
+		context 'with new status, body and headers' do
 			let(:args) { [200, 'Cats!', 'Content-Type' => 'animal/cat'] }
 
 			describe 'status' do
@@ -403,7 +423,7 @@ describe Flame::Dispatcher do
 			end
 		end
 
-		context 'receiving result of `Controller#redirect`' do
+		context 'with result of `Controller#redirect`' do
 			let(:controller) { DispatcherTest::IndexController.new(dispatcher) }
 			let(:args) { [controller.redirect('http://example.com', 301)] }
 
@@ -422,21 +442,21 @@ describe Flame::Dispatcher do
 	end
 
 	describe '#dump_error' do
-		let(:error) { RuntimeError.new 'Just an example error' }
+		subject do
+			dispatcher.instance_variable_get(:@env)[Rack::RACK_ERRORS].string
+		end
 
 		before do
 			dispatcher.dump_error(error)
 		end
 
-		subject do
-			dispatcher.instance_variable_get(:@env)[Rack::RACK_ERRORS].string
+		let(:error) { RuntimeError.new 'Just an example error' }
+
+		let(:expected_words) do
+			[Time.now.strftime('%Y-%m-%d %H:%M:%S'), error.class.name, error.message]
 		end
 
-		it do
-			is_expected.to match_words(
-				Time.now.strftime('%Y-%m-%d %H:%M:%S'), error.class.name, error.message
-			)
-		end
+		it { is_expected.to match_words expected_words }
 	end
 
 	describe '#default_body' do
@@ -447,19 +467,19 @@ describe Flame::Dispatcher do
 				dispatcher.status status
 			end
 
-			context 'status 200' do
+			context 'when status is 200' do
 				let(:status) { 200 }
 
 				it { is_expected.to eq 'OK' }
 			end
 
-			context 'status 404' do
+			context 'when status is 404' do
 				let(:status) { 404 }
 
 				it { is_expected.to eq 'Not Found' }
 			end
 
-			context 'status 500' do
+			context 'when status is 500' do
 				let(:status) { 500 }
 
 				it { is_expected.to eq 'Internal Server Error' }
@@ -467,13 +487,13 @@ describe Flame::Dispatcher do
 		end
 
 		describe 'calls from `execute`' do
+			subject { dispatcher.request.env[:execute_before_called] }
+
 			let(:path) { 'redirect_from_before' }
 
 			before do
 				dispatcher.run!
 			end
-
-			subject { dispatcher.request.env[:execute_before_called] }
 
 			it { is_expected.to eq 1 }
 		end
@@ -484,7 +504,7 @@ describe Flame::Dispatcher do
 		let(:query) { 'bar=%%' }
 
 		before do
-			expect { dispatcher.run! }.not_to raise_error
+			dispatcher.run!
 		end
 
 		describe 'status' do

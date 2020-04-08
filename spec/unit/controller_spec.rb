@@ -145,30 +145,30 @@ describe Flame::Controller do
 	describe '.actions' do
 		subject { controller_class.actions }
 
-		it do
-			is_expected.to eq(
-				ControllerTest::OneController.public_instance_methods(false)
-			)
+		let(:expected_actions) do
+			ControllerTest::OneController.public_instance_methods(false)
 		end
+
+		it { is_expected.to eq expected_actions }
 	end
 
 	describe '.path' do
 		subject { controller_class.path }
 
 		context 'without PATH constant (default)' do
-			context 'one-word named controller' do
+			context 'with one-word named controller' do
 				let(:controller_class) { ControllerTest::OneController }
 
 				it { is_expected.to eq '/one' }
 			end
 
-			context 'two-word named controller' do
+			context 'with two-word named controller' do
 				let(:controller_class) { ControllerTest::AnotherOneController }
 
 				it { is_expected.to eq '/another_one' }
 			end
 
-			context 'nested in module index controller' do
+			context 'with nested in module index controller' do
 				let(:controller_class) { ControllerTest::Nested::IndexController }
 
 				it { is_expected.to eq '/nested' }
@@ -185,12 +185,11 @@ describe Flame::Controller do
 	describe 'delegators' do
 		subject { controller.methods }
 
-		it do
-			is_expected.to include(
-				:config, :request, :params, :halt, :session, :response,
-				:status, :body, :default_body
-			)
+		let(:expected_methods) do
+			%i[config request params halt session response status body default_body]
 		end
+
+		it { is_expected.to include(*expected_methods) }
 	end
 
 	describe '#initialize' do
@@ -214,25 +213,25 @@ describe Flame::Controller do
 	describe '#path_to' do
 		subject { controller.path_to(*args) }
 
-		context 'another controller and action' do
+		context 'with another controller and action' do
 			let(:args) { [ControllerTest::AnotherOneController, :baz] }
 
 			it { is_expected.to eq '/another/baz' }
 		end
 
-		context 'another controller without action' do
+		context 'with another controller without action' do
 			let(:args) { [ControllerTest::AnotherOneController] }
 
 			it { is_expected.to eq '/another' }
 		end
 
-		context 'action without controller' do
+		context 'with action without controller' do
 			let(:args) { [:bar] }
 
 			it { is_expected.to eq '/bar' }
 		end
 
-		context 'action with arguments' do
+		context 'with action with arguments' do
 			let(:args) { [:foo, first: 'Alex'] }
 
 			it { is_expected.to eq '/foo/Alex' }
@@ -242,13 +241,13 @@ describe Flame::Controller do
 	describe '#url_to' do
 		subject { controller.url_to(*args, **kwargs) }
 
-		context 'String path' do
+		context 'with String path' do
 			let(:args) { ['/some/path?with=args'] }
 			let(:kwargs) { {} }
 
 			it { is_expected.to eq 'http://localhost:3000/some/path?with=args' }
 
-			context 'default port for scheme' do
+			context 'with default port for scheme' do
 				let(:env) do
 					{
 						Rack::RACK_URL_SCHEME => 'http',
@@ -261,7 +260,7 @@ describe Flame::Controller do
 				it { is_expected.to eq 'http://example.domain/some/path?with=args' }
 			end
 
-			context 'HTTP host' do
+			context 'with HTTP host' do
 				context 'with port' do
 					let(:env) do
 						{
@@ -288,28 +287,28 @@ describe Flame::Controller do
 			end
 		end
 
-		context 'controller and action' do
+		context 'with controller and action' do
 			let(:args) { [ControllerTest::AnotherOneController, :baz] }
 			let(:kwargs) { {} }
 
 			it { is_expected.to eq 'http://localhost:3000/another/baz' }
 		end
 
-		context 'action and argument' do
+		context 'with action and argument' do
 			let(:args) { [:foo] }
 			let(:kwargs) { { first: 'Alex' } }
 
 			it { is_expected.to eq 'http://localhost:3000/foo/Alex' }
 		end
 
-		context 'Flame::Path object' do
+		context 'with `Flame::Path` object' do
 			let(:args) { [Flame::Path.new('/some/path?with=args')] }
 			let(:kwargs) { {} }
 
 			it { is_expected.to eq 'http://localhost:3000/some/path?with=args' }
 		end
 
-		context 'static file with version' do
+		context 'with static file and with version' do
 			let(:file) { 'test.txt' }
 			let!(:mtime) { File.mtime File.join(__dir__, 'public', file) }
 			let(:times) { 5 }
@@ -319,30 +318,26 @@ describe Flame::Controller do
 			end
 
 			shared_examples 'correct URL' do
+				subject { -> { controller.url_to("/#{file}", version: true) } }
+
 				before do
-					expect(File).to receive(:mtime).and_call_original
+					allow(File).to receive(:mtime).and_call_original
 						.exactly(expected_times).times
 				end
 
-				it do
-					times.times do
-						expect(
-							controller.url_to("/#{file}", version: true)
-						).to eq(
-							"http://localhost:3000/#{file}?v=#{mtime.to_i}"
-						)
-					end
-				end
+				let(:expected_url) { "http://localhost:3000/#{file}?v=#{mtime.to_i}" }
+
+				it { times.times { expect(subject.call).to eq expected_url } }
 			end
 
-			context 'production environment' do
+			context 'when environment is production' do
 				let(:environment) { 'production' }
 				let(:expected_times) { 1 }
 
 				it_behaves_like 'correct URL'
 			end
 
-			context 'development environment' do
+			context 'when environment is development' do
 				let(:environment) { 'development' }
 				let(:expected_times) { times }
 
@@ -352,17 +347,18 @@ describe Flame::Controller do
 	end
 
 	describe '#path_to_back' do
-		let(:controller_class) { ControllerTest::AnotherOneController }
 		subject { controller.back } ## it's action with `path_to_back`
 
-		context 'referer URL exists' do
+		let(:controller_class) { ControllerTest::AnotherOneController }
+
+		context 'when referer URL exists' do
 			let(:referer) { 'http://example.com/' }
 			let(:env) { super().merge('HTTP_REFERER' => referer) }
 
 			it { is_expected.to eq referer }
 		end
 
-		context 'referer with the same URL' do
+		context 'when referer with the same URL' do
 			let(:referer) { 'http://localhost:3000/another/bar' }
 			let(:env) do
 				super().merge(
@@ -391,7 +387,7 @@ describe Flame::Controller do
 			controller.redirect(*args)
 		end
 
-		context 'by String' do
+		context 'with String' do
 			let(:url) { 'http://example.com/' }
 
 			context 'without status' do
@@ -482,9 +478,11 @@ describe Flame::Controller do
 				describe 'no mutation of of args as array' do
 					subject { args }
 
-					it do
-						is_expected.to eq [controller_class, :hello, { name: 'Alex' }, 301]
+					let(:expected_args) do
+						[controller_class, :hello, { name: 'Alex' }, 301]
 					end
+
+					it { is_expected.to eq expected_args }
 				end
 			end
 		end
@@ -538,17 +536,17 @@ describe Flame::Controller do
 		end
 
 		describe 'default status' do
-			let(:args) { ['http://example.com'] }
-
 			subject { controller.status }
+
+			let(:args) { ['http://example.com'] }
 
 			it { is_expected.to eq 302 }
 		end
 
 		describe 'specified status' do
-			let(:args) { ['http://example.com', 301] }
-
 			subject { controller.status }
+
+			let(:args) { ['http://example.com', 301] }
 
 			it { is_expected.to eq 301 }
 		end
@@ -557,13 +555,13 @@ describe Flame::Controller do
 	describe '#reroute' do
 		subject { controller.public_send(action) }
 
-		context 'specified action of specified controller' do
+		context 'with specified action of specified controller' do
 			let(:action) { :baz }
 
 			it { is_expected.to eq 'Another baz' }
 		end
 
-		context 'specified action of current controller' do
+		context 'with specified action of current controller' do
 			let(:action) { :current_reroute }
 
 			it { is_expected.to eq 'Hello from reroute' }
@@ -595,11 +593,11 @@ describe Flame::Controller do
 	end
 
 	describe '#attachment' do
+		subject { controller.response }
+
 		before do
 			controller.attachment(*args)
 		end
-
-		subject { controller.response }
 
 		describe 'Content-Disposition header' do
 			subject { super()['Content-Disposition'] }
@@ -633,46 +631,48 @@ describe Flame::Controller do
 
 		let(:block) { nil }
 
-		context 'partial' do
+		context 'with partial' do
 			let(:args) { [:_partial] }
 
 			it { is_expected.to eq "<p>This is partial</p>\n" }
 		end
 
-		context 'view with layout and instance variables' do
-			let(:args) { [:view] }
-
+		context 'with view, layout and instance variables' do
 			before do
 				controller.instance_variable_set(:@name, 'user')
 			end
 
-			it do
-				is_expected.to eq <<~CONTENT
+			let(:args) { [:view] }
+
+			let(:expected_result) do
+				<<~CONTENT
 					<body>
 						<h1>Hello, user!</h1>\n
 					</body>
 				CONTENT
 			end
+
+			it { is_expected.to eq expected_result }
 		end
 
-		context 'view without layout' do
+		context 'with view without layout' do
 			let(:args) { [:view, layout: false] }
 
 			it { is_expected.to eq "<h1>Hello, world!</h1>\n" }
 		end
 
-		context 'template file not found' do
+		context 'when template file not found' do
 			let(:args) { [:nonexistent] }
 
 			it do
-				expect { subject }.to raise_error(
+				expect { view_subject }.to raise_error(
 					Flame::Errors::TemplateNotFoundError,
 					"Template 'nonexistent' not found for 'ControllerTest::OneController'"
 				)
 			end
 		end
 
-		context 'partial with block' do
+		context 'with partial with block' do
 			let(:args) { [:_partial_with_block] }
 			let(:block) { proc { 'world' } }
 
@@ -680,7 +680,9 @@ describe Flame::Controller do
 		end
 
 		describe 'cache' do
-			subject(:cached_tilts) { ControllerTest::Application.cached_tilts }
+			subject { cached_tilts.size }
+
+			let(:cached_tilts) { ControllerTest::Application.cached_tilts }
 
 			before do
 				cached_tilts.clear
@@ -688,47 +690,45 @@ describe Flame::Controller do
 				view_subject
 			end
 
-			subject { cached_tilts.size }
-
-			context 'development environment' do
+			context 'when environment is development' do
 				let(:environment) { 'development' }
 				let(:args) { [:view] }
 
 				it { is_expected.to be_zero }
+
+				context 'when cache option is enabled' do
+					let(:args) { [:view, layout: false, cache: true] }
+
+					it { is_expected.to eq 1 }
+				end
 			end
 
-			context 'production environment' do
+			context 'when environment is production' do
 				let(:environment) { 'production' }
 				let(:args) { [:view, layout: false] }
 
 				it { is_expected.to eq 1 }
-			end
 
-			context 'production environment and false value of cache option' do
-				let(:environment) { 'production' }
-				let(:args) { [:view, cache: false] }
+				context 'when cache option is disabled' do
+					let(:args) { [:view, cache: false] }
 
-				it { is_expected.to be_zero }
-			end
-
-			context 'development environment and true value of cache option' do
-				let(:environment) { 'development' }
-				let(:args) { [:view, layout: false, cache: true] }
-
-				it { is_expected.to eq 1 }
+					it { is_expected.to be_zero }
+				end
 			end
 		end
 
 		describe 'taking controller name as default path' do
 			subject { controller.bar }
 
-			it do
-				is_expected.to eq <<~CONTENT
+			let(:expected_result) do
+				<<~CONTENT
 					<body>
 						This is view for bar method of ControllerTest::OneController\n
 					</body>
 				CONTENT
 			end
+
+			it { is_expected.to eq expected_result }
 		end
 
 		describe '`render` alias' do
@@ -762,7 +762,7 @@ describe Flame::Controller do
 				end
 			end
 
-			context 'specific actions' do
+			context 'with specific actions' do
 				let(:args) { [%i[foo bar baz]] }
 				let(:kwargs) { {} }
 
@@ -773,7 +773,7 @@ describe Flame::Controller do
 				end
 			end
 
-			context 'excluded actions' do
+			context 'with excluded actions' do
 				let(:args) { [] }
 				let(:kwargs) { { exclude: %i[foo bar] } }
 
@@ -795,11 +795,11 @@ describe Flame::Controller do
 				let(:args) { [] }
 				let(:kwargs) { {} }
 
-				it do
-					is_expected.to eq(
-						ControllerTest::SomeActions.public_instance_methods(false).sort
-					)
+				let(:expected_actions) do
+					ControllerTest::SomeActions.public_instance_methods(false).sort
 				end
+
+				it { is_expected.to eq expected_actions }
 
 				it 'saves refinements' do
 					expect(inherited_controller.refined_http_methods)
@@ -812,39 +812,39 @@ describe Flame::Controller do
 				end
 			end
 
-			context 'excluded actions' do
+			context 'with excluded actions' do
 				let(:args) { [] }
 				let(:kwargs) { { exclude: %i[included_action] } }
 
-				it do
-					is_expected.to eq(
-						(
-							ControllerTest::SomeActions.public_instance_methods(false) -
-								%i[included_action]
-						).sort
-					)
+				let(:expected_actions) do
+					(
+						ControllerTest::SomeActions.public_instance_methods(false) -
+							%i[included_action]
+					).sort
 				end
+
+				it { is_expected.to eq expected_actions }
 			end
 
-			context 'only actions' do
+			context 'with only actions' do
 				let(:args) { [] }
 				let(:kwargs) { { only: %i[included_action] } }
 
-				it do
-					is_expected.to eq(
-						(
-							ControllerTest::SomeActions.public_instance_methods(false) &
-								%i[included_action]
-						).sort
-					)
+				let(:expected_actions) do
+					(
+						ControllerTest::SomeActions.public_instance_methods(false) &
+							%i[included_action]
+					).sort
 				end
+
+				it { is_expected.to eq expected_actions }
 
 				it 'drops excluded refinements' do
 					expect(inherited_controller.refined_http_methods).to be_empty
 				end
 			end
 
-			context '+ .inherit_actions' do
+			context 'with multiple .inherit_actions' do
 				let(:inherited_controller) do
 					Class.new(controller_class) do
 						inherit_actions
@@ -852,14 +852,14 @@ describe Flame::Controller do
 					end
 				end
 
-				it do
-					is_expected.to eq(
-						(
-							ControllerTest::OneController.actions +
-								ControllerTest::SomeActions.public_instance_methods(false)
-						).sort
-					)
+				let(:expected_actions) do
+					(
+						ControllerTest::OneController.actions +
+							ControllerTest::SomeActions.public_instance_methods(false)
+					).sort
 				end
+
+				it { is_expected.to eq expected_actions }
 			end
 		end
 	end

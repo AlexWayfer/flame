@@ -52,6 +52,6 @@ Metrics/BlockLength:
 
 RSpec/NestedGroups:
   Max: 5
-## https://github.com/rubocop-hq/rubocop-rspec/issues/895
 RSpec/FilePath:
-  Enabled: false
+  Exclude:
+    - spec/integration/**/*

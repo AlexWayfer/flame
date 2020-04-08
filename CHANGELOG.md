@@ -33,12 +33,13 @@ All notable changes to this project will be documented in this file.
     But you can disable it with `nested: false` option for `mount`,
     for example, for conditional umbrella application.
 *   Add `Flame::Router::Routes#to_s`, for routes printing
+
     ```ruby
     puts MyApplication.router.routes
     ```
+
 *   Add `Request#headers` method (with Camel-Cased Hash)
 *   Allow to mount anonymous controllers
-
 
 ### Changed
 
@@ -96,7 +97,6 @@ All notable changes to this project will be documented in this file.
     You could get the content of any file
     from the outside of public directory. \
     It did not work with `nginx`, Cloudflare or something else.
-
 
 ## 4.18.1 - 2017-06-29
 

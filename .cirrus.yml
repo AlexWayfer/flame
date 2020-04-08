@@ -11,6 +11,7 @@ bundle_cache: &bundle_cache
 
 test_task:
   depends_on:
+    - markdownlint
     - rubocop
   container:
     matrix:
@@ -25,6 +26,14 @@ test_task:
     changesInclude(
       '.cirrus.yml', 'Gemfile', 'Rakefile', '.rspec', 'lib/**/*', 'spec/**/*'
     )
+
+markdownlint_task:
+  container:
+    image: ruby
+  <<: *bundle_cache
+  lint_script: bundle exec mdl .
+  only_if: ($CIRRUS_BRANCH == 'master') ||
+    changesInclude('.cirrus.yml', '*.gemspec', '.mdl*' '**/*.md')
 
 rubocop_task:
   container:

@@ -1,6 +1,8 @@
 Gemfile.lock
 tests/
 .ruby-version
+node_modules/
+package-lock.json
 
 # Gem files
 *.gem

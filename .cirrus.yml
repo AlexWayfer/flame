@@ -8,9 +8,32 @@ bundle_cache: &bundle_cache
       - cat *.gemspec
     populate_script: bundle update
 
+remark_task:
+  container:
+    image: node
+  node_modules_cache:
+    folder: node_modules
+    fingerprint_script:
+      - echo $CIRRUS_OS
+      - node -v
+      - cat package.json
+  install_script: npm install
+  lint_script: npm run remark
+
+rubocop_task:
+  container:
+    image: ruby
+  <<: *bundle_cache
+  rubocop_script: bundle exec rubocop
+  only_if: ($CIRRUS_BRANCH == 'master') ||
+    changesInclude(
+      '.cirrus.yml', 'Gemfile', 'Rakefile', '.rubocop.yml', '*.gemspec',
+      '**/*.rb', '**/*.ru'
+    )
 
 test_task:
   depends_on:
+    - remark
     - rubocop
   container:
     matrix:
@@ -24,15 +47,4 @@ test_task:
   only_if: ($CIRRUS_BRANCH == 'master') ||
     changesInclude(
       '.cirrus.yml', 'Gemfile', 'Rakefile', '.rspec', 'lib/**/*', 'spec/**/*'
-    )
-
-rubocop_task:
-  container:
-    image: ruby
-  <<: *bundle_cache
-  rubocop_script: bundle exec rubocop
-  only_if: ($CIRRUS_BRANCH == 'master') ||
-    changesInclude(
-      '.cirrus.yml', 'Gemfile', 'Rakefile', '.rubocop.yml', '*.gemspec',
-      '**/*.rb', '**/*.ru'
     )

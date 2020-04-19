@@ -6,6 +6,9 @@ module RouterTest
 		def index; end
 
 		def foo(first, second, third = nil, fourth = nil); end
+
+		get '/:?key/bar',
+			def bar(key = nil); end
 	end
 
 	## Another test controller for Router

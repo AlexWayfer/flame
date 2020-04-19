@@ -41,6 +41,12 @@ module Flame
 				super
 			end
 
+			## Return the first available route (at the first level).
+			## @return [Flame::Router::Route] the first route
+			def first_route
+				values.find { |value| value.is_a?(Route) }
+			end
+
 			## Navigate to Routes or Route through static parts or arguments
 			## @param path_parts [Array<String, Flame::Path, Flame::Path::Part>]
 			##   path or path parts as keys for navigating
@@ -63,7 +69,11 @@ module Flame
 			## @return [Flame::Router::Routes] return most nested end-point
 			##   without optional arguments
 			def dig_through_opt_args
-				self[first_opt_arg_key]&.dig_through_opt_args || self
+				[
+					self[first_opt_arg_key]&.dig_through_opt_args,
+					self
+				]
+					.compact.find(&:first_route)
 			end
 
 			def allow

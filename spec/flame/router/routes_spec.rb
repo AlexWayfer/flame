@@ -1,9 +1,16 @@
 # frozen_string_literal: true
 
 describe Flame::Router::Routes do
-	subject(:routes) { described_class.new(path) }
+	def initialize_routes(path = nil, endpoints = nil)
+		result = described_class.new(path)
+		result.dig(*Flame::Path.new(path).parts).merge! endpoints if endpoints
+		result
+	end
+
+	subject(:routes) { initialize_routes path, endpoints }
 
 	let(:path) { '/foo/bar/baz' }
+	let(:endpoints) { nil }
 
 	describe '#initialize' do
 		it { is_expected.to be_kind_of Hash }
@@ -63,17 +70,29 @@ describe Flame::Router::Routes do
 	describe '#navigate' do
 		subject { routes.navigate(*args) }
 
-		context 'when path without arguments' do
-			context 'with Path Part argument' do
-				let(:args) { Flame::Path.new('/foo/bar').parts }
+		let(:endpoints) do
+			{ GET: Flame::Router::Route.new(:foo_controller, :baz_action) }
+		end
 
-				it { is_expected.to eq('baz' => {}) }
+		context 'when path without arguments' do
+			let(:path) { '/foo/bar/baz' }
+
+			context 'with Path Part argument' do
+				let(:args) { Flame::Path.new('/foo/bar/baz').parts }
+
+				it { is_expected.to eq endpoints }
 			end
 
 			context 'with String argument' do
-				let(:args) { %w[foo bar] }
+				let(:args) { %w[foo bar baz] }
 
-				it { is_expected.to eq('baz' => {}) }
+				it { is_expected.to eq endpoints }
+
+				context 'with not complete path' do
+					let(:args) { %w[foo bar] }
+
+					it { is_expected.to be_nil }
+				end
 			end
 		end
 
@@ -81,59 +100,65 @@ describe Flame::Router::Routes do
 			let(:path) { '/:first/:second' }
 
 			context 'with Path Part argument' do
-				let(:args) { Flame::Path.new('/foo').parts }
+				let(:args) { Flame::Path.new('/foo/bar').parts }
 
-				it { is_expected.to eq(':second' => {}) }
+				it { is_expected.to eq endpoints }
 			end
 
-			context 'with String argument' do
-				let(:args) { 'foo' }
+			context 'with String arguments' do
+				let(:args) { %w[foo bar] }
 
-				it { is_expected.to eq(':second' => {}) }
+				it { is_expected.to eq endpoints }
+
+				context 'with not complete path' do
+					let(:args) { %w[foo] }
+
+					it { is_expected.to be_nil }
+				end
 			end
 		end
 
 		context 'when path with optional argument at beginning' do
 			let(:path) { '/:?first/second/third' }
 
-			context 'with Path Part argument' do
-				let(:args) { Flame::Path.new('/second').parts }
+			context 'with this optional argument' do
+				context 'with Path Part argument' do
+					let(:args) { Flame::Path.new('/foo/second/third').parts }
 
-				it { is_expected.to eq('third' => {}) }
+					it { is_expected.to eq endpoints }
+				end
+
+				context 'with String arguments' do
+					let(:args) { %w[foo second third] }
+
+					it { is_expected.to eq endpoints }
+
+					context 'with not complete path' do
+						let(:args) { %w[foo second] }
+
+						it { is_expected.to be_nil }
+					end
+				end
 			end
 
-			context 'with String argument' do
-				let(:args) { 'second' }
+			context 'without this optional argument' do
+				context 'with Path Part argument' do
+					let(:args) { Flame::Path.new('/second/third').parts }
 
-				it { is_expected.to eq('third' => {}) }
-			end
-		end
+					it { is_expected.to eq endpoints }
+				end
 
-		context 'with root path' do
-			let(:args) { '/' }
+				context 'with String arguments' do
+					let(:args) { %w[second third] }
 
-			it { is_expected.to eq('foo' => { 'bar' => { 'baz' => {} } }) }
-		end
+					it { is_expected.to eq endpoints }
 
-		context 'with nested routes from path' do
-			let(:path) { '/foo/:?var/bar' }
+					context 'with not complete path' do
+						let(:args) { %w[second] }
 
-			describe 'level one' do
-				let(:args) { '/foo' }
-
-				it { is_expected.to eq routes['foo'][':?var'] }
-			end
-
-			describe 'level two' do
-				let(:args) { '/foo/some' }
-
-				it { is_expected.to eq routes['foo'][':?var'] }
-			end
-
-			describe 'level three' do
-				let(:args) { '/foo/some/bar' }
-
-				it { is_expected.to eq routes['foo'][':?var']['bar'] }
+						it { is_expected.to be_nil }
+					end
+				end
 			end
 		end
 
@@ -141,6 +166,19 @@ describe Flame::Router::Routes do
 			let(:args) { '/foo/baz' }
 
 			it { is_expected.to be_nil }
+		end
+
+		context 'with concurent routes with optional argument at the start' do
+			let(:path) { '/foo/bar' }
+			let(:args) { path }
+
+			let(:concurent_routes) { initialize_routes '/:?qux/baz' }
+
+			before do
+				routes.dig(*Flame::Path.new(path).parts).merge! concurent_routes
+			end
+
+			it { is_expected.to eq endpoints.merge(concurent_routes) }
 		end
 	end
 
@@ -168,7 +206,7 @@ describe Flame::Router::Routes do
 
 		before do
 			routes['foo']['bar'][:GET] = 42
-			routes['foo']['bar']['bar'] = described_class.new
+			routes['foo']['bar']['bar'] = initialize_routes
 			routes['foo']['bar']['baz'][:DELETE] = 84
 			routes['foo']['bar']['bar'][:POST] = 36
 			routes['foo']['bar']['baz'][:GET] = 62

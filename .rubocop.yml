@@ -51,7 +51,7 @@ Metrics/BlockLength:
     - '*.gemspec'
 
 RSpec/NestedGroups:
-  Max: 5
+  Max: 6
 RSpec/FilePath:
   Exclude:
     - spec/integration/**/*

@@ -15,6 +15,13 @@ module CustomTest
 			"Hello, #{name}!"
 		end
 
+		get ':?key/document',
+			def document(key = '')
+				return 'I have no document for you.' if key.empty?
+
+				"Here is your #{key} document."
+			end
+
 		# def page(*path_parts)
 		# 	path_parts.join '/'
 		# end
@@ -64,6 +71,8 @@ module CustomTest
 	## Mount example controller to app
 	class Application < Flame::Application
 		mount :custom
+
+		# puts router.routes
 	end
 end
 
@@ -114,6 +123,36 @@ describe CustomTest do
 				subject { super().body }
 
 				it { is_expected.to eq 'Hello, Alex!' }
+			end
+		end
+	end
+
+	describe 'document' do
+		context 'without key' do
+			before { get '/custom/document' }
+
+			describe 'last_response' do
+				it { is_expected.to be_ok }
+
+				describe 'body' do
+					subject { super().body }
+
+					it { is_expected.to eq 'I have no document for you.' }
+				end
+			end
+		end
+
+		context 'with a key' do
+			before { get '/custom/service_agreement/document' }
+
+			describe 'last_response' do
+				it { is_expected.to be_ok }
+
+				describe 'body' do
+					subject { super().body }
+
+					it { is_expected.to eq 'Here is your service_agreement document.' }
+				end
 			end
 		end
 	end

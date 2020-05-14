@@ -952,8 +952,9 @@ describe Flame::Application do
 			end
 		end
 
-		describe 'mounting neighboring controllers ' \
-		         'with root-with-argument action' do
+		describe(
+			'mounting neighboring controllers with root-with-argument action'
+		) do
 			before do
 				app_class.class_exec do
 					mount :application do

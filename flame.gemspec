@@ -7,8 +7,10 @@ Gem::Specification.new do |s|
 	s.version     = Flame::VERSION
 
 	s.summary     = 'Web-framework, based on MVC-pattern'
-	s.description = 'Use controller\'s classes with instance methods' \
-	                ' as routing actions, mounting its in application class.'
+	s.description = <<~DESC
+		Use controller's classes with instance methods as routing actions,
+		mounting its in application class.
+	DESC
 
 	s.authors     = ['Alexander Popov']
 	s.email       = ['alex.wayfer@gmail.com']

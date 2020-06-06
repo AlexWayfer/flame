@@ -3,7 +3,6 @@
 require 'gorilla_patch/deep_merge'
 require 'gorilla_patch/inflections'
 require 'gorilla_patch/namespace'
-require 'gorilla_patch/transform'
 
 require_relative 'router/controller_finder'
 require_relative 'errors/controller_not_found_error'

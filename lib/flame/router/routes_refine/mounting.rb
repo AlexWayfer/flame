@@ -7,7 +7,6 @@ module Flame
 			module Mounting
 				private
 
-				using GorillaPatch::Transform
 				using GorillaPatch::DeepMerge
 
 				## Mount controller inside other (parent) controller

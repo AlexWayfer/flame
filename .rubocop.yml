@@ -7,6 +7,8 @@ Layout/IndentationStyle:
   IndentationWidth: 2
 Layout/IndentationWidth:
   Width: 1
+Layout/LineLength:
+  Max: 100
 Layout/MultilineMethodCallIndentation:
   EnforcedStyle: indented
 Layout/ParameterAlignment:
@@ -36,6 +38,10 @@ Lint/RaiseException:
   Enabled: true
 Lint/StructNewOverride:
   Enabled: true
+Lint/DeprecatedOpenSSLConstant:
+  Enabled: true
+Lint/MixedRegexpCaptureTypes:
+  Enabled: true
 
 Style/ParenthesesAroundCondition:
   AllowInMultilineConditions: true
@@ -48,6 +54,10 @@ Style/HashTransformValues:
 Style/ExponentialNotation:
   Enabled: true
 Style/SlicingWithRange:
+  Enabled: true
+Style/RedundantRegexpCharacterClass:
+  Enabled: true
+Style/RedundantRegexpEscape:
   Enabled: true
 
 AllCops:

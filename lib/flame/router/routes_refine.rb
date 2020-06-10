@@ -95,9 +95,7 @@ module Flame
 			def rest
 				self.class.rest_routes.each do |rest_route|
 					action = rest_route[:action]
-					if !@controller.actions.include?(action) || find_reverse_route(action)
-						next
-					end
+					next if !@controller.actions.include?(action) || find_reverse_route(action)
 
 					send(*rest_route.values.map(&:downcase))
 				end

@@ -38,9 +38,7 @@ module Flame
 
 			## Find filename
 			@filename = find_file(path)
-			unless @filename
-				raise Flame::Errors::TemplateNotFoundError.new(controller, path)
-			end
+			raise Flame::Errors::TemplateNotFoundError.new(controller, path) unless @filename
 
 			@layout = nil if File.basename(@filename)[0] == '_'
 		end

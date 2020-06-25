@@ -19,6 +19,10 @@ remark_task:
       - cat package.json
   install_script: npm install
   lint_script: npm run remark
+  only_if: ($CIRRUS_BRANCH == 'master') ||
+    changesInclude(
+      '.cirrus.yml', 'package.json', '.remarkrc.yaml', '**/*.md'
+    )
 
 rubocop_task:
   container:

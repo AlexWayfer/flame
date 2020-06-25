@@ -55,16 +55,10 @@ module Flame
 		## @return [-1, 0, 1] result of comparing
 		def <=>(other)
 			self_parts, other_parts = [self, other].map(&:parts)
-			parts_size = self_parts.size <=> other_parts.size
-			return parts_size unless parts_size.zero?
+			by_parts_size = self_parts.size <=> other_parts.size
+			return by_parts_size unless by_parts_size.zero?
 
-			self_parts.zip(other_parts)
-				.reduce(0) do |result, (self_part, other_part)|
-					break -1 if self_part.arg? && !other_part.arg?
-					break 1 if other_part.arg? && !self_part.arg?
-
-					result
-				end
+			compare_by_args_in_parts self_parts.zip(other_parts)
 		end
 
 		## Compare with other path by parts
@@ -138,6 +132,20 @@ module Flame
 
 			## All is ok
 			param
+		end
+
+		def compare_by_args_in_parts(self_and_other_parts)
+			result = 0
+
+			self_and_other_parts.each do |self_part, other_part|
+				if self_part.arg?
+					break result = -1 unless other_part.arg?
+				elsif other_part.arg?
+					break result = 1
+				end
+			end
+
+			result
 		end
 
 		## Class for extracting arguments from other path

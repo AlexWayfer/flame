@@ -59,6 +59,8 @@ Style/RedundantRegexpCharacterClass:
   Enabled: true
 Style/RedundantRegexpEscape:
   Enabled: true
+Style/RedundantFetchBlock:
+  Enabled: true
 
 AllCops:
   TargetRubyVersion: 2.5

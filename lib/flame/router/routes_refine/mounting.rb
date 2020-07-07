@@ -47,10 +47,7 @@ module Flame
 				def should_be_mounted?(controller)
 					if controller.instance_of?(Module)
 						controller.const_defined?(:IndexController, false)
-					elsif (
-						controller.actions.empty? ||
-						@reverse_routes.key?(controller.to_s)
-					)
+					elsif controller.actions.empty? || @reverse_routes.key?(controller.to_s)
 						false
 					else
 						true

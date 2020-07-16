@@ -50,7 +50,7 @@ describe Flame::Render do
 		end
 
 		context 'with locals' do
-			let(:args) { [:view, foo: :bar] }
+			let(:args) { [:view, { foo: :bar }] }
 
 			describe '@locals' do
 				subject { super().instance_variable_get(:@locals) }
@@ -62,7 +62,7 @@ describe Flame::Render do
 		context 'with scope' do
 			let(:scope) { Object.new }
 
-			let(:args) { [:view, scope: scope, foo: :bar] }
+			let(:args) { [:view, { scope: scope, foo: :bar }] }
 
 			describe '@locals' do
 				subject { super().instance_variable_get(:@locals) }
@@ -78,7 +78,7 @@ describe Flame::Render do
 		end
 
 		context 'with layout' do
-			let(:args) { [:view, layout: 'some', foo: :bar] }
+			let(:args) { [:view, { layout: 'some', foo: :bar }] }
 
 			describe '@locals' do
 				subject { super().instance_variable_get(:@locals) }
@@ -94,7 +94,7 @@ describe Flame::Render do
 		end
 
 		context 'with tilt options' do
-			let(:args) { [:view, tilt: { outvar: 'baz' }, foo: :bar] }
+			let(:args) { [:view, { tilt: { outvar: 'baz' }, foo: :bar }] }
 
 			describe '@locals' do
 				subject { super().instance_variable_get(:@locals) }
@@ -182,7 +182,7 @@ describe Flame::Render do
 		end
 
 		describe 'without layout by false option' do
-			let(:args) { [:view, layout: false] }
+			let(:args) { [:view, { layout: false }] }
 
 			it { is_expected.to eq "<h1>Hello, world!</h1>\n" }
 		end
@@ -250,7 +250,7 @@ describe Flame::Render do
 			end
 
 			context 'with false option' do
-				let(:args) { [:view, layout: false] }
+				let(:args) { [:view, { layout: false }] }
 
 				it do
 					2.times do
@@ -263,7 +263,7 @@ describe Flame::Render do
 			end
 
 			context 'with true option' do
-				let(:args) { [:view, layout: false] }
+				let(:args) { [:view, { layout: false }] }
 
 				describe 'cached_tilts.count' do
 					subject(:cached_tilts_count) { cached_tilts.count }

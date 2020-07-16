@@ -402,7 +402,7 @@ describe Flame::Dispatcher do
 		end
 
 		context 'with new status, body and headers' do
-			let(:args) { [200, 'Cats!', 'Content-Type' => 'animal/cat'] }
+			let(:args) { [200, 'Cats!', { 'Content-Type' => 'animal/cat' }] }
 
 			describe 'status' do
 				subject { dispatcher.status }

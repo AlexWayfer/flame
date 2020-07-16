@@ -35,7 +35,7 @@ Gem::Specification.new do |s|
 	s.add_runtime_dependency 'rack', '~> 2.1'
 	s.add_runtime_dependency 'tilt', '~> 2.0'
 
-	s.add_development_dependency 'codecov', '~> 0.1.14'
+	s.add_development_dependency 'codecov', '~> 0.2.1'
 	s.add_development_dependency 'pry-byebug', '~> 3.5'
 	s.add_development_dependency 'rack-test', '~> 1.1'
 	s.add_development_dependency 'rake', '~> 13.0'

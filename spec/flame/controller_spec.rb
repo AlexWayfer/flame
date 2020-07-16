@@ -232,7 +232,7 @@ describe Flame::Controller do
 		end
 
 		context 'with action with arguments' do
-			let(:args) { [:foo, first: 'Alex'] }
+			let(:args) { [:foo, { first: 'Alex' }] }
 
 			it { is_expected.to eq '/foo/Alex' }
 		end
@@ -439,7 +439,7 @@ describe Flame::Controller do
 			let(:controller_class) { ControllerTest::AnotherOneController }
 
 			context 'without status' do
-				let(:args) { [controller_class, :hello, name: 'Alex'] }
+				let(:args) { [controller_class, :hello, { name: 'Alex' }] }
 
 				describe 'status' do
 					subject { controller.status }
@@ -456,7 +456,7 @@ describe Flame::Controller do
 				describe 'no mutation of of args as array' do
 					subject { args }
 
-					it { is_expected.to eq [controller_class, :hello, name: 'Alex'] }
+					it { is_expected.to eq [controller_class, :hello, { name: 'Alex' }] }
 				end
 			end
 
@@ -656,7 +656,7 @@ describe Flame::Controller do
 		end
 
 		context 'with view without layout' do
-			let(:args) { [:view, layout: false] }
+			let(:args) { [:view, { layout: false }] }
 
 			it { is_expected.to eq "<h1>Hello, world!</h1>\n" }
 		end
@@ -697,7 +697,7 @@ describe Flame::Controller do
 				it { is_expected.to be_zero }
 
 				context 'when cache option is enabled' do
-					let(:args) { [:view, layout: false, cache: true] }
+					let(:args) { [:view, { layout: false, cache: true }] }
 
 					it { is_expected.to eq 1 }
 				end
@@ -705,12 +705,12 @@ describe Flame::Controller do
 
 			context 'when environment is production' do
 				let(:environment) { 'production' }
-				let(:args) { [:view, layout: false] }
+				let(:args) { [:view, { layout: false }] }
 
 				it { is_expected.to eq 1 }
 
 				context 'when cache option is disabled' do
-					let(:args) { [:view, cache: false] }
+					let(:args) { [:view, { cache: false }] }
 
 					it { is_expected.to be_zero }
 				end

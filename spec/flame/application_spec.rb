@@ -433,7 +433,7 @@ describe Flame::Application do
 		end
 
 		context 'with controller and action with arguments' do
-			let(:args) { [ApplicationController, :hello, name: 'world'] }
+			let(:args) { [ApplicationController, :hello, { name: 'world' }] }
 
 			it { is_expected.to eq '/hello/world' }
 		end
@@ -452,9 +452,10 @@ describe Flame::Application do
 		context 'with nested params' do
 			let(:args) do
 				[
-					ApplicationController, :foo,
-					name: 'world',
-					nested: { some: 'here', another: %w[there maybe] }
+					ApplicationController, :foo, {
+						name: 'world',
+						nested: { some: 'here', another: %w[there maybe] }
+					}
 				]
 			end
 

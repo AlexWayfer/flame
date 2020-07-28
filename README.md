@@ -11,7 +11,7 @@
 	<a href="https://depfu.com/repos/AlexWayfer/flame"><img src="https://img.shields.io/depfu/AlexWayfer/flame.svg?style=flat-square" alt="Depfu" /></a>
 	<a href="http://inch-ci.org/github/AlexWayfer/flame"><img src="http://inch-ci.org/github/AlexWayfer/flame.svg?branch=master&style=flat-square" alt="Docs" /></a>
 	<a href="https://rubygems.org/gems/flame"><img src="https://img.shields.io/gem/v/flame.svg?style=flat-square" alt="Gem" /></a>
-	<a href="https://github.com/AlexWayfer/flame/blob/master/LICENSE"><img src="https://img.shields.io/github/license/AlexWayfer/flame.svg?style=flat-square" alt="MIT license" /></a>
+	<a href="https://github.com/AlexWayfer/flame/blob/master/LICENSE.txt"><img src="https://img.shields.io/github/license/AlexWayfer/flame.svg?style=flat-square" alt="MIT license" /></a>
 </p>
 
 Flame is a small Ruby web framework,
@@ -83,3 +83,23 @@ More at [Wiki](https://github.com/AlexWayfer/flame/wiki) and in `example/` direc
 ## Benchmark
 
 The last benchmark can be viewed [here](https://github.com/luislavena/bench-micro).
+
+## Development
+
+After checking out the repo, run `bundle install` to install dependencies.
+
+Then, run `toys rspec` to run the tests.
+
+To install this gem onto your local machine, run `toys gem install`.
+
+To release a new version, run `toys gem release %version%`.
+See how it works [here](https://github.com/AlexWayfer/gem_toys#release).
+
+## Contributing
+
+Bug reports and pull requests are welcome on [GitHub](https://github.com/<%= @project_github_path %>).
+
+## License
+
+The gem is available as open source under the terms of the
+[MIT License](https://opensource.org/licenses/MIT).

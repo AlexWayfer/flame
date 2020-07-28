@@ -1,11 +1,9 @@
 Gemfile.lock
-tests/
-.ruby-version
-node_modules/
+
+/node_modules/
 package-lock.json
+yarn.lock
 
-# Gem files
-*.gem
+/coverage/
 
-# Tests coverage
-coverage/
+/pkg/

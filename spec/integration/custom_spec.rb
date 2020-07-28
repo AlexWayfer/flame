@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require_relative 'spec_helper'
-
 module CustomTest
 	## Example of custom controller
 	class CustomController < Flame::Controller

@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require_relative 'spec_helper'
-
 module IndexTest
 	## Example of index controller
 	class IndexController < Flame::Controller

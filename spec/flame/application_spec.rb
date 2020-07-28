@@ -621,7 +621,7 @@ describe Flame::Application do
 			end
 		end
 
-		context 'when controller with overwrited action path' do
+		context 'when controller with overwritten action path' do
 			before do
 				app_class.class_exec do
 					mount :application do
@@ -638,7 +638,7 @@ describe Flame::Application do
 			end
 		end
 
-		context 'when controller with overwrited arguments order' do
+		context 'when controller with overwritten arguments order' do
 			before do
 				app_class.class_exec do
 					mount :application do

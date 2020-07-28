@@ -412,7 +412,7 @@ describe Flame::Controller do
 				end
 			end
 
-			context 'with status as the last arument' do
+			context 'with status as the last argument' do
 				let(:args) { [url, 301] }
 
 				describe 'status' do
@@ -460,7 +460,7 @@ describe Flame::Controller do
 				end
 			end
 
-			context 'with status as the last arument' do
+			context 'with status as the last argument' do
 				let(:args) { [controller_class, :hello, { name: 'Alex' }, 301] }
 
 				describe 'status' do
@@ -512,7 +512,7 @@ describe Flame::Controller do
 				end
 			end
 
-			context 'with status as the last arument' do
+			context 'with status as the last argument' do
 				let(:args) { [uri, 301] }
 
 				describe 'status' do

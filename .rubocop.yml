@@ -41,6 +41,9 @@ Metrics/BlockLength:
 
 RSpec/NestedGroups:
   Max: 6
+## https://github.com/rubocop-hq/rubocop-rspec/pull/863/files#r471603667
+RSpec/MultipleMemoizedHelpers:
+  Enabled: false
 RSpec/FilePath:
   Exclude:
     - spec/integration/**/*

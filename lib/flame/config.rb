@@ -6,7 +6,7 @@ module Flame
 	## Class for application configuration
 	class Config < Hash
 		DEFAULT_DIRS =
-			%i[public views config tmp].each_with_object({}) do |key, result|
+			%i[config log public tmp views].each_with_object({}) do |key, result|
 				result[:"#{key}_dir"] = proc { File.join(self[:root_dir], key.to_s) }
 			end.freeze
 

@@ -106,5 +106,13 @@ describe Flame::Config do
 				)
 			end
 		end
+
+		context 'when `:required` option is false' do
+			subject(:result) { config.load_yaml :not_exist, required: false }
+
+			it do
+				expect { result }.not_to raise_error(Flame::Errors::ConfigFileNotFoundError)
+			end
+		end
 	end
 end

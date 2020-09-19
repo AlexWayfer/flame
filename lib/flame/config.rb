@@ -35,6 +35,7 @@ module Flame
 		## @param key [Symbol, String, nil]
 		##   key for allocating YAML in config Hash (typecast to Symbol)
 		## @param set [Boolean] allocating YAML in Config Hash
+		## @param require [Boolean] don't raise an error if file not found and not required
 		## @example Load SMTP file from `config/smtp.yaml' to config[]
 		##   config.load_yaml('smtp.yaml')
 		## @example Load SMTP file without extension, by Symbol
@@ -43,9 +44,13 @@ module Flame
 		##   config.load_yaml('smtp.yaml', key: :mail)
 		## @example Load SMTP file without allocating in config[]
 		##   config.load_yaml('smtp.yaml', set: false)
-		def load_yaml(file, key: nil, set: true)
+		## @example Try to load nonexistent SMTP file without raising an error
+		##   config.load_yaml('smtp.yaml', require: false)
+		def load_yaml(file, key: nil, set: true, required: true)
 			file = "#{file}.y{a,}ml" if file.is_a? Symbol
-			file_path = find_config_file file
+
+			file_path = find_config_file file, required: required
+			return unless file_path
 
 			yaml = YAML.load_file(file_path)
 			key ||= File.basename(file, '.*')
@@ -55,9 +60,9 @@ module Flame
 
 		private
 
-		def find_config_file(filename)
+		def find_config_file(filename, required:)
 			file_path = Dir[File.join(self[:config_dir], filename)].first
-			return file_path if file_path
+			return file_path if file_path || !required
 
 			raise Errors::ConfigFileNotFoundError.new(
 				filename, self[:config_dir].sub(self[:root_dir], '')

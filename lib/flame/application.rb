@@ -96,7 +96,7 @@ module Flame
 			## @param controller [Symbol] the snake-cased name of mounted controller
 			##   (without `Controller` or `::IndexController` for namespaces)
 			## @param path [String, nil] root path for the mounted controller
-			## @yield refine defaults pathes for a methods of the mounted controller
+			## @yield refine defaults paths for a methods of the mounted controller
 			## @example Mount controller with defaults
 			##   mount :articles # ArticlesController
 			## @example Mount controller with specific path
@@ -133,7 +133,7 @@ module Flame
 			@app = app
 		end
 
-		## Request recieving method
+		## Request receiving method
 		def call(env)
 			@app.call(env) if @app.respond_to? :call
 			Flame::Dispatcher.new(self.class, env).run!

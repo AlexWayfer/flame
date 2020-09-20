@@ -71,7 +71,7 @@ end
 
 # config.ru
 
-require_relative './index_contoller'
+require_relative './index_controller'
 
 require_relative './app'
 
@@ -97,7 +97,7 @@ See how it works [here](https://github.com/AlexWayfer/gem_toys#release).
 
 ## Contributing
 
-Bug reports and pull requests are welcome on [GitHub](https://github.com/<%= @project_github_path %>).
+Bug reports and pull requests are welcome on [GitHub](https://github.com/AlexWayfer/flame).
 
 ## License
 

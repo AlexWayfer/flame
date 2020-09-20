@@ -13,6 +13,7 @@ module Flame
 
 			## Remember root directory when inherited
 			def inherited(app)
+				super
 				app.root_dir = File.dirname caller(2..2).first.split(':')[0]
 			end
 

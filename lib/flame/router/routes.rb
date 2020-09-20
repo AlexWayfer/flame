@@ -12,6 +12,8 @@ module Flame
 			##   Flame::Router::Routes.new('/foo/bar/baz')
 			##   # => { 'foo' => { 'bar' => { 'baz' => {} } } }
 			def initialize(*path_parts)
+				super()
+
 				path = Flame::Path.new(*path_parts)
 				return if path.parts.empty?
 

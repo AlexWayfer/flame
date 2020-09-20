@@ -1,9 +1,5 @@
 # frozen_string_literal: true
 
-## https://github.com/stevekinney/pizza/issues/103#issuecomment-136052789
-## https://github.com/docker-library/ruby/issues/45
-Encoding.default_external = 'UTF-8'
-
 require 'simplecov'
 SimpleCov.start
 
@@ -17,6 +13,7 @@ require 'pry-byebug'
 require_relative '../lib/flame'
 
 Dir["#{__dir__}/**/spec_helper.rb"].sort.each do |spec_helper|
+	next if spec_helper == __FILE__
 	next if spec_helper.include?('require_dirs')
 
 	require spec_helper

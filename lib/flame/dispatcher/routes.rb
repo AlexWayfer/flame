@@ -51,7 +51,8 @@ module Flame
 
 				return not_found_body(route) if response.not_found?
 
-				controller = @current_controller || route.controller.new(self)
+				controller =
+					(@current_controller if defined?(@current_controller)) || route.controller.new(self)
 				controller.send :default_body
 			end
 

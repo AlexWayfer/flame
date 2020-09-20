@@ -78,7 +78,7 @@ require_relative './app'
 run App.new # or `run App`
 ```
 
-More at [Wiki](https://github.com/AlexWayfer/flame/wiki) and in `example/` directory.
+More at [Wiki](https://github.com/AlexWayfer/flame/wiki).
 
 ## Benchmark
 

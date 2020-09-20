@@ -14,6 +14,7 @@ module Flame
 		## @param app [Flame::Application] application
 		## @param hash [Hash] config content
 		def initialize(root_dir)
+			super()
 			replace DEFAULT_DIRS.merge(
 				root_dir: File.realpath(root_dir),
 				environment: ENV['RACK_ENV'] || 'development'

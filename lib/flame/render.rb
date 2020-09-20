@@ -115,11 +115,13 @@ module Flame
 
 		using GorillaPatch::Inflections
 
+		CONTROLLER_SUFFIXES = %w[_controller _ctrl].freeze
+		private_constant :CONTROLLER_SUFFIXES
+
 		## Find possible directories for the controller
 		def controller_dirs
 			parts = @controller.class.underscore.split('/').map do |part|
-				%w[_controller _ctrl]
-					.find { |suffix| part.chomp! suffix }
+				CONTROLLER_SUFFIXES.find { |suffix| part.chomp! suffix }
 				part
 				## Alternative, but slower by ~50%:
 				# part.sub(/_(controller|ctrl)$/, '')

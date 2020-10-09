@@ -43,6 +43,13 @@ describe Flame::Controller::Cookies do
 			let(:cookie_value) { 'xyz' }
 
 			it { is_expected.to include 'abc=xyz;' }
+
+			describe 'accepting options' do
+				let(:max_age) { 30 * 24 * 60 * 60 }
+				let(:cookie_value) { { value: 'xyz', max_age: max_age } }
+
+				it { is_expected.to include "abc=xyz; max-age=#{max_age}"}
+			end
 		end
 
 		describe 'deleting cookie for response by nil value' do

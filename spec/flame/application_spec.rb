@@ -593,17 +593,6 @@ describe Flame::Application do
 			end
 		end
 
-		context 'when controller with refining block' do
-			before do
-				app_class.class_exec do
-					mount :application do
-					end
-				end
-			end
-
-			it { is_expected.to be_any }
-		end
-
 		context 'when controller with refining HTTP-methods' do
 			before do
 				app_class.class_exec do

@@ -29,7 +29,7 @@ describe Flame::Config do
 				subject { config[:another_baz] }
 
 				before do
-					config[:another_baz] = proc { |x| }
+					config[:another_baz] = proc { |x| x }
 				end
 
 				it { is_expected.to be_kind_of Proc }

@@ -40,6 +40,7 @@ Gem::Specification.new do |spec|
 	spec.add_development_dependency 'pry-byebug', '~> 3.9'
 
 	spec.add_development_dependency 'bundler', '~> 2.0'
+	spec.add_development_dependency 'bundler-audit', '~> 0.7.0'
 	spec.add_development_dependency 'gem_toys', '~> 0.4.0'
 	spec.add_development_dependency 'toys', '~> 0.11.0'
 

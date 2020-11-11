@@ -48,7 +48,7 @@ describe Flame::Controller::Cookies do
 				let(:max_age) { 30 * 24 * 60 * 60 }
 				let(:cookie_value) { { value: 'xyz', max_age: max_age } }
 
-				it { is_expected.to include "abc=xyz; max-age=#{max_age}"}
+				it { is_expected.to include "abc=xyz; max-age=#{max_age}" }
 			end
 		end
 

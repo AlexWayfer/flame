@@ -39,6 +39,10 @@ Metrics/BlockLength:
     - 'spec/**/*'
     - '*.gemspec'
 
+Lint/EmptyClass:
+  Exclude:
+    - spec/flame/require_dirs/**/*
+
 RSpec/NestedGroups:
   Max: 6
 ## https://github.com/rubocop-hq/rubocop-rspec/pull/863/files#r471603667

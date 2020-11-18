@@ -89,7 +89,7 @@ module Flame
 			PADDING_FORMAT = "%#{PADDING_SIZE}.#{PADDING_SIZE}s"
 
 			## Output routes in human readable format
-			def to_s(prefix = nil)
+			def to_s(prefix = '/')
 				sort.map do |key, value|
 					if key.is_a?(Symbol)
 						<<~OUTPUT

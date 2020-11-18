@@ -205,6 +205,7 @@ describe Flame::Router::Routes do
 		subject { routes.to_s }
 
 		before do
+			routes[:GET] = 'Index'
 			routes['foo']['bar'][:GET] = 42
 			routes['foo']['bar']['bar'] = initialize_routes
 			routes['foo']['bar']['baz'][:DELETE] = 84
@@ -214,6 +215,8 @@ describe Flame::Router::Routes do
 
 		let(:expected_output) do
 			<<~OUTPUT
+				\e[1m   GET /\e[22m
+				       \e[3m\e[36mIndex\e[0m\e[23m
 				\e[1m   GET /foo/bar\e[22m
 				       \e[3m\e[36m42\e[0m\e[23m
 				\e[1m  POST /foo/bar/bar\e[22m
@@ -232,6 +235,8 @@ describe Flame::Router::Routes do
 
 			let(:expected_output) do
 				<<~OUTPUT
+					   GET /
+					       Index
 					   GET /foo/bar
 					       42
 					  POST /foo/bar/bar

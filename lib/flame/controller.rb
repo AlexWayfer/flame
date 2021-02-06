@@ -152,7 +152,9 @@ module Flame
 		## Default method for Internal Server Error, can be inherited
 		## @param _exception [Exception] exception from code executing
 		## @return [String] content of exception page
-		def server_error(_exception)
+		def server_error(exception)
+			raise exception if Object.const_defined?(:BetterErrors)
+
 			body default_body
 		end
 

@@ -7,6 +7,6 @@ subtool_apply do
 end
 
 require 'gem_toys'
-expand GemToys::Template
+expand GemToys::Template, unreleased_title: '## Unreleased'
 
 alias_tool :g, :gem

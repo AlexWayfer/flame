@@ -6,14 +6,19 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+*   Add ability for controllers auto-mounting \
+    Good bye giant application `mount` blocks! \
+    But you can disable it with `nested: false` option for `mount`,
+    for example, for conditional umbrella application.
+*   Allow to mount anonymous controllers
+*   Add support for Ruby 3.0
 *   Add support of `OPTIONS` HTTP-method
-*   Add specs for application generator, including application start
 *   Add `Application.require_dirs` method
 *   Add `Controller#path_to_back` method
-*   Receive options for Tilt in `Controller#(render|view)` method
-    via `:tilt` argument
+*   Add `:log_dir` for default config
+*   Add `:require` option for `Config#load_yaml`
+*   Receive options for Tilt in `Controller#(render|view)` method via `:tilt` argument
 *   Add support of block for `Controller#render` method
-*   Add support for Ruby 2.5
 *   Add metadata to Gem specification with links
 *   Add required Ruby version into Gem specification
 *   Add `Controller.with_actions` method for modules
@@ -21,30 +26,33 @@ All notable changes to this project will be documented in this file.
 *   Allow to render view by relative path from current view
 *   Add ability for refining HTTP-methods of actions inside controllers \
     Now you can not use `post`, `patch` and others inside `mount` blocks, yay!
-*   Add `:ignore` parameter for `Application.require_dirs`
 *   Catch `SyntaxError` for custom Internal Server Error page
 *   Add `:only` option to `#with_actions` method
 *   Add cache for `Controller#url_to` in production via `memery` gem
 *   Add ability to refine actions in modules \
     Just `extend Flame::Controller::Actions` in module now,
     and than `include with_actions ThatModule`, as before.
-*   Add ability for controllers auto-mounting \
-    Good bye giant application `mount` blocks! \
-    But you can disable it with `nested: false` option for `mount`,
-    for example, for conditional umbrella application.
 *   Add `Flame::Router::Routes#to_s`, for routes printing
     ```ruby
     puts MyApplication.router.routes
     ```
 *   Add `Request#headers` method (with Camel-Cased Hash)
-*   Allow to mount anonymous controllers
+*   Accept options for cookies setting
+*   Add `Flame::Path#include?` method, forwarding to `#to_s`
+*   Allow integration with `better_errors` gem \
+    More info [here](https://github.com/BetterErrors/better_errors/issues/454).
+*   Add RuboCop plugins, resolve offenses by them
+*   Add `remark` Markdown linter
 
 
 ### Changed
 
 *   Replace Array-based routes system with Hash-based
-*   Refactor `flame new` command of executable file
-*   Update template for application generator
+*   Move `flame` executable and `template/` to separated gem
+    `flame-cli`, not required by default.
+*   Take out `Config` from `Flame::Application` to `Flame` \
+    Now it's possible to load config before routes (and models). \
+    Also add `ConfigFileNotFoundError`.
 *   Replace `URI` building with `Addressable::URI` from external gem
 *   Replace `no-cache` with `public` and `max-age` (one year)
     for `Cache-Control` header for static files
@@ -66,35 +74,37 @@ All notable changes to this project will be documented in this file.
     I think it's unnecessary for API-like usage.
 *   Slightly optimize `StaticFile`
 *   Build query in `#path_to` from root-Hash \
-    Now building a path with merged query parameters is easier,
-    no more `params: {}`.
+    Now building a path with merged query parameters is easier, no more `params: {}`.
 *   Run `Controller#not_found` through `execute` \
     For found nearest routes. \
     Now we can write before-hooks in `execute` also for nonexistent pages.
 *   Don't assign results of `execute` (after-hooks) as `body`
 *   Require directories starting with `_` first
 *   Allow to redefine controller path with `PATH` constant inside
-*   Update RuboCop to version 0.65.0, resolve some new offenses \
-    Also lock at the patch version instead of minor, cause it's still in alpha.
-*   Move `flame` executable and `template/` to separated gem
-    `flame-cli`, not required by default.
+*   Update RuboCop to a new version, resolve new offenses.
 *   Improve version locks for dependencies
+*   Use Depfu instead of closed Gemnasium
 
 ### Removed
 
 *   Remove `Application#config` and `Application#router` methods
-*   Remove Ruby 2.3 support
+*   Remove Ruby < 2.5 support
+*   Remove HTML tags (`<h1>`) from default body \
+    There is no `Content-Type` HTTP header, also there is no reason to return exactly HTML content \
+    (Flame can be used only for API or something else).
 
 ### Fixed
 
 *   Fix issue with `nil` in after-hook which returned 404 status
 *   Fix routing to path without an optional argument at the beginning
+*   Fix routing for multiple routes starting with arguments \
+    Example: parent controller with `show(id)` and nested controller at `/:parent_id/nested`.
+*   Avoid new controller creation in `halt`
 
 ### Security
 
 *   Fix exploit with static files \
-    You could get the content of any file
-    from the outside of public directory. \
+    You could get the content of any file from the outside of public directory. \
     It did not work with `nginx`, Cloudflare or something else.
 
 

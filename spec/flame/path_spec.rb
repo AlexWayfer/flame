@@ -234,46 +234,46 @@ describe Flame::Path do
 		context 'with regular arguments' do
 			let(:other_args) { '/foo/bar/baz' }
 
-			it { is_expected.to eq Hash[first: 'bar', second: 'baz'] }
+			it { is_expected.to eq(first: 'bar', second: 'baz') }
 		end
 
 		context 'with encoded arguments' do
 			let(:other_args) { '/foo/another%20bar/baz' }
 
-			it { is_expected.to eq Hash[first: 'another bar', second: 'baz'] }
+			it { is_expected.to eq(first: 'another bar', second: 'baz') }
 		end
 
 		context 'with arguments with spaces instead of `+`' do
 			let(:other_args) { '/foo/another+bar/baz' }
 
-			it { is_expected.to eq Hash[first: 'another bar', second: 'baz'] }
+			it { is_expected.to eq(first: 'another bar', second: 'baz') }
 		end
 
 		context 'with missing optional argument before static part' do
 			let(:path_args)  { '/foo/:?bar/baz' }
 			let(:other_args) { '/foo/baz' }
 
-			it { is_expected.to eq Hash[bar: nil] }
+			it { is_expected.to eq(bar: nil) }
 		end
 
 		context 'with arguments after optional argument at start' do
 			let(:path_args)  { '/:?foo/bar/:?baz/qux/:id' }
 			let(:other_args) { '/bar/baz/qux/2' }
 
-			it { is_expected.to eq Hash[foo: nil, baz: 'baz', id: '2'] }
+			it { is_expected.to eq(foo: nil, baz: 'baz', id: '2') }
 		end
 
 		context 'with optional argument after missing optional argument' do
 			let(:path_args)  { '/:?foo/bar/:?baz' }
 			let(:other_args) { '/bar/baz' }
 
-			it { is_expected.to eq Hash[foo: nil, baz: 'baz'] }
+			it { is_expected.to eq(foo: nil, baz: 'baz') }
 		end
 
 		context 'with path with slash at the end' do
 			let(:other_args) { '/foo/bar/baz//' }
 
-			it { is_expected.to eq Hash[first: 'bar', second: 'baz'] }
+			it { is_expected.to eq(first: 'bar', second: 'baz') }
 		end
 	end
 

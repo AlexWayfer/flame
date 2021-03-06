@@ -303,7 +303,7 @@ describe Flame::Dispatcher do
 			let(:path) { '/hello' }
 			let(:query) { 'name=world&when=now' }
 
-			it { is_expected.to eq Hash[name: 'world', when: 'now'] }
+			it { is_expected.to eq(name: 'world', when: 'now') }
 			it { is_expected.not_to be dispatcher.request.params }
 			it { is_expected.to be dispatcher.params }
 		end

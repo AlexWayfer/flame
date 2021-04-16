@@ -16,16 +16,18 @@ Gem::Specification.new do |spec|
 	spec.email       = ['alex.wayfer@gmail.com']
 	spec.license     = 'MIT'
 
-	spec.metadata = {
-		'bug_tracker_uri' => 'https://github.com/AlexWayfer/flame/issues',
-		'documentation_uri' =>
-			"http://www.rubydoc.info/gems/flame/#{Flame::VERSION}",
-		'source_code_uri' => 'https://github.com/AlexWayfer/flame',
-		'wiki_uri' => 'https://github.com/AlexWayfer/flame/wiki'
-	}
+	github_uri = "https://github.com/AlexWayfer/#{spec.name}"
 
-	spec.metadata['homepage_uri'] = spec.metadata['source_code_uri']
-	spec.homepage = spec.metadata['homepage_uri']
+	spec.homepage = github_uri
+
+	spec.metadata = {
+		'bug_tracker_uri' => "#{github_uri}/issues",
+		'changelog_uri' => "#{github_uri}/blob/v#{spec.version}/CHANGELOG.md",
+		'documentation_uri' => "http://www.rubydoc.info/gems/#{spec.name}/#{spec.version}",
+		'homepage_uri' => spec.homepage,
+		'source_code_uri' => github_uri,
+		'wiki_uri' => "#{github_uri}/wiki"
+	}
 
 	spec.files = Dir['lib/**/*.rb', 'public/**/*.ico', 'README.md', 'LICENSE.txt', 'CHANGELOG.md']
 

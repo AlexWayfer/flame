@@ -31,8 +31,8 @@
         alt="Docs"
     /></a>
     <a href="https://rubygems.org/gems/flame"><img
-        src="https://img.shields.io/gem/v/flame.svg?style=flat-square"
-        alt="Gem"
+        src="https://img.shields.io/gem/v/flame.svg?include_prereleases&style=flat-square"
+        alt="Gem (including prereleases)"
     /></a>
     <a href="https://github.com/AlexWayfer/flame/blob/master/LICENSE.txt"><img
         src="https://img.shields.io/github/license/AlexWayfer/flame.svg?style=flat-square"

@@ -48,8 +48,7 @@ describe Flame::Validators do
 				it do
 					expect { result }.to raise_error(
 						Flame::Errors::RouteExtraArgumentsError,
-						"Action 'ValidatorsController#foo'" \
-							' has no required arguments [:fourth]'
+						"Action 'ValidatorsController#foo' has no required arguments [:fourth]"
 					)
 				end
 			end
@@ -60,8 +59,7 @@ describe Flame::Validators do
 				it do
 					expect { result }.to raise_error(
 						Flame::Errors::RouteExtraArgumentsError,
-						"Action 'ValidatorsController#foo'" \
-							' has no optional arguments [:fifth]'
+						"Action 'ValidatorsController#foo' has no optional arguments [:fifth]"
 					)
 				end
 			end

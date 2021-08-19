@@ -38,8 +38,7 @@ describe Flame::Dispatcher::Static do
 
 		context 'with URL-encoded request' do
 			let(:path) do
-				'/%D1%82%D0%B5%D1%81%D1%82%D0%BE%D0%B2%D1%8B%D0%B9%20' \
-				'%D1%84%D0%B0%D0%B9%D0%BB'
+				'/%D1%82%D0%B5%D1%81%D1%82%D0%BE%D0%B2%D1%8B%D0%B9%20%D1%84%D0%B0%D0%B9%D0%BB'
 			end
 
 			it { is_expected.to eq "Тестовый файл\n" }

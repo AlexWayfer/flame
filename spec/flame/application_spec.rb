@@ -848,9 +848,9 @@ describe Flame::Application do
 
 			it do
 				expect { mounting }.to raise_error(
-					Flame::Errors::RouteArgumentsOrderError,
-					"Path '/baz/:first/:second/:?fourth/:?third' should have " \
-					"':?third' argument before ':?fourth'"
+					Flame::Errors::RouteArgumentsOrderError, <<~MESSAGE.chomp
+						Path '/baz/:first/:second/:?fourth/:?third' should have ':?third' argument before ':?fourth'
+					MESSAGE
 				)
 			end
 		end

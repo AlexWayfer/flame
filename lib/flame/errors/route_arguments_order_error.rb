@@ -9,11 +9,9 @@ module Flame
 			## @param wrong_ordered_arguments [Array<Symbol>]
 			##   two wrong ordered arguments
 			def initialize(path, wrong_ordered_arguments)
-				super(
-					"Path '#{path}' should have" \
-						" '#{wrong_ordered_arguments.first}' argument before" \
-						" '#{wrong_ordered_arguments.last}'"
-				)
+				super(<<~MESSAGE.chomp)
+					Path '#{path}' should have '#{wrong_ordered_arguments.first}' argument before '#{wrong_ordered_arguments.last}'
+				MESSAGE
 			end
 		end
 	end

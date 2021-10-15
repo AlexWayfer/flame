@@ -106,10 +106,7 @@ module Flame
 			def sort
 				sort_by do |key, _value|
 					[
-						if key.is_a?(Symbol)
-						then Router::HTTP_METHODS.index(key)
-						else Float::INFINITY
-						end,
+						key.is_a?(Symbol) ? Router::HTTP_METHODS.index(key) : Float::INFINITY,
 						key.to_s
 					]
 				end

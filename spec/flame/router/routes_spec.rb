@@ -48,7 +48,7 @@ describe Flame::Router::Routes do
 			it { is_expected.to eq('bar' => { 'baz' => {} }) }
 		end
 
-		context 'with String which is not argument ' do
+		context 'with String which is not argument' do
 			subject { routes['foo'] }
 
 			it { is_expected.to eq('bar' => { 'baz' => {} }) }

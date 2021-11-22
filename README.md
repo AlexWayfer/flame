@@ -1,6 +1,6 @@
 <p align="center">
     <img
-        src="https://raw.githubusercontent.com/AlexWayfer/flame/master/public/favicon.ico"
+        src="https://raw.githubusercontent.com/AlexWayfer/flame/main/public/favicon.ico"
         height="150"
         alt="Flame Logo"
         title="Logo from open-source Elusive-Iconfont (https://github.com/reduxframework/elusive-iconfont)"
@@ -10,8 +10,8 @@
 <h1 align="center">Flame</h1>
 
 <p align="center">
-    <a href="https://cirrus-ci.com/github/AlexWayfer/flame/master"><img
-        src="https://api.cirrus-ci.com/github/AlexWayfer/flame.svg?branch=master"
+    <a href="https://cirrus-ci.com/github/AlexWayfer/flame/main"><img
+        src="https://api.cirrus-ci.com/github/AlexWayfer/flame.svg?branch=main"
         alt="Cirrus CI"
     /></a>
     <a href="https://codecov.io/gh/AlexWayfer/flame"><img
@@ -27,14 +27,14 @@
         alt="Depfu"
     /></a>
     <a href="http://inch-ci.org/github/AlexWayfer/flame"><img
-        src="http://inch-ci.org/github/AlexWayfer/flame.svg?branch=master&style=flat-square"
+        src="http://inch-ci.org/github/AlexWayfer/flame.svg?branch=main&style=flat-square"
         alt="Docs"
     /></a>
     <a href="https://rubygems.org/gems/flame"><img
         src="https://img.shields.io/gem/v/flame.svg?include_prereleases&style=flat-square"
         alt="Gem (including prereleases)"
     /></a>
-    <a href="https://github.com/AlexWayfer/flame/blob/master/LICENSE.txt"><img
+    <a href="https://github.com/AlexWayfer/flame/blob/main/LICENSE.txt"><img
         src="https://img.shields.io/github/license/AlexWayfer/flame.svg?style=flat-square"
         alt="MIT license"
     /></a>

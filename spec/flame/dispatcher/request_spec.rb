@@ -40,14 +40,6 @@ describe Flame::Dispatcher::Request do
 			it { is_expected.to eq :PUT }
 		end
 
-		describe 'with cache of computed value' do
-			before do
-				allow(request).to receive(:params).and_call_original.once
-			end
-
-			it { 3.times { http_method } }
-		end
-
 		context 'with invalid %-encoding query' do
 			let(:query) { 'bar=%%' }
 

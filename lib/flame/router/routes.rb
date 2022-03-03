@@ -17,7 +17,7 @@ module Flame
 				path = Flame::Path.new(*path_parts)
 				return if path.parts.empty?
 
-				nested_routes = self.class.new Flame::Path.new(*path.parts[1..-1])
+				nested_routes = self.class.new Flame::Path.new(*path.parts[1..])
 				# path.parts.reduce(result) do |hash, part|
 				# 	hash[part] ||= self.class.new
 				# end
@@ -63,8 +63,8 @@ module Flame
 				endpoint =
 					self[path_parts.first] || dig(first_opt_arg_key, path_parts.first)
 
-				endpoint&.navigate(*path_parts[1..-1]) ||
-					find_among_arg_keys(path_parts[1..-1])
+				endpoint&.navigate(*path_parts[1..]) ||
+					find_among_arg_keys(path_parts[1..])
 			end
 
 			## Dig through optional arguments as keys

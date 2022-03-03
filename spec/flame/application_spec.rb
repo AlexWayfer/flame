@@ -190,7 +190,7 @@ using GorillaPatch::DeepMerge
 def initialize_path_hashes(
 	controller, *actions, prefix: nil, **actions_with_options
 )
-	actions.map { |action| [action, {}] }.to_h
+	actions.to_h { |action| [action, {}] }
 		.merge(actions_with_options)
 		.each_with_object({}) do |(action, options), result|
 			result.deep_merge! initialize_path_hash(

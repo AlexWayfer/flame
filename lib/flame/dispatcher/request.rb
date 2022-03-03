@@ -33,11 +33,8 @@ module Flame
 				env.each_with_object({}) do |(key, value), result|
 					next unless key.start_with?(HEADER_PREFIX)
 
-					## TODO: Replace `String#[]` with `#delete_prefix`
-					## after Ruby < 2.5 dropping
 					camelized_key =
-						key[HEADER_PREFIX.size..-1].downcase.tr('_', '/')
-							.camelize.gsub('::', '-')
+						key.delete_prefix(HEADER_PREFIX).downcase.tr('_', '/').camelize.gsub('::', '-')
 
 					result[camelized_key] = value
 				end

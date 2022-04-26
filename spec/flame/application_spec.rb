@@ -268,10 +268,16 @@ describe Flame::Application do
 				end
 			end
 
-			before do
-				allow(ENV).to receive(:[]).and_call_original
-				allow(ENV).to receive(:[]).with('RACK_ENV').and_return 'production'
+			around do |example|
+				original_rack_env = ENV.fetch('RACK_ENV', nil)
+				ENV['RACK_ENV'] = 'production'
 
+				example.run
+
+				ENV['RACK_ENV'] = original_rack_env
+			end
+
+			before do
 				app_class.class_exec do
 					mount :application, '/'
 				end
@@ -384,8 +390,13 @@ describe Flame::Application do
 				end
 
 				describe 'environment from ENV' do
-					before do
-						allow(ENV).to receive(:[]).with('RACK_ENV').and_return 'production'
+					around do |example|
+						original_rack_env = ENV.fetch('RACK_ENV', nil)
+						ENV['RACK_ENV'] = 'production'
+
+						example.run
+
+						ENV['RACK_ENV'] = original_rack_env
 					end
 
 					let(:key) { :environment }

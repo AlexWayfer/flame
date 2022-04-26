@@ -17,7 +17,7 @@ module Flame
 			super()
 			replace DEFAULT_DIRS.merge(
 				root_dir: File.realpath(root_dir),
-				environment: ENV['RACK_ENV'] || 'development'
+				environment: ENV.fetch('RACK_ENV', 'development')
 			)
 		end
 

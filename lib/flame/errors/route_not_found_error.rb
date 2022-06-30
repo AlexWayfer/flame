@@ -10,8 +10,8 @@ module Flame
 			## @param action [Symbol] action with which route not found
 			def initialize(controller, action)
 				super(
-					"Route with controller '#{controller}' and action '#{action}'" \
-					' not found in application routes'
+					"Route with controller '#{controller}' and action '#{action}' " \
+						'not found in application routes'
 				)
 			end
 		end

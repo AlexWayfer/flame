@@ -124,7 +124,7 @@ module Flame
 		def dump_error(error)
 			error_message = [
 				"#{Time.now.strftime('%Y-%m-%d %H:%M:%S')} - " \
-				"#{error.class} - #{error.message}:",
+					"#{error.class} - #{error.message}:",
 				*error.backtrace
 			].join("\n\t")
 			@env[Rack::RACK_ERRORS].puts(error_message)

@@ -825,7 +825,7 @@ describe Flame::Application do
 				expect { mounting }.to raise_error(
 					Flame::Errors::RouteExtraArgumentsError,
 					"Action 'ApplicationController#baz' has no " \
-					'required arguments [:third]'
+						'required arguments [:third]'
 				)
 			end
 		end
@@ -843,7 +843,7 @@ describe Flame::Application do
 				expect { mounting }.to raise_error(
 					Flame::Errors::RouteExtraArgumentsError,
 					"Action 'ApplicationController#baz' has no " \
-					'optional arguments [:fifth]'
+						'optional arguments [:fifth]'
 				)
 			end
 		end

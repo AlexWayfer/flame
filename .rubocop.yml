@@ -18,6 +18,8 @@ Layout/MultilineMethodCallIndentation:
   EnforcedStyle: indented
 Layout/MultilineOperationIndentation:
   EnforcedStyle: indented
+Layout/LineEndStringConcatenationIndentation:
+  EnforcedStyle: indented
 Layout/ArgumentAlignment:
   EnforcedStyle: with_fixed_indentation
 Layout/ParameterAlignment:

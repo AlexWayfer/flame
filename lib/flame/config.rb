@@ -53,7 +53,7 @@ module Flame
 			file_path = find_config_file file, required: required
 			return unless file_path
 
-			yaml = YAML.load_file(file_path)
+			yaml = YAML.load_file(file_path, aliases: true)
 			key ||= File.basename(file, '.*')
 			self[key.to_sym] = yaml if set
 			yaml

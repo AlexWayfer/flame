@@ -37,6 +37,7 @@ Gem::Specification.new do |spec|
 	spec.add_runtime_dependency 'addressable', '~> 2.5'
 	spec.add_runtime_dependency 'alt_memery', '~> 2.0'
 	spec.add_runtime_dependency 'gorilla_patch', '>= 3.0', '< 5'
+	spec.add_runtime_dependency 'psych', '~> 4.0'
 	spec.add_runtime_dependency 'rack', '~> 2.1'
 	spec.add_runtime_dependency 'tilt', '~> 2.0'
 

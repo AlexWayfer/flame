@@ -70,6 +70,23 @@ describe Flame::Config do
 
 				it { is_expected.to eq(foo: 2, bar: 'qux') }
 			end
+
+			context 'with anchors inside' do
+				let(:key) { :example3 }
+
+				let(:expected_content) do
+					{
+						'.default' => { foo: 3, bar: 'quux' },
+						'production' => { foo: 3, bar: 'quux' }
+					}
+				end
+
+				before do
+					config.load_yaml :example3
+				end
+
+				it { is_expected.to eq expected_content }
+			end
 		end
 
 		context 'with refined key' do

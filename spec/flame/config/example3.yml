@@ -1,0 +1,6 @@
+.default: &default
+  :foo: 3
+  :bar: 'quux'
+
+production:
+  <<: *default

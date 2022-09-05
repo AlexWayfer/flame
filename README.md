@@ -41,7 +41,7 @@
 </p>
 
 Flame is a small Ruby web framework, built on [Rack](https://github.com/rack/rack),
-inspired by [Gin](https://github.com/0jcasts/gin) (which follows class-controllers style),
+inspired by [Gin](https://github.com/jcasts/gin) (which follows class-controllers style),
 designed as a replacement [Sinatra](https://github.com/sinatra/sinatra)
 or maybe even [Rails](https://github.com/rails/rails).
 

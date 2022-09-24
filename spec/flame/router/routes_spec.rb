@@ -13,7 +13,7 @@ describe Flame::Router::Routes do
 	let(:endpoints) { nil }
 
 	describe '#initialize' do
-		it { is_expected.to be_kind_of Hash }
+		it { is_expected.to be_a Hash }
 
 		context 'with path as Flame::Path' do
 			let(:path) { Flame::Path.new('/foo/bar/baz') }

@@ -108,7 +108,7 @@ describe Flame::Path do
 
 			it { is_expected.to eq expected_result }
 
-			it { is_expected.to be_kind_of described_class }
+			it { is_expected.to be_a described_class }
 
 			it { is_expected.not_to be path }
 

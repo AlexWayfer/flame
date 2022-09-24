@@ -16,12 +16,12 @@ describe Flame::Dispatcher::Request do
 		}
 	end
 
-	it { is_expected.to be_kind_of Rack::Request }
+	it { is_expected.to be_a Rack::Request }
 
 	describe '#path' do
 		subject { request.path }
 
-		it { is_expected.to be_kind_of Flame::Path }
+		it { is_expected.to be_a Flame::Path }
 		it { is_expected.to eq '/hello/great/world' }
 	end
 
@@ -32,7 +32,7 @@ describe Flame::Dispatcher::Request do
 			it { is_expected.to eq :PATCH }
 		end
 
-		it { is_expected.to be_kind_of Symbol }
+		it { is_expected.to be_a Symbol }
 
 		context 'when input is downcased' do
 			let(:method) { :put }

@@ -3,7 +3,7 @@
 describe Flame::Dispatcher::Response do
 	subject(:response) { described_class.new }
 
-	it { is_expected.to be_kind_of Rack::Response }
+	it { is_expected.to be_a Rack::Response }
 
 	describe '#content_type=' do
 		subject { response.content_type }

@@ -243,19 +243,19 @@ describe Flame::Application do
 	describe '.config' do
 		subject { app_class.config }
 
-		it { is_expected.to be_kind_of Flame::Config }
+		it { is_expected.to be_a Flame::Config }
 	end
 
 	describe '.router' do
 		subject { app_class.router }
 
-		it { is_expected.to be_kind_of Flame::Router }
+		it { is_expected.to be_a Flame::Router }
 	end
 
 	describe '.cached_tilts' do
 		subject(:cached_tilts) { app_class.cached_tilts }
 
-		it { is_expected.to be_kind_of Hash }
+		it { is_expected.to be_a Hash }
 
 		describe 'filling' do
 			let(:call_result) { app_class.call(env) }
@@ -369,7 +369,7 @@ describe Flame::Application do
 		describe 'default config' do
 			subject { app_class.config }
 
-			it { is_expected.to be_kind_of Flame::Config }
+			it { is_expected.to be_a Flame::Config }
 
 			describe 'values' do
 				subject { super()[key] }
@@ -410,7 +410,7 @@ describe Flame::Application do
 	describe '.call' do
 		subject(:result) { app_class.call(env) }
 
-		it { is_expected.to be_kind_of Array }
+		it { is_expected.to be_a Array }
 
 		it 'caches created instance' do
 			first_app, second_app = Array.new(2) do
@@ -504,7 +504,7 @@ describe Flame::Application do
 				end
 			end
 
-			it { is_expected.to be_kind_of Array }
+			it { is_expected.to be_a Array }
 
 			describe 'status' do
 				subject { super().first }

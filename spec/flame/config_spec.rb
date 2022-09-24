@@ -32,7 +32,7 @@ describe Flame::Config do
 					config[:another_baz] = proc { |x| x }
 				end
 
-				it { is_expected.to be_kind_of Proc }
+				it { is_expected.to be_a Proc }
 			end
 		end
 	end

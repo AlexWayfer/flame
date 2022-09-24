@@ -49,7 +49,7 @@ module CustomTest
 		end
 
 		def not_found
-			response.header['Custom-Header'] = 'Hello from not_found'
+			response.headers['Custom-Header'] = 'Hello from not_found'
 			halt redirect :foo if request.path.include? 'redirecting'
 			super
 		end

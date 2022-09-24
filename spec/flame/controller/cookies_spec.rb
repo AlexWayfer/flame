@@ -53,6 +53,10 @@ describe Flame::Controller::Cookies do
 		end
 
 		describe 'deleting cookie for response by nil value' do
+			## It becomes an Array of values, but only the last should matter
+			## https://github.com/rack/rack/issues/1965
+			subject { super().last }
+
 			let(:cookie_value) { nil }
 
 			before do

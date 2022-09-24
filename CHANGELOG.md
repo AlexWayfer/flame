@@ -81,7 +81,8 @@ All notable changes to this project will be documented in this file.
 *   Don't assign results of `execute` (after-hooks) as `body`
 *   Require directories starting with `_` first
 *   Allow to redefine controller path with `PATH` constant inside
-*   Update RuboCop to a new version, resolve new offenses.
+*   Update Rack and GorillaPatch
+*   Update RuboCop to a new version, resolve new offenses
 *   Improve version locks for dependencies
 *   Use Depfu instead of closed Gemnasium
 
@@ -100,6 +101,7 @@ All notable changes to this project will be documented in this file.
 *   Fix routing for multiple routes starting with arguments \
     Example: parent controller with `show(id)` and nested controller at `/:parent_id/nested`.
 *   Avoid new controller creation in `halt`
+*   Fix typos in documentation
 
 ### Security
 

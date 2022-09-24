@@ -8,6 +8,10 @@ if ENV['CODECOV_TOKEN']
 	SimpleCov.formatter = SimpleCov::Formatter::Codecov
 end
 
+RSpec.configure do |config|
+	config.example_status_persistence_file_path = "#{__dir__}/examples.txt"
+end
+
 require 'pry-byebug'
 
 require_relative '../lib/flame'

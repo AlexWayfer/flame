@@ -10,3 +10,5 @@ yarn.lock
 
 /.yardoc/
 /doc/
+
+/spec/examples.txt

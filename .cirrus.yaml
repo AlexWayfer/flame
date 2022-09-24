@@ -51,18 +51,33 @@ test_task:
   depends_on:
     - remark
     - rubocop
+
   container:
     matrix:
       image: ruby:2.6
       image: ruby:2.7
       image: ruby:3.0
       image: ruby:3.1
+
   <<: *bundle_cache
+
   environment:
     ## https://github.com/docker-library/ruby/issues/45
     LANG: C.UTF-8
-    CODECOV_TOKEN: ENCRYPTED[fc3cdd6692dedbd2133ce8100d2cf236617d6acddc313b5f90f1994d3f62400fcc17fa2af079e8568fb3e85ee5803735]
+
   test_script: bundle exec rspec
+
+  codecov_uploader_cache:
+    folder: codecov
+    fingerprint_script:
+      - curl --no-progress-meter https://uploader.codecov.io/latest/linux/codecov.SHA256SUM
+    populate_script:
+      - mkdir -p codecov
+      - curl https://uploader.codecov.io/latest/linux/codecov -o codecov/uploader
+      - chmod +x codecov/uploader
+
+  codecov_script: codecov/uploader
+
   only_if: ($CIRRUS_BRANCH == 'main') ||
     changesInclude(
       '.cirrus.yaml', '.gitignore', 'Gemfile', '.toys.rb', '.rspec', '*.gemspec', 'lib/**',

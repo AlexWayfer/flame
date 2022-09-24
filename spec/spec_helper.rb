@@ -1,18 +1,19 @@
 # frozen_string_literal: true
 
-require 'simplecov'
-SimpleCov.start
+require 'pry-byebug'
 
-if ENV['CODECOV_TOKEN']
-	require 'codecov'
-	SimpleCov.formatter = SimpleCov::Formatter::Codecov
+require 'simplecov'
+
+if ENV['CI']
+	require 'simplecov-cobertura'
+	SimpleCov.formatter = SimpleCov::Formatter::CoberturaFormatter
 end
+
+SimpleCov.start
 
 RSpec.configure do |config|
 	config.example_status_persistence_file_path = "#{__dir__}/examples.txt"
 end
-
-require 'pry-byebug'
 
 require_relative '../lib/flame'
 

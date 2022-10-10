@@ -46,7 +46,7 @@ Gem::Specification.new do |spec|
 	spec.add_development_dependency 'bundler', '~> 2.0'
 	spec.add_development_dependency 'bundler-audit', '~> 0.9.0'
 	spec.add_development_dependency 'gem_toys', '~> 0.12.1'
-	spec.add_development_dependency 'toys', '~> 0.13.1'
+	spec.add_development_dependency 'toys', '~> 0.14.2'
 
 	spec.add_development_dependency 'better_errors', '~> 2.0'
 	spec.add_development_dependency 'rack-test', '~> 2.0'

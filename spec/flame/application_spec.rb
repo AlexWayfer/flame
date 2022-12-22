@@ -474,9 +474,9 @@ describe Flame::Application do
 				<<~PATH.delete("\n")
 					/foo?
 					name=world&
-					nested[some]=here&
-					nested[another][]=there&
-					nested[another][]=maybe
+					nested%5Bsome%5D=here&
+					nested%5Banother%5D%5B%5D=there&
+					nested%5Banother%5D%5B%5D=maybe
 				PATH
 			end
 

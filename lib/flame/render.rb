@@ -95,12 +95,9 @@ module Flame
 		def find_file(path)
 			caller_path = caller_locations(4..4).first.path
 
-			caller_dir =
-				begin
-					File.dirname(caller_path).sub(views_dir, '') if Tilt[caller_path]
-				rescue LoadError
-					nil
-				end
+			## It now never causes `LoadError`, but returning `nil`, as I want
+			## https://github.com/jeremyevans/tilt/issues/2
+			caller_dir = File.dirname(caller_path).sub(views_dir, '') if Tilt[caller_path]
 
 			find_files(path, controller_dirs | Array(caller_dir))
 				.find { |file| Tilt[file] }

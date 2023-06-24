@@ -39,5 +39,5 @@ Gem::Specification.new do |spec|
 	spec.add_runtime_dependency 'gorilla_patch', '>= 3.0', '< 6'
 	spec.add_runtime_dependency 'psych', '~> 5.0'
 	spec.add_runtime_dependency 'rack', '~> 3.0'
-	spec.add_runtime_dependency 'tilt', '~> 2.1'
+	spec.add_runtime_dependency 'tilt', '2.2.0'
 end

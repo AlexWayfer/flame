@@ -89,7 +89,7 @@ All notable changes to this project will be documented in this file.
 ### Removed
 
 *   Remove `Application#config` and `Application#router` methods
-*   Remove Ruby < 2.6 support
+*   Remove Ruby < 2.7 support
 *   Remove HTML tags (`<h1>`) from default body \
     There is no `Content-Type` HTTP header, also there is no reason to return exactly HTML content \
     (Flame can be used only for API or something else).

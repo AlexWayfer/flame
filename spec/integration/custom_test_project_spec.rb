@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module CustomTest
+module CustomTestProject
 	## Example of custom controller
 	class CustomController < Flame::Controller
 		def index; end
@@ -74,7 +74,7 @@ module CustomTest
 	end
 end
 
-describe CustomTest do
+describe CustomTestProject do
 	include Rack::Test::Methods
 
 	subject { last_response }
@@ -84,7 +84,7 @@ describe CustomTest do
 	let(:app) do
 		builder = Rack::Builder.new
 		middlewares.each { |middleware| builder.use middleware }
-		builder.run CustomTest::Application.new
+		builder.run CustomTestProject::Application.new
 	end
 
 	describe 'foo' do

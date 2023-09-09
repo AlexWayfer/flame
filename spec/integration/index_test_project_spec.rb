@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module IndexTest
+module IndexTestProject
 	## Example of index controller
 	class IndexController < Flame::Controller
 		def index
@@ -14,11 +14,11 @@ module IndexTest
 	end
 end
 
-describe IndexTest do
+describe IndexTestProject do
 	include Rack::Test::Methods
 
 	let(:app) do
-		IndexTest::Application.new
+		IndexTestProject::Application.new
 	end
 
 	describe 'index' do

@@ -59,6 +59,3 @@ RSpec/NestedGroups:
 ## https://github.com/rubocop-hq/rubocop-rspec/pull/863/files#r471603667
 RSpec/MultipleMemoizedHelpers:
   Enabled: false
-RSpec/FilePath:
-  Exclude:
-    - spec/integration/**/*

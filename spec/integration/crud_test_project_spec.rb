@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module CRUDTest
+module CRUDTestProject
 	## Example of CRUD controller
 	class CRUDController < Flame::Controller
 		def index
@@ -51,11 +51,11 @@ module CRUDTest
 	end
 end
 
-describe CRUDTest do
+describe CRUDTestProject do
 	include Rack::Test::Methods
 
 	let(:app) do
-		CRUDTest::Application.new
+		CRUDTestProject::Application.new
 	end
 
 	describe 'list of items' do

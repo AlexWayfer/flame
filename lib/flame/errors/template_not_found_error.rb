@@ -11,7 +11,7 @@ module Flame
 			def initialize(controller, path)
 				controller = controller.class unless controller.is_a? Class
 
-				super "Template '#{path}' not found for '#{controller}'"
+				super("Template '#{path}' not found for '#{controller}'")
 			end
 		end
 	end

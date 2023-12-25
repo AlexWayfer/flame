@@ -59,7 +59,6 @@ rubocop_task:
 test_task:
   container:
     matrix:
-      image: ruby:2.7
       image: ruby:3.0
       image: ruby:3.1
       image: ruby:3.2

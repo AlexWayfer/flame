@@ -23,7 +23,7 @@ module Flame
 					path: "Action '#{ctrl}##{action}'"
 				}[extra[:place]]
 
-				super "#{entity} has no #{extra[:type_name]} arguments #{extra[:args].inspect}"
+				super("#{entity} has no #{extra[:type_name]} arguments #{extra[:args].inspect}")
 			end
 		end
 	end

@@ -10,7 +10,7 @@ module Flame
 			## @param directory [String] directory in which file was not found
 			def initialize(file_name, directory)
 				directory = directory.sub(%r{^/+}, '').sub(%r{/+$}, '')
-				super "Config file '#{file_name}' not found in '#{directory}/'"
+				super("Config file '#{file_name}' not found in '#{directory}/'")
 			end
 		end
 	end

@@ -17,7 +17,7 @@ end
 
 require_relative '../lib/flame'
 
-Dir["#{__dir__}/**/spec_helper.rb"].sort.each do |spec_helper|
+Dir["#{__dir__}/**/spec_helper.rb"].each do |spec_helper|
 	next if spec_helper == __FILE__
 	next if spec_helper.include?('require_dirs')
 

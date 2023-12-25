@@ -86,7 +86,7 @@ module Flame
 			end
 
 			PADDING_SIZE = Router::HTTP_METHODS.map(&:size).max
-			PADDING_FORMAT = "%#{PADDING_SIZE}.#{PADDING_SIZE}s"
+			PADDING_FORMAT = "%#{PADDING_SIZE}.#{PADDING_SIZE}s".freeze
 
 			## Output routes in human readable format
 			def to_s(prefix = '/')

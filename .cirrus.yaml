@@ -38,8 +38,11 @@ remark_task:
 bundle-audit_task:
   container:
     image: ruby
+
   <<: *bundle_cache
+
   bundle-audit_script: bundle audit check --update
+
   only_if: ($CIRRUS_BRANCH == 'main') ||
     changesInclude(
       '.cirrus.yaml', '.gitignore', 'Gemfile', '*.gemspec'
@@ -48,8 +51,11 @@ bundle-audit_task:
 rubocop_task:
   container:
     image: ruby
+
   <<: *bundle_cache
+
   rubocop_script: bundle exec rubocop
+
   only_if: ($CIRRUS_BRANCH == 'main') ||
     changesInclude(
       '.cirrus.yaml', '.gitignore', 'Gemfile', '.toys.rb', '.rubocop.yml', '*.gemspec',

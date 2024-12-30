@@ -130,7 +130,7 @@ module Flame
 			cache = config[:environment] == 'production' if cache.nil?
 			template = Flame::Render.new(
 				self,
-				(path || caller_locations(1, 1)[0].label.to_sym),
+				(path || caller_locations(1, 1)[0].base_label.to_sym),
 				options
 			)
 			template.render(cache: cache, &block)

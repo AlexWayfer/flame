@@ -11,7 +11,7 @@ All notable changes to this project will be documented in this file.
     But you can disable it with `nested: false` option for `mount`,
     for example, for conditional umbrella application.
 *   Allow to mount anonymous controllers
-*   Add support for Ruby 3.0
+*   Add support for Ruby 3.0 ­– 3.4
 *   Add support of `OPTIONS` HTTP-method
 *   Add `Application.require_dirs` method
 *   Add `Controller#path_to_back` method

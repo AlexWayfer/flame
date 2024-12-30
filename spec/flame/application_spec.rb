@@ -791,7 +791,7 @@ describe Flame::Application do
 
 			it do
 				expect { mounting }.to raise_error(
-					NameError, /`wat' [\w\s]+ `ApplicationController'/
+					NameError, /[`']wat' [\w\s]+ [`']ApplicationController'/
 				)
 			end
 		end
@@ -807,7 +807,7 @@ describe Flame::Application do
 
 			it do
 				expect { mounting }.to raise_error(
-					NoMethodError, /`wrong'/
+					NoMethodError, /[`']wrong'/
 				)
 			end
 		end

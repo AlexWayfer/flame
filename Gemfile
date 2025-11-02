@@ -7,7 +7,7 @@ gemspec
 group :development do
 	gem 'pry-byebug', '~> 3.9'
 
-	gem 'gem_toys', '~> 0.14.0'
+	gem 'gem_toys', '~> 0.15.0'
 	gem 'toys', '~> 0.15.3'
 end
 

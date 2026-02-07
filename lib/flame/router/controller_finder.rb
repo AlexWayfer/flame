@@ -39,6 +39,8 @@ module Flame
 
 			TRASNFORMATION_METHODS = %i[camelize upcase].freeze
 
+			private_constant :TRASNFORMATION_METHODS
+
 			def controller_name_variations
 				TRASNFORMATION_METHODS.each_with_object([]) do |method, result|
 					transformed = @controller_name.to_s.send(method)

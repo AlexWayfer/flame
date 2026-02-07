@@ -109,7 +109,7 @@ describe Flame::Dispatcher do
 		let(:headers) { response[1] }
 		let(:body) { response[2] }
 
-		shared_examples 'status is correct' do
+		shared_examples 'correct status' do
 			describe 'status' do
 				subject { status }
 
@@ -122,14 +122,14 @@ describe Flame::Dispatcher do
 
 			it { is_expected.to eq ['Hello, world!'] }
 
-			include_examples 'status is correct'
+			it_behaves_like 'correct status'
 
 			context 'with nil in after-hook' do
 				let(:path) { 'action_with_after_hook' }
 
 				it { is_expected.to eq ['Body of action'] }
 
-				include_examples 'status is correct'
+				it_behaves_like 'correct status'
 			end
 
 			context 'when body is empty' do
@@ -137,7 +137,7 @@ describe Flame::Dispatcher do
 
 				it { is_expected.to eq [''] }
 
-				include_examples 'status is correct'
+				it_behaves_like 'correct status'
 			end
 
 			context 'with static file' do
@@ -145,7 +145,7 @@ describe Flame::Dispatcher do
 
 				it { is_expected.to eq ["Test static\n"] }
 
-				include_examples 'status is correct'
+				it_behaves_like 'correct status'
 			end
 
 			context 'with static file in gem' do
@@ -154,7 +154,7 @@ describe Flame::Dispatcher do
 
 				it { is_expected.to eq [File.read(real_file_path)] }
 
-				include_examples 'status is correct'
+				it_behaves_like 'correct status'
 			end
 
 			context 'with static file before route executing' do
@@ -162,7 +162,7 @@ describe Flame::Dispatcher do
 
 				it { is_expected.to eq ["Static file\n"] }
 
-				include_examples 'status is correct'
+				it_behaves_like 'correct status'
 			end
 
 			context 'with HEAD method' do
@@ -170,7 +170,7 @@ describe Flame::Dispatcher do
 
 				it { is_expected.to eq [] }
 
-				include_examples 'status is correct'
+				it_behaves_like 'correct status'
 			end
 		end
 
@@ -182,7 +182,7 @@ describe Flame::Dispatcher do
 
 				it { is_expected.to eq ['Not Found'] }
 
-				include_examples 'status is correct'
+				it_behaves_like 'correct status'
 			end
 
 			context 'when route with required argument and without path' do
@@ -190,7 +190,7 @@ describe Flame::Dispatcher do
 
 				it { is_expected.to eq ['Not Found'] }
 
-				include_examples 'status is correct'
+				it_behaves_like 'correct status'
 			end
 		end
 
@@ -202,7 +202,7 @@ describe Flame::Dispatcher do
 
 			it { is_expected.to eq 'GET, OPTIONS' }
 
-			include_examples 'status is correct'
+			it_behaves_like 'correct status'
 		end
 
 		context 'when HTTP-method is OPTIONS' do

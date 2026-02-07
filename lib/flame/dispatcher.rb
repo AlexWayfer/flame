@@ -16,15 +16,16 @@ module Flame
 	class Dispatcher
 		include Memery
 
-		GEM_STATIC_FILES = File.join(__dir__, '../../public').freeze
-
 		extend Forwardable
-		def_delegators :@app_class, :router, :path_to
-
-		attr_reader :request, :response
 
 		include Flame::Dispatcher::Static
 		include Flame::Dispatcher::Routes
+
+		GEM_STATIC_FILES = File.join(__dir__, '../../public').freeze
+
+		attr_reader :request, :response
+
+		def_delegators :@app_class, :router, :path_to
 
 		## Initialize Dispatcher from Application#call
 		## @param app_class [Class] application class

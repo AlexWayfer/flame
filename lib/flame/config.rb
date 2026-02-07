@@ -25,7 +25,7 @@ module Flame
 		## @param key [Symbol] config key
 		## @return [Object] config value
 		def [](key)
-			result = super(key)
+			result = super
 			result = instance_exec(&result) if result.class <= Proc && result.parameters.empty?
 			result
 		end

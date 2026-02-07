@@ -7,6 +7,7 @@ module Flame
 		## Module for work with actions
 		module Actions
 			include Memery
+
 			using GorillaPatch::Slice
 
 			## Shortcut for not-inherited public methods: actions

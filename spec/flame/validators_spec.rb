@@ -11,8 +11,8 @@ describe Flame::Validators do
 			described_class.new(ValidatorsController, path, :foo)
 		end
 
-		describe '#valid?' do
-			subject(:result) { validator.valid? }
+		describe '#validate!' do
+			subject(:result) { validator.validate! }
 
 			context 'when no extra arguments' do
 				let(:path) { '/foo/:first/:second/:?third/:?fourth' }

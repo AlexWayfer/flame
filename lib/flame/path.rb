@@ -11,6 +11,7 @@ module Flame
 		include Memery
 
 		extend Forwardable
+
 		def_delegators :to_s, :include?
 
 		## Merge parts of path to one path
@@ -196,10 +197,10 @@ module Flame
 		class Part
 			extend Forwardable
 
-			def_delegators :to_s, :[], :hash, :size, :empty?, :b, :inspect
-
 			ARG_CHAR = ':'
 			ARG_CHAR_OPT = '?'
+
+			def_delegators :to_s, :[], :hash, :size, :empty?, :b, :inspect
 
 			## Create new instance from String
 			## @param part [String] path part as String

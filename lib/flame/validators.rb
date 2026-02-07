@@ -20,14 +20,14 @@ module Flame
 			end
 
 			## Validate
-			## @return [true, false] valid or not
-			def valid?
-				extra_valid? && order_valid?
+			## @return [true, false] valid or raise an error
+			def validate!
+				extra_validate! && order_validate!
 			end
 
 			private
 
-			def extra_valid?
+			def extra_validate!
 				extra_arguments = first_extra_arguments
 				## Raise error if extra arguments
 				return true unless extra_arguments
@@ -37,7 +37,7 @@ module Flame
 				)
 			end
 
-			def order_valid?
+			def order_validate!
 				wrong_ordered_arguments = first_wrong_ordered_arguments
 				return true unless wrong_ordered_arguments
 

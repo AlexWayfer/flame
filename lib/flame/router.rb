@@ -10,16 +10,17 @@ require_relative 'errors/controller_not_found_error'
 module Flame
 	## Router class for routing
 	class Router
+		extend Forwardable
+
 		HTTP_METHODS = %i[GET POST PUT PATCH DELETE].freeze
 
 		require_relative 'router/route'
 		require_relative 'router/routes'
 		require_relative 'router/routes_refine'
 
-		extend Forwardable
-		def_delegators :routes, :navigate
-
 		attr_reader :app, :routes, :reverse_routes
+
+		def_delegators :routes, :navigate
 
 		## @param app [Flame::Application] host application
 		def initialize(app)

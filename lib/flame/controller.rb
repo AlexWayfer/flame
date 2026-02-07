@@ -16,8 +16,17 @@ module Flame
 	## Class initialize when Dispatcher found route with it
 	## For new request and response
 	class Controller
-		extend Actions
 		include Memery
+
+		extend Forwardable
+
+		extend Actions
+
+		def_delegators(
+			:@dispatcher,
+			:config, :request, :params, :halt, :session, :response, :status, :body,
+			:default_body, :cached_tilts, :find_static
+		)
 
 		class << self
 			attr_accessor :path_arguments
@@ -42,14 +51,6 @@ module Flame
 				Flame::Path.merge nil, parts.join('_')
 			end
 		end
-
-		extend Forwardable
-
-		def_delegators(
-			:@dispatcher,
-			:config, :request, :params, :halt, :session, :response, :status, :body,
-			:default_body, :cached_tilts, :find_static
-		)
 
 		## Initialize the controller for request execution
 		## @param dispatcher [Flame::Dispatcher] host dispatcher
@@ -125,15 +126,15 @@ module Flame
 		## @param path [Symbol, nil] path to the template file
 		## @param options [Hash] options for the `Flame::Render` rendering
 		## @return [String] rendered template
-		def view(path = nil, options = {}, &block)
+		def view(path = nil, options = {}, &)
 			cache = options.delete(:cache)
 			cache = config[:environment] == 'production' if cache.nil?
 			template = Flame::Render.new(
 				self,
-				(path || caller_locations(1, 1)[0].base_label.to_sym),
+				path || caller_locations(1, 1)[0].base_label.to_sym,
 				options
 			)
-			template.render(cache: cache, &block)
+			template.render(cache: cache, &)
 		end
 		alias render view
 

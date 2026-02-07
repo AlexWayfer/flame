@@ -14,8 +14,8 @@ module Flame
 			end
 
 			## Build a URI to the given controller and action, or path
-			def url_to(*args, **options)
-				path = build_path_for_url(*args, **options)
+			def url_to(*, **)
+				path = build_path_for_url(*, **)
 				Addressable::URI.join(request.base_url, path).to_s
 			end
 

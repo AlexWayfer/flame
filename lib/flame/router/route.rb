@@ -9,9 +9,9 @@ module Flame
 		class Route
 			extend Forwardable
 
-			def_delegators :to_s, :inspect
-
 			attr_reader :controller, :action
+
+			def_delegators :to_s, :inspect
 
 			## Create a new instance
 			## @param controller [Flame::Controller] controller

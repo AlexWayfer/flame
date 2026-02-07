@@ -13,9 +13,9 @@ module Flame
 				## @param controller [Flame::Controller] class of mounting controller
 				## @param path [String, nil] root path for mounting controller
 				## @yield Block of code for routes refine
-				def mount(controller_name, path = nil, &block)
+				def mount(controller_name, path = nil, &)
 					routes_refine = self.class.new(
-						@namespace_name, controller_name, path, &block
+						@namespace_name, controller_name, path, &
 					)
 
 					@endpoint.deep_merge! routes_refine.routes

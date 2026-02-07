@@ -25,18 +25,15 @@ module Flame
 
 			using GorillaPatch::Namespace
 
-			def initialize(
-				namespace_name, controller_or_name, path, nested: true, &block
-			)
-				@controller =
-					ControllerFinder.new(namespace_name, controller_or_name).controller
+			def initialize(namespace_name, controller_or_name, path, nested: true, &)
+				@controller = ControllerFinder.new(namespace_name, controller_or_name).controller
 				@namespace_name = @controller.deconstantize
 				@path = Flame::Path.new(path || @controller.path)
 				@controller.path_arguments = @path.parts.select(&:arg?).map(&:to_sym)
 				@routes, @endpoint = @path.to_routes_with_endpoint
 				@reverse_routes = {}
 				@mount_nested = nested
-				execute(&block)
+				execute(&)
 			end
 
 			private
@@ -85,10 +82,11 @@ module Flame
 					get action unless find_reverse_route(action)
 				end
 
-				mount_nested_controllers if @mount_nested && (
-					@controller.demodulize == 'IndexController' &&
-					!@namespace_name.empty?
-				)
+				if @mount_nested &&
+						@controller.demodulize == 'IndexController' &&
+						!@namespace_name.empty?
+					mount_nested_controllers
+				end
 			end
 
 			## Assign methods of the controller to REST architecture
@@ -120,7 +118,7 @@ module Flame
 			def validate_action_path(action, action_path)
 				Validators::RouteArgumentsValidator
 					.new(@controller, action_path, action)
-					.valid?
+					.validate!
 			end
 
 			def remove_old_routes(action, new_route)

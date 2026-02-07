@@ -74,10 +74,6 @@ test_task:
 
   <<: *bundle_cache
 
-  environment:
-    ## https://github.com/docker-library/ruby/issues/45
-    LANG: C.UTF-8
-
   test_script: bundle exec rspec
 
   codecov_uploader_cache:

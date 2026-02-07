@@ -35,8 +35,8 @@ Gem::Specification.new do |spec|
 	spec.required_ruby_version = '>= 3.0', '< 3.5'
 
 	spec.add_runtime_dependency 'addressable', '~> 2.5'
-	spec.add_runtime_dependency 'alt_memery', '~> 2.0'
-	spec.add_runtime_dependency 'gorilla_patch', '>= 3.0', '< 6'
+	spec.add_runtime_dependency 'alt_memery', '~> 3.0'
+	spec.add_runtime_dependency 'gorilla_patch', '>= 3.0', '< 7'
 	spec.add_runtime_dependency 'psych', '~> 5.0'
 	spec.add_runtime_dependency 'rack', '~> 3.0'
 	spec.add_runtime_dependency 'tilt', '~> 2.1'

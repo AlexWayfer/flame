@@ -205,12 +205,6 @@ describe CustomTestProject do
 			end
 		end
 
-		before do
-			hide_const 'BetterErrors' if hide_better_errors
-		end
-
-		let(:hide_better_errors) { true }
-
 		context 'with regular error' do
 			before { get '/custom/error' }
 
@@ -225,16 +219,6 @@ describe CustomTestProject do
 			let(:exception) { SyntaxError }
 
 			it_behaves_like 'custom 500'
-		end
-
-		## https://github.com/BetterErrors/better_errors/issues/454
-		context 'when there is `BetterErrors`' do
-			subject(:make_request) { get '/custom/error' }
-
-			let(:hide_better_errors) { false }
-			let(:middlewares) { [BetterErrors::Middleware] }
-
-			it { expect { make_request }.to raise_error 'Test' }
 		end
 	end
 

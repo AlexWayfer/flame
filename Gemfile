@@ -16,7 +16,6 @@ group :audit do
 end
 
 group :test do
-	gem 'better_errors', '~> 2.0'
 	gem 'rack-test', '~> 2.0'
 	gem 'rspec', '~> 3.9'
 	gem 'simplecov', '~> 0.22.0'

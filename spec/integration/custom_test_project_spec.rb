@@ -85,6 +85,7 @@ describe CustomTestProject do
 		builder = Rack::Builder.new
 		middlewares.each { |middleware| builder.use middleware }
 		builder.run CustomTestProject::Application.new
+		builder
 	end
 
 	describe 'foo' do

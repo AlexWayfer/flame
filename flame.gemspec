@@ -32,7 +32,7 @@ Gem::Specification.new do |spec|
 
 	spec.files = Dir['lib/**/*.rb', 'public/**/*.ico', 'README.md', 'LICENSE.txt', 'CHANGELOG.md']
 
-	spec.required_ruby_version = '>= 3.0', '< 3.5'
+	spec.required_ruby_version = '>= 3.0', '< 5'
 
 	spec.add_runtime_dependency 'addressable', '~> 2.5'
 	spec.add_runtime_dependency 'alt_memery', '~> 3.0'

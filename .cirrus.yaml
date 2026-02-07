@@ -70,6 +70,7 @@ test_task:
       image: ruby:3.2
       image: ruby:3.3
       image: ruby:3.4
+      image: ruby:4.0
 
   <<: *bundle_cache
 

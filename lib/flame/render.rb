@@ -93,7 +93,7 @@ module Flame
 
 		## Find template-file by path
 		def find_file(path)
-			caller_path = caller_locations(4..4).first.path
+			caller_path = find_caller_path
 
 			## It now never causes `LoadError`, but returning `nil`, as I want
 			## https://github.com/jeremyevans/tilt/issues/2
@@ -101,6 +101,11 @@ module Flame
 
 			find_files(path, controller_dirs | Array(caller_dir))
 				.find { |file| Tilt[file] }
+		end
+
+		## Find caller path
+		def find_caller_path
+			caller_locations.find { |location| !location.path.include?(__dir__) }.path
 		end
 
 		## Find layout-files by path

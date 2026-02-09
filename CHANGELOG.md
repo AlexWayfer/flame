@@ -11,7 +11,7 @@ All notable changes to this project will be documented in this file.
     But you can disable it with `nested: false` option for `mount`,
     for example, for conditional umbrella application.
 *   Allow to mount anonymous controllers
-*   Add support for Ruby 3.0 ­– 3.4
+*   Add support for Ruby 3.0 ­– 4.0
 *   Add support of `OPTIONS` HTTP-method
 *   Add `Application.require_dirs` method
 *   Add `Controller#path_to_back` method
@@ -81,18 +81,22 @@ All notable changes to this project will be documented in this file.
 *   Don't assign results of `execute` (after-hooks) as `body`
 *   Require directories starting with `_` first
 *   Allow to redefine controller path with `PATH` constant inside
+*   Resolve Ruby warnings
 *   Update Rack and GorillaPatch
 *   Update RuboCop to a new version, resolve new offenses
 *   Improve version locks for dependencies
 *   Use Depfu instead of closed Gemnasium
+*   Improve CI config
 
 ### Removed
 
 *   Remove `Application#config` and `Application#router` methods
 *   Remove Ruby < 2.7 support
+*   Remove integration with `better_errors`.
 *   Remove HTML tags (`<h1>`) from default body \
     There is no `Content-Type` HTTP header, also there is no reason to return exactly HTML content \
     (Flame can be used only for API or something else).
+*   Remove `bundler` as development dependency.
 
 ### Fixed
 

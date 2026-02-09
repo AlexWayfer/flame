@@ -29,7 +29,7 @@ module CustomTestProject
 		end
 
 		def syntax_error
-			ERB.new('<% % %>').result(binding)
+			ERB.new('<% . %>').result(binding)
 		end
 
 		def merge_query_parameter(_id)

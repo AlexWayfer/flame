@@ -117,7 +117,7 @@ module Flame
 			response[content_dis] = disposition.to_s
 			return unless filename
 
-			response[content_dis] << "; filename=\"#{File.basename(filename)}\""
+			response[content_dis] += "; filename=\"#{File.basename(filename)}\""
 			ext = File.extname(filename)
 			response.content_type = ext unless ext.empty?
 		end

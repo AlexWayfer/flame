@@ -18,10 +18,6 @@
         src="https://img.shields.io/codecov/c/github/AlexWayfer/flame.svg?style=flat-square"
         alt="Codecov"
     /></a>
-    <a href="https://codeclimate.com/github/AlexWayfer/flame"><img
-        src="https://img.shields.io/codeclimate/maintainability/AlexWayfer/flame.svg?style=flat-square"
-        alt="Code Climate"
-    /></a>
     <a href="https://depfu.com/repos/AlexWayfer/flame"><img
         src="https://img.shields.io/depfu/AlexWayfer/flame.svg?style=flat-square"
         alt="Depfu"

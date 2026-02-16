@@ -1,6 +1,6 @@
 <p align="center">
     <img
-        src="https://raw.githubusercontent.com/AlexWayfer/flame/main/public/favicon.ico"
+        src="public/favicon.ico"
         height="150"
         alt="Flame Logo"
         title="Logo from open-source Elusive-Iconfont (https://github.com/reduxframework/elusive-iconfont)"

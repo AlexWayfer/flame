@@ -8,7 +8,7 @@ bundle_cache: &bundle_cache
       - cat *.gemspec
   install_script:
     - gem update --system --no-document
-    - bundle update
+    - bundle update --all
 
 remark_task:
   container:

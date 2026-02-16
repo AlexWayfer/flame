@@ -10,27 +10,45 @@
 <h1 align="center">Flame</h1>
 
 <p align="center">
-    <a href="https://cirrus-ci.com/github/AlexWayfer/flame/main"><img
+    <a
+        href="https://cirrus-ci.com/github/AlexWayfer/flame/main"
+        target="_blank" rel="noopener noreferrer"
+    ><img
         src="https://api.cirrus-ci.com/github/AlexWayfer/flame.svg?branch=main"
         alt="Cirrus CI"
     /></a>
-    <a href="https://codecov.io/gh/AlexWayfer/flame"><img
+    <a
+        href="https://codecov.io/gh/AlexWayfer/flame"
+        target="_blank" rel="noopener noreferrer"
+    ><img
         src="https://img.shields.io/codecov/c/github/AlexWayfer/flame.svg?style=flat-square"
         alt="Codecov"
     /></a>
-    <a href="https://depfu.com/repos/AlexWayfer/flame"><img
+    <a
+        href="https://depfu.com/repos/AlexWayfer/flame"
+        target="_blank" rel="noopener noreferrer"
+    ><img
         src="https://img.shields.io/depfu/AlexWayfer/flame.svg?style=flat-square"
         alt="Depfu"
     /></a>
-    <a href="http://inch-ci.org/github/AlexWayfer/flame"><img
+    <a
+        href="http://inch-ci.org/github/AlexWayfer/flame"
+        target="_blank" rel="noopener noreferrer"
+    ><img
         src="http://inch-ci.org/github/AlexWayfer/flame.svg?branch=main&style=flat-square"
         alt="Docs"
     /></a>
-    <a href="https://rubygems.org/gems/flame"><img
+    <a
+        href="https://rubygems.org/gems/flame"
+        target="_blank" rel="noopener noreferrer"
+    ><img
         src="https://img.shields.io/gem/v/flame.svg?include_prereleases&style=flat-square"
         alt="Gem (including prereleases)"
     /></a>
-    <a href="https://github.com/AlexWayfer/flame/blob/main/LICENSE.txt"><img
+    <a
+        href="https://github.com/AlexWayfer/flame/blob/main/LICENSE.txt"
+        target="_blank" rel="noopener noreferrer"
+    ><img
         src="https://img.shields.io/github/license/AlexWayfer/flame.svg?style=flat-square"
         alt="MIT license"
     /></a>

@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+## 5.0.1 (2026-02-16)
+
+*   Update logo to the blue.
+*   Improve README.
+
 ## 5.0.0 (2026-02-16)
 
 ### Added

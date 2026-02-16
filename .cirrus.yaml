@@ -7,7 +7,7 @@ bundle_cache: &bundle_cache
       - cat Gemfile
       - cat *.gemspec
   install_script:
-    - gem install bundler
+    - gem update --system --no-document
     - bundle update
 
 remark_task:

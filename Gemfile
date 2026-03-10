@@ -8,7 +8,7 @@ group :development do
 	gem 'pry-byebug', '~> 3.9'
 
 	gem 'gem_toys', '~> 1.0'
-	gem 'toys', '~> 0.19.1'
+	gem 'toys', '~> 0.20.0'
 end
 
 group :audit do
